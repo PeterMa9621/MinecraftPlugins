@@ -1,0 +1,13 @@
+name: GetMoreDrops
+main: getMoreDrops.GetMoreDrops
+version: 1.0
+author: Jingyuan Ma
+softdepend: [Vault]
+commands:
+  gm:
+    description: GetMoreDrops commands.
+    usage: /gm
+    permission-message: §c无权执行！
+permissions: 
+  gm.gm: 
+    default: op  

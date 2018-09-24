@@ -1,0 +1,13 @@
+name: EazyRepair
+main: eazyRepair.EazyRepair
+version: 1.0
+author: Jingyuan Ma
+depend: [Citizens]
+commands:
+  er:
+    description: EazyRepair Command
+    usage: /er
+    permission-message: §c无权执行！
+permissions: 
+  eazyRepair.op: 
+    default: op

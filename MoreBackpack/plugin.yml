@@ -1,0 +1,13 @@
+name: MoreBackpack
+main: moreBackpack.MoreBackpack
+version: 1.0
+author: Jingyuan Ma
+commands:
+  mb:
+    description: More Backpacks
+    usage: /mb help
+    permission: mb.mb
+    permission-message: §c无权执行！
+permissions: 
+  mb.mb: 
+    default: op 

@@ -1,0 +1,14 @@
+name: Dungeon
+main: dungeon.Dungeon
+version: 1.0
+author: Jingyuan Ma
+commands:
+  dungeon:
+    description: Dungeon Commands
+    usage: /dungeon
+    permission-message: §c无权执行！
+permissions: 
+  dungeon.op: 
+    default: op
+  dungeon.player: 
+    default: true

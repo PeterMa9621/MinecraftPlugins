@@ -1,0 +1,15 @@
+name: QueueSystem
+main: queueSystem.QueueSystem
+version: 1.0
+author: Jingyuan Ma
+depend: [HolographicDisplays]
+commands:
+  q:
+    description: QueueSystem Commands
+    usage: /q
+    permission-message: §c无权执行！
+permissions: 
+  queueSystem.op: 
+    default: op
+  queueSystem.player: 
+    default: true

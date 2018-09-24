@@ -1,0 +1,14 @@
+name: Dps
+main: dps.Dps
+version: 1.0
+author: Jingyuan Ma
+commands:
+  dps:
+    description: Dps Commands
+    usage: /dps
+    permission-message: §c无权执行！
+permissions: 
+  dps.op: 
+    default: op
+  dps.player: 
+    default: true

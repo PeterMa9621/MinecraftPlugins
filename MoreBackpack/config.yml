@@ -1,0 +1,17 @@
+Recipes:
+  Recipe: [NNN,N-N,NNN]
+  N: 3
+
+Amount: 10
+
+ID: 334
+
+Dur: 998
+
+Line: 6
+
+EnableGive: true
+
+Money: 50
+
+Open: true

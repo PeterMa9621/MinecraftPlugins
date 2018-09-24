@@ -1,0 +1,13 @@
+name: MultiHome
+main: multiHome.MultiHome
+version: 1.0
+author: Jingyuan Ma
+commands:
+  mh:
+    description: used to set multi homes
+    usage: /mh
+    permission: mh.mh
+    permission-message: §c无权执行！
+permissions: 
+  mh.mh: 
+    default: op

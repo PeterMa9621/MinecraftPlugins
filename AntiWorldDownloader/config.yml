@@ -1,0 +1,11 @@
+# CrispyBow's Anti World Downloader Plugin
+# Skype : crispybow31
+# YouTube : CrispyBow
+
+# Variables: %player%, %prefix%
+
+Messages:
+  reloadConfig: '&a配置重读!'
+  noPermission: '&c你没有权限!'
+  
+Punishment-Command: 踢出 %player% %prefix% 因为下载地图!

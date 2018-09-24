@@ -1,0 +1,14 @@
+name: SimpleClanHelper
+main: simpleClanHelper.SimpleClanHelper
+version: 1.0
+author: Jingyuan Ma
+commands:
+  cc:
+    description: SimpleClanHelper Command
+    usage: /cc
+    permission-message: §c无权执行！
+permissions: 
+  simpleClanHelper.op: 
+    default: op
+  simpleClanHelper.player: 
+    default: true

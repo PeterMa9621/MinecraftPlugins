@@ -1,0 +1,16 @@
+name: AntiXray
+main: antiXray.AntiXray
+version: 1.7
+author: Jingyuan Ma
+commands:
+  ax:
+    description: used to limit the quantity of mineral
+    usage: /ax
+    permission-message: §c无权执行！
+permissions: 
+  antiXray.op: 
+    default: op
+  antiXray.bypass:
+    default: op
+  antiXray.player: 
+    default: true

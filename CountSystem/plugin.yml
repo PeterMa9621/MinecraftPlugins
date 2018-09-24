@@ -1,0 +1,14 @@
+name: CountSystem
+main: countSystem.CountSystem
+version: 1.0
+author: Jingyuan Ma
+commands:
+  count:
+    description: CountSystem Command
+    usage: /count
+    permission-message: §c无权执行！
+permissions: 
+  countSystem.op: 
+    default: op
+  countSystem.player: 
+    default: true

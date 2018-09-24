@@ -1,0 +1,13 @@
+name: MMSpawn
+main: mmSpawn.MMSpawn
+version: 1.0
+author: Jingyuan Ma
+depend: [MythicMobs]
+commands:
+  mms:
+    description: MMSpawn Commands
+    usage: /mms
+    permission-message: §c无权执行！
+permissions: 
+  mmSpawn.op: 
+    default: op

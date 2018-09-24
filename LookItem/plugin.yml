@@ -1,0 +1,15 @@
+name: LookItem
+main: lookItem.LookItem
+version: 1.0
+author: Jingyuan Ma
+depend: [QuickShop]
+commands:
+  look:
+    description: LookItem Commands
+    usage: /look
+    permission-message: §c无权执行！
+permissions: 
+  lookItem.op: 
+    default: op
+  lookItem.player: 
+    default: true

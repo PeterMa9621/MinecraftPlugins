@@ -1,0 +1,24 @@
+# PunishTypes:
+# kickban = Kick the user 3 times, then ban them for the specified amount of time
+# mute = Warn the player 3 times, then mute them for the specified amount of time
+# kick = Kick the player each time they say a banned word or line
+# deny = Don't ban, mute, or kick, just don't let them say the message in chat, and give them a warning
+punishtype: kickban
+# How many minutes shall we ban the user for if the mode is kickban
+bantime: 1
+# How long do we mute the user for? If the mode is mute
+mutetime: 1
+# The words that are banned ingame. you can even add sentences! like so:
+# bannedwords:
+# - this is a blocked sentence!
+# See? It's literally the same thing as adding a word!.. but adding more words :)
+#
+bannedwords:
+- add
+- banned
+- words
+- here
+- mineplex
+# DO NOT EDIT THESE IF YOU DON'T KNOW WHAT YOU'RE DOING, Will cause i/o errors if you edit it wrong.
+# These use unix system timestamps, if you don't know the format, don't edit it
+bannedplayers:

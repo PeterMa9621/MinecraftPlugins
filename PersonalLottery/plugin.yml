@@ -1,0 +1,15 @@
+name: PersonalLottery
+main: personalLottery.PersonalLottery
+version: 1.0
+author: Jingyuan Ma
+depend: [Multiverse-Core]
+commands:
+  pl:
+    description: PersonalLottery Commands
+    usage: /pl
+    permission-message: §c无权执行！
+permissions: 
+  personalLottery.op: 
+    default: op
+  personalLottery.player: 
+    default: true

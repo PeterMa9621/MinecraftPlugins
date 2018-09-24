@@ -1,0 +1,14 @@
+name: BetterWeapon
+main: betterWeapon.BetterWeapon
+version: 1.0
+author: Jingyuan Ma
+commands:
+  qh:
+    description: used to check in
+    usage: /qh
+    permission-message: §c无权执行！
+permissions: 
+  BetterWeapon.op: 
+    default: op
+  BetterWeapon.player: 
+    default: true

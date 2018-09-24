@@ -1,0 +1,14 @@
+name: PersonalQuest
+main: personalQuest.PersonalQuest
+version: 1.0
+author: Jingyuan Ma
+commands:
+  pq:
+    description: PersonalQuest Command
+    usage: /pq
+    permission-message: §c无权执行！
+permissions: 
+  personalQuest.op: 
+    default: op
+  personalQuest.player: 
+    default: true

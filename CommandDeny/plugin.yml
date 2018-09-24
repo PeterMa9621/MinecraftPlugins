@@ -1,0 +1,12 @@
+name: CommandDeny
+main: commandDeny.CommandDeny
+version: 1.0
+author: Jingyuan Ma
+commands:
+  cd:
+    description: CommandDeny Commands
+    usage: /cd
+    permission-message: §f未知命令. 输入/help查看帮助.
+permissions: 
+  commandDeny.op: 
+    default: op

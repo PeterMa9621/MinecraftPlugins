@@ -1,0 +1,15 @@
+name: MaxHeart
+main: maxHeart.MaxHeart
+version: 1.0
+author: Jingyuan Ma
+depend: [LevelSystem]
+commands:
+  mh:
+    description: MaxHeart Commands
+    usage: /mh
+    permission-message: §c无权执行！
+permissions: 
+  maxHeart.op: 
+    default: op
+  maxHeart.player: 
+    default: true

@@ -1,0 +1,14 @@
+name: LevelSystem
+main: levelSystem.LevelSystem
+version: 1.0
+author: Jingyuan Ma
+commands:
+  level:
+    description: LevelSystem Commands
+    usage: /level
+    permission-message: §c无权执行！
+permissions: 
+  levelSystem.op: 
+    default: op
+  levelSystem.player: 
+    default: true

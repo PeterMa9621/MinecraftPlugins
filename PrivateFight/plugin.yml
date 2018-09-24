@@ -1,0 +1,15 @@
+name: PrivateFight
+main: privateFight.PrivateFight
+version: 1.0
+author: Jingyuan Ma
+depend: [Multiverse-Core]
+commands:
+  pk:
+    description: PrivateFight Commands
+    usage: /pk
+    permission-message: §c无权执行！
+permissions: 
+  privateFight.op: 
+    default: op
+  privateFight.player: 
+    default: true

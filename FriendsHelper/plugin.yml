@@ -1,0 +1,12 @@
+name: FriendsHelper
+main: friendsHelper.FriendsHelper
+version: 1.0
+author: Jingyuan Ma
+commands:
+  friendsHelper:
+    description: FriendsHelper Commands
+    usage: /friendsHelper
+    permission-message: §c无权执行！
+permissions: 
+  friendsHelper.op: 
+    default: op

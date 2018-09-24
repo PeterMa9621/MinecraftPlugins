@@ -1,0 +1,12 @@
+name: LotterySystem
+main: lotterySystem.LotterySystem
+version: 1.0
+author: Jingyuan Ma
+commands:
+  cj:
+    description: used to lottery
+    usage: /cj
+    permission-message: §c无权执行！
+permissions: 
+  cj.cj: 
+    default: op

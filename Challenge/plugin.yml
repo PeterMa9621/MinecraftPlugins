@@ -1,0 +1,15 @@
+name: Challenge
+main: challenge.Challenge
+version: 1.0
+author: Jingyuan Ma
+depend: [Multiverse-Core,Citizens]
+commands:
+  tz:
+    description: Challenge Commands
+    usage: /tz
+    permission-message: §c无权执行！
+permissions: 
+  challenge.op: 
+    default: op
+  challenge.player: 
+    default: true

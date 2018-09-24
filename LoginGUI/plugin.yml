@@ -1,0 +1,14 @@
+name: LoginGUI
+main: loginGUI.LoginGUI
+version: 1.0
+author: Jingyuan Ma
+commands:
+  lg:
+    description: LoginGUI Command
+    usage: /lg
+    permission-message: §c无权执行！
+permissions: 
+  loginGUI.op: 
+    default: op
+  loginGUI.player: 
+    default: true

@@ -1,0 +1,17 @@
+name: PrefixShop
+main: prefixShop.PrefixShop
+version: 1.0
+author: Jingyuan Ma
+softdepend: [Vault]
+commands:
+  ch:
+    description: PrefixShop Commands
+    usage: /ch
+    permission-message: §c无权执行！
+permissions: 
+  PrefixShop.op: 
+    default: op
+  PrefixShop.player: 
+    default: true
+  PrefixShop.define: 
+    default: op

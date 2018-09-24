@@ -1,0 +1,15 @@
+name: Voucher
+main: voucher.Voucher
+version: 1.0
+author: Jingyuan Ma
+depend: [Citizens]
+commands:
+  voucher:
+    description: Voucher Commands
+    usage: /voucher
+    permission-message: §c无权执行！
+permissions: 
+  voucher.op: 
+    default: op
+  voucher.player: 
+    default: true

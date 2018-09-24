@@ -1,0 +1,24 @@
+#If your config gets messed up just delete it to restore the default.
+
+times:
+  #Warntimes before shutdown
+  warntimes: 900,600,300,240,180,120,60,45,30,20,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1
+  #Sets the shutdowntimes. Format HH:MM seperated by comma. If only one time is set is MUST be 'HH:MM'!
+  shutdowntimes: 0:00,3:00,6:00,9:00,12:00,15:00,18:00,21:00 
+  #shutdowntimes: '12:00'
+  #Countdown to shutdown in seconds
+  gracetime: 20
+ 
+#If players should be kicked before shutdown
+kickonshutdown: true
+
+messages:
+  #Kickreason
+  kickreason: Scheduled Shutdown.
+  #Configurable shutdownmessage. Output will be "<shutdownmessage> in/at time/date X seconds/minutes /NOW! "
+  shutdownmessage: Server is shutting down
+  #If true the [AutoShutdown] tag will be displayed before the warning messages. False will add [Warning] tag before the message.
+  showtag: true
+  #Configuration for time unit. Plurals will be set automatically
+  minute: minute
+  second: second

@@ -1,0 +1,15 @@
+name: Dungeon
+main: dungeon.Dungeon
+version: 1.0
+author: Jingyuan Ma
+depend: [Multiverse-Core,Citizens]
+commands:
+  fb:
+    description: Dungeon Commands
+    usage: /fb
+    permission-message: §c无权执行！
+permissions: 
+  dungeon.op: 
+    default: op
+  dungeon.player: 
+    default: true

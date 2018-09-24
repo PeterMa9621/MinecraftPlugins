@@ -1,0 +1,15 @@
+name: DailyQuest
+main: dailyQuest.DailyQuest
+version: 1.0
+author: Jingyuan Ma
+depend: [Citizens]
+commands:
+  rw:
+    description: DailyQuest Commands
+    usage: /rw
+    permission-message: §c无权执行！
+permissions: 
+  dailyQuest.op: 
+    default: op
+  dailyQuest.player: 
+    default: true

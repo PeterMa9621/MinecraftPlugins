@@ -1,0 +1,14 @@
+name: VipSystem
+main: vipSystem.VipSystem
+version: 1.0
+author: Jingyuan Ma
+commands:
+  vip:
+    description: VipSystem Command
+    usage: /vip
+    permission-message: §c无权执行！
+permissions: 
+  VipSystem.op: 
+    default: op
+  VipSystem.player: 
+    default: true

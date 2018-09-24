@@ -1,0 +1,12 @@
+name: AntiWorldDownloader
+main: antiWorldDownloader.AntiWorldDownloader
+version: 1.0
+author: Jingyuan Ma
+commands:
+  antiwdl:
+    description: AntiWorldDownloader Command
+    usage: /antiwdl
+    permission-message: §c无权执行！
+permissions: 
+  antiWorldDownloader.op: 
+    default: op
