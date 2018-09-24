@@ -1,0 +1,104 @@
+package personalQuest;
+
+import java.io.File;
+import java.io.IOException;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+
+public class PersonalQuestListener implements Listener
+{
+	private PersonalQuest plugin;
+
+	public PersonalQuestListener(PersonalQuest plugin)
+	{
+		this.plugin=plugin;
+	}
+	
+	@EventHandler
+	public void onPlayerJoin(PlayerJoinEvent event)
+    {
+		loadQuestsConfig(event.getPlayer());
+		return;
+    }
+	
+	@EventHandler
+	public void onPlayerQuit(PlayerQuitEvent event)
+    {
+		saveQuestsConfig(event.getPlayer());
+		return;
+    }
+	
+	public void loadQuestsConfig(Player p)
+	{
+		File file=new File(plugin.getDataFolder(),"/Data/quests.yml");
+		FileConfiguration config;
+		if (!file.exists())
+		{
+			config = plugin.load(file);
+			
+			try 
+			{
+				config.save(file);
+			} 
+			catch (IOException e) 
+			{
+				e.printStackTrace();
+			}
+			loadQuestsConfig(p);
+			return;
+		}
+		config = plugin.load(file);
+		if(!config.contains(p.getName()))
+			return;
+		plugin.quests.get(p.getName()).clear();
+		plugin.quests.get(p.getName()).add(config.getString(p.getName()+".QuestType"));
+		plugin.quests.get(p.getName()).add(config.getString(p.getName()+".QuestName"));
+		plugin.quests.get(p.getName()).add(config.getString(p.getName()+".QuestContent"));
+	}
+	
+	public void saveQuestsConfig(Player p)
+	{
+		File file=new File(plugin.getDataFolder(),"/Data/quests.yml");
+		FileConfiguration config;
+		config = plugin.load(file);
+		if(!plugin.quests.containsKey(p.getName()))
+			return;
+		config.set(p.getName()+".QuestType", plugin.quests.get(p.getName()).get(0));
+		config.set(p.getName()+".QuestName", plugin.quests.get(p.getName()).get(1));
+		config.set(p.getName()+".QuestContent", plugin.quests.get(p.getName()).get(2));
+		//plugin.quests
+	}
+	
+	@EventHandler
+	public void onPlayerClickGUI(InventoryClickEvent event)
+    {
+		if(event.getInventory().getTitle().equalsIgnoreCase("§5任务系统"))
+		{
+			event.setCancelled(true);
+			Player p = (Player)event.getWhoClicked();
+			if(event.getRawSlot()==2)
+			{
+				p.openInventory(plugin.initQuestGUI(p));
+				return;
+			}
+		}
+		
+		if(event.getInventory().getTitle().equalsIgnoreCase("§5任务平台"))
+		{
+			event.setCancelled(true);
+			Player p = (Player)event.getWhoClicked();
+			if(event.getRawSlot()==2)
+			{
+				p.openInventory(plugin.initMain(p));
+				return;
+			}
+		}
+		
+		return;
+    }
+}

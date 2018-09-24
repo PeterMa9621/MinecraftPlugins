@@ -1,0 +1,27 @@
+package net.stupendous.autoshutdown;
+
+import java.util.TimerTask;
+import net.stupendous.autoshutdown.misc.Log;
+
+public class WarnTask extends TimerTask {
+	protected final AutoShutdownPlugin plugin;
+	protected final Log log;
+	protected long seconds = 0L;
+
+	public WarnTask(AutoShutdownPlugin plugin, long seconds) {
+		this.plugin = plugin;
+		this.log = plugin.log;
+		this.seconds = seconds;
+	}
+
+	public void run() 
+	{
+		this.plugin.getServer().getScheduler().scheduleSyncDelayedTask(this.plugin, new Runnable() 
+		{
+			public void run() 
+			{
+				
+			}
+		});
+	}
+}

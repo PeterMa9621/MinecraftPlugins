@@ -1,0 +1,5 @@
+package net.stupendous.autoshutdown;
+
+public class ShutdownScheduleTask {
+
+}

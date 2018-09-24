@@ -1,0 +1,58 @@
+package betterWeapon;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+
+import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.FurnaceBurnEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+
+import net.milkbowl.vault.economy.Economy;
+
+public class BetterWeaponListener implements Listener
+{
+	private BetterWeapon plugin;
+	
+	public BetterWeaponListener(BetterWeapon plugin)
+	{
+		this.plugin=plugin;
+	}
+	
+	@EventHandler
+	public void onPlayerUseFurnace(FurnaceBurnEvent event)
+	{
+		if(!event.getFuel().hasItemMeta())
+		{
+			return;
+		}
+		if(event.getFuel().equals(null) || event.getFuel().getType()==Material.AIR)
+		{
+			return;
+		}
+		if(event.getFuel().getItemMeta().getLore()==plugin.itemList.get(0))
+		{
+			event.setBurning(true);
+			event.setBurnTime(100);
+		}
+		else if(event.getFuel().getItemMeta().getLore()==plugin.itemList.get(1))
+		{
+			event.setBurning(true);
+			event.setBurnTime(200);
+		}
+		else if(event.getFuel().getItemMeta().getLore()==plugin.itemList.get(2))
+		{
+			event.setBurning(true);
+			event.setBurnTime(300);
+		}
+	}
+
+
+}

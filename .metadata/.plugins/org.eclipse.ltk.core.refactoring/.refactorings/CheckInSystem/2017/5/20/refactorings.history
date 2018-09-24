@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;plugin.yml&apos; to &apos;Test&apos;&#x0D;&#x0A;－ 原始项目：“CheckInSystem”&#x0D;&#x0A;－ 目标元素：“Test”&#x0D;&#x0A;－ 原始元素：“plugin.yml”" description="复制文件" destination="=Test" element1="plugin.yml" files="1" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1494837131578" units="0" version="1.0"/>
+</session>

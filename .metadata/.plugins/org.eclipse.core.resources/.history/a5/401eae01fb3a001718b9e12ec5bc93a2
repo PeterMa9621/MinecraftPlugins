@@ -1,0 +1,240 @@
+package personalQuest;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.Inventory;
+
+public class PersonalQuestListener implements Listener
+{
+	private PersonalQuest plugin;
+	HashMap<String, ArrayList<String>> quest = new HashMap<String, ArrayList<String>>();
+
+	public PersonalQuestListener(PersonalQuest plugin)
+	{
+		this.plugin=plugin;
+	}
+	
+	@EventHandler
+	public void onPlayerJoin(PlayerJoinEvent event)
+    {
+		//loadQuestsConfig(event.getPlayer());
+		return;
+    }
+	
+	@EventHandler
+	public void onPlayerQuit(PlayerQuitEvent event)
+    {
+		saveQuestsConfig(event.getPlayer());
+		return;
+    }
+	
+	public void loadQuestsConfig(Player p)
+	{
+		File file=new File(plugin.getDataFolder(),"/Data/quests.yml");
+		FileConfiguration config;
+		if (!file.exists())
+		{
+			config = plugin.load(file);
+			
+			try 
+			{
+				config.save(file);
+			} 
+			catch (IOException e) 
+			{
+				e.printStackTrace();
+			}
+			loadQuestsConfig(p);
+			return;
+		}
+		config = plugin.load(file);
+		if(!config.contains(p.getName()))
+			return;
+		ArrayList<ArrayList<String>> totalQuest = new ArrayList<ArrayList<String>>();
+		for(int i=1; config.contains(p.getName()+i); i++)
+		{
+			plugin.quests.get(p.getName()).clear();
+			ArrayList<String> everyQuest = new ArrayList<String>();
+			everyQuest.add(config.getString(p.getName()+"."+i+".QuestType"));
+			everyQuest.add(config.getString(p.getName()+"."+i+".QuestName"));
+			everyQuest.add(config.getString(p.getName()+"."+i+".QuestContent"));
+			totalQuest = plugin.quests.get(p.getName());
+			totalQuest.add(everyQuest);
+			plugin.quests.put(p.getName(), totalQuest);
+		}
+		
+	}
+	
+	public void saveQuestsConfig(Player p)
+	{
+		File file=new File(plugin.getDataFolder(),"/Data/quests.yml");
+		FileConfiguration config;
+		config = plugin.load(file);
+		if(!plugin.quests.containsKey(p.getName()))
+			return;
+		int number = 1;
+		for(ArrayList<String> everyQuest:plugin.quests.get(p.getName()))
+		{
+			config.set(p.getName()+"."+number+".QuestType", everyQuest.get(0));
+			config.set(p.getName()+"."+number+".QuestName", everyQuest.get(1));
+			config.set(p.getName()+"."+number+".QuestContent", everyQuest.get(2));
+			number += 1;
+		}
+		try {
+			config.save(file);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@EventHandler
+	public void onPlayerClickGUI(InventoryClickEvent event)
+    {
+		if(event.getInventory().getTitle().equalsIgnoreCase("§5任务系统"))
+		{
+			event.setCancelled(true);
+			Player p = (Player)event.getWhoClicked();
+			if(event.getRawSlot()==2)
+			{
+				p.openInventory(plugin.initQuestGUI(p).get(0));
+				return;
+			}
+		}
+		
+		if(event.getInventory().getTitle().equalsIgnoreCase("§5任务平台"))
+		{
+			Player p = (Player)event.getWhoClicked();
+			ArrayList<Inventory> inventory = plugin.initQuestGUI(p);
+			event.setCancelled(true);
+			p.sendMessage(event.getInventory().getItem(47).getItemMeta().getDisplayName().substring(3, 3));
+			int page = Integer.valueOf(event.getInventory().getItem(47).getItemMeta().getDisplayName().substring(3, 3));
+			if(event.getRawSlot()==49)
+			{
+				p.openInventory(plugin.initAdd(p));
+				return;
+			}
+			
+			if(event.getRawSlot()==45)
+			{
+				if(page==0)
+					return;
+				else
+					p.openInventory(inventory.get(page-1));
+				return;
+			}
+			
+			if(event.getRawSlot()==53)
+			{
+				if(page==inventory.size()-1)
+					return;
+				else
+					p.openInventory(inventory.get(page+1));
+				return;
+			}
+		}
+		
+		if(event.getInventory().getTitle().equalsIgnoreCase("§5发布任务"))
+		{
+			event.setCancelled(true);
+			Player p = (Player)event.getWhoClicked();
+			if(event.getRawSlot()==2)
+			{
+				p.sendMessage("§a[发布物品需求任务]§e 请输入任务名称(最大8个字,输入exit放弃发布任务):");
+				p.closeInventory();
+				//plugin.quests.get(p.getName()).add(e)
+				plugin.playerPostQuest1.add(p.getName());
+				return;
+			}
+		}
+		
+		return;
+    }
+	
+	@EventHandler
+	private void onPlayerChat(AsyncPlayerChatEvent event)
+	{
+		if(plugin.playerPostQuest2.contains(event.getPlayer().getName()))
+		{
+			event.setCancelled(true);
+			Player p = event.getPlayer();
+			
+			if(event.getMessage().toLowerCase().equalsIgnoreCase("exit"))
+			{
+				plugin.playerPostQuest2.remove(p.getName());
+				p.sendMessage("§a[发布物品需求任务]§3 已放弃发布任务");
+				quest.clear();
+				return;
+			}
+			
+			if(event.getMessage().length()>30)
+			{
+				p.sendMessage("§a[发布物品需求任务]§e 你输入的任务名称大于字数限制,请重新输入(最大8个字,输入exit放弃发布任务):");
+				return;
+			}
+			
+			//--------------------------------------------------------------------
+			
+			quest.get(p.getName()).add(event.getMessage());
+
+			p.sendMessage("§a[发布物品需求任务]§c 发布任务成功");
+			plugin.playerPostQuest2.remove(event.getPlayer().getName());
+			if(plugin.quests.containsKey(p.getName()))
+			{
+				ArrayList<ArrayList<String>> result = plugin.quests.get(p.getName());
+				result.add(quest.get(p.getName()));
+				plugin.quests.put(p.getName(), result);
+			}
+			else
+			{
+				ArrayList<ArrayList<String>> result = new ArrayList<ArrayList<String>>();
+				result.add(quest.get(p.getName()));
+				plugin.quests.put(p.getName(), result);
+			}
+			quest.clear();
+		}
+		else if(plugin.playerPostQuest1.contains(event.getPlayer().getName()))
+		{
+			event.setCancelled(true);
+			Player p = event.getPlayer();
+			
+			if(event.getMessage().toLowerCase().equalsIgnoreCase("exit"))
+			{
+				plugin.playerPostQuest1.remove(p.getName());
+				p.sendMessage("§a[发布物品需求任务]§3 已放弃发布任务");
+				quest.clear();
+				return;
+			}
+			
+			if(event.getMessage().length()>8)
+			{
+				p.sendMessage("§a[发布物品需求任务]§e 你输入的任务名称大于字数限制,请重新输入(最大8个字,输入exit放弃发布任务):");
+				return;
+			}
+			
+			//--------------------------------------------------------------------
+			ArrayList<String> list = new ArrayList<String>();
+			quest.put(p.getName(), list);
+			quest.get(p.getName()).add("item");
+			quest.get(p.getName()).add(event.getMessage());
+
+			plugin.playerPostQuest1.remove(event.getPlayer().getName());
+			plugin.playerPostQuest2.add(event.getPlayer().getName());
+			p.sendMessage("§a[发布物品需求任务]§3 任务名称已收录");
+			p.sendMessage("§a[发布物品需求任务]§e 请输入任务描述(最大30个字,输入exit放弃发布任务):");
+		}
+		
+		
+	}
+
+}

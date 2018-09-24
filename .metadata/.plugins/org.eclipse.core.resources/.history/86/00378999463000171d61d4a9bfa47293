@@ -1,0 +1,30 @@
+package betterWeapon;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+
+import net.milkbowl.vault.economy.Economy;
+
+public class BetterWeaponListener implements Listener
+{
+	private BetterWeapon plugin;
+	
+	public BetterWeaponListener(BetterWeapon plugin)
+	{
+		this.plugin=plugin;
+	}
+	
+	
+
+
+}

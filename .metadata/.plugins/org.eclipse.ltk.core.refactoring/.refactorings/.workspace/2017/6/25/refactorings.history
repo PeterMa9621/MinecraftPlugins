@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="将Java 项目“模版2”重命名为“LevelSystem”&#x0D;&#x0A;－ 原始元素：“模版2”&#x0D;&#x0A;－ 重命名的元素：“模版2”&#x0D;&#x0A;－ 更新对已重构元素的引用" description="重命名 Java 项目“模版2”" flags="7" id="org.eclipse.jdt.ui.rename.java.project" input="=模版2" name="LevelSystem" references="true" stamp="1498047582044" version="1.0"/>
+</session>

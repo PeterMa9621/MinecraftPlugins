@@ -1,0 +1,274 @@
+package personalQuest;
+
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+public class PersonalQuest extends JavaPlugin
+{
+	HashMap<String, String> vipQuest = new HashMap<String, String>();
+	HashMap<String, ArrayList<ArrayList<String>>> quests = new HashMap<String, ArrayList<ArrayList<String>>>();
+	ArrayList<String> playerPostQuest1 = new ArrayList<String>();
+	ArrayList<String> playerPostQuest2 = new ArrayList<String>();
+	/** 
+	 * The first ArrayList used to store every quest, the second ArrayList used to store the info of every quest
+	 * The first index of the second ArrayList which is in the HashMap is about the TYPE of the quest
+	 * The second index of the second ArrayList is about the NAME of the quest
+	 * The third index of the second ArrayList is about the DESCRIPTION of the quest(every line separates with %)
+	 * The fourth index of the second ArrayList is to judge if it is VIP
+	**/ 
+
+
+	public void onEnable() 
+	{
+		if(!getDataFolder().exists()) 
+		{
+			getDataFolder().mkdir();
+		}
+		getServer().getPluginManager().registerEvents(new PersonalQuestListener(this), this);
+		Bukkit.getConsoleSender().sendMessage("§a[PersonalQuest] §e任务系统加载完毕");
+	}
+
+	public void onDisable() 
+	{
+		Bukkit.getConsoleSender().sendMessage("§a[PersonalQuest] §e任务系统卸载完毕");
+	}
+	
+	public void loadQuestsConfig()
+	{
+		File file=new File(getDataFolder(),"/Data/quests.yml");
+		FileConfiguration config;
+		if (!file.exists())
+		{
+			config = load(file);
+			
+			try 
+			{
+				config.save(file);
+			} 
+			catch (IOException e) 
+			{
+				e.printStackTrace();
+			}
+			loadQuestsConfig();
+			return;
+		}
+		config = load(file);
+
+		for(OfflinePlayer p:Bukkit.getOfflinePlayers())
+		{
+			Bukkit.getConsoleSender().sendMessage("§e111");
+			if(config.contains(p.getName()))
+			{
+				Bukkit.getConsoleSender().sendMessage("§e222");
+				ArrayList<ArrayList<String>> totalQuest = new ArrayList<ArrayList<String>>();
+				for(int i=1; config.contains(p.getName()+"."+i); i++)
+				{
+					Bukkit.getConsoleSender().sendMessage("§e333");
+					ArrayList<String> everyQuest = new ArrayList<String>();
+					everyQuest.add(config.getString(p.getName()+"."+i+".QuestType"));
+					everyQuest.add(config.getString(p.getName()+"."+i+".QuestName"));
+					everyQuest.add(config.getString(p.getName()+"."+i+".QuestContent"));
+					totalQuest.add(everyQuest);
+				}
+				quests.put(p.getName(), totalQuest);
+			}
+		}
+	}
+
+	public FileConfiguration load(File file)
+	{
+        if (!(file.exists())) 
+        { //假如文件不存在
+        	try   //捕捉异常，因为有可能创建不成功
+        	{
+        		file.createNewFile();
+        	}
+        	catch(IOException e)
+        	{
+        		e.printStackTrace();
+        	}
+        }
+        return YamlConfiguration.loadConfiguration(file);
+	}
+	public FileConfiguration load(String path)
+	{
+		File file=new File(path);
+		if(!file.exists())
+		{
+			try
+		{
+				file.createNewFile();
+		}
+			catch(IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		return YamlConfiguration.loadConfiguration(new File(path));
+	}
+	
+	public Inventory initMain(Player p)
+	{
+		Inventory inv = Bukkit.createInventory(p, 9, "§5任务系统");
+		ItemStack quest = new ItemStack(Material.BOOK);
+		ItemMeta meta = quest.getItemMeta();
+		meta.setDisplayName("§e点击打开任务平台");
+		quest.setItemMeta(meta);
+		
+		ItemStack job = new ItemStack(Material.PAPER);
+		ItemMeta metaJob = job.getItemMeta();
+		metaJob.setDisplayName("§e点击打开招聘平台");
+		job.setItemMeta(metaJob);
+		
+		
+		inv.setItem(2, quest);
+		inv.setItem(4, job);
+
+		return inv;
+	}
+	
+	public Inventory initAdd(Player p)
+	{
+		Inventory inv = Bukkit.createInventory(p, 9, "§5发布任务");
+		ItemStack quest = new ItemStack(Material.NETHER_STAR);
+		ItemMeta meta = quest.getItemMeta();
+		meta.setDisplayName("§e点击发布物品需求任务");
+		ArrayList<String> lore = new ArrayList<String>();
+		lore.add("§c需要支付500金币");
+		meta.setLore(lore);
+		quest.setItemMeta(meta);
+		
+		lore.clear();
+		ItemStack head = new ItemStack(397, 1, (short)3);
+		ItemMeta metahead = head.getItemMeta();
+		metahead.setDisplayName("§e点击发布人头悬赏任务");
+		lore.add("§c需要支付1000金币");
+		meta.setLore(lore);
+		head.setItemMeta(metahead);
+		
+		
+		inv.setItem(2, quest);
+		inv.setItem(6, head);
+
+		return inv;
+	}
+	
+	public Inventory initQuestGUI(Player p)
+	{
+		Inventory inv = Bukkit.createInventory(p, 54, "§5任务平台");
+		ItemStack previous = new ItemStack(351,1,(short)13);
+		ItemMeta meta = previous.getItemMeta();
+		meta.setDisplayName("§e点击打开下一页");
+		previous.setItemMeta(meta);
+		
+		ItemStack next = new ItemStack(351,1,(short)8);
+		ItemMeta metaNext = next.getItemMeta();
+		metaNext.setDisplayName("§e点击打开上一页");
+		next.setItemMeta(metaNext);
+		
+		ItemStack add = new ItemStack(386);
+		ItemMeta metaAdd = add.getItemMeta();
+		metaAdd.setDisplayName("§e点击发布我的任务");
+		add.setItemMeta(metaAdd);
+		
+		int indexOfInv = 9;
+		
+		for(String player:quests.keySet())
+		{
+			for(ArrayList<String> i:quests.get(player))
+			{
+				ItemStack item = null;
+				String type = i.get(0);
+				String name = i.get(1);
+				String content = i.get(2);
+				ArrayList<String> lore = new ArrayList<String>();
+				int length = 0;
+				if(type.equalsIgnoreCase("item"))
+					item = new ItemStack(340);
+				if(type.equalsIgnoreCase("head"))
+					item = new ItemStack(397, 1, (short)3);
+				ItemMeta metaItem = item.getItemMeta();
+				metaItem.setDisplayName("§a[物品任务]§f"+name);
+				if(content.length()%8==0)
+					length = content.length()/8;
+				else
+					length = (content.length()/8)+1;
+				int index = 0;
+				for(int c=0; c<length ; c++)
+				{
+					if(c==length-1)
+					{
+						lore.add("§e"+content.substring(index, content.length()-1));
+						break;
+					}
+					lore.add(content.substring(index, index+8));
+					index +=8;
+				}
+				metaItem.setLore(lore);
+				item.setItemMeta(metaItem);
+				inv.setItem(indexOfInv, item);
+				indexOfInv+=1;
+			}
+			
+		}
+		
+		inv.setItem(49, add);
+		inv.setItem(45, previous);
+		inv.setItem(53, next);
+
+		return inv;
+	}
+	
+	public boolean onCommand(CommandSender sender,Command cmd,String label,String[] args)  
+	{
+		if (cmd.getName().equalsIgnoreCase("pq"))
+		{
+			if(args.length==0)
+			{
+				sender.sendMessage("§a=========[任务系统]=========");
+				sender.sendMessage("§a/pq gui §3打开主菜单");
+				sender.sendMessage("§a/pq my §3查看我的任务");
+				if(sender.isOp())
+				{
+					sender.sendMessage("§a/pq reload §3重载配置");
+				}
+				return true;
+			}
+			
+			if(args[0].equalsIgnoreCase("my"))
+			{
+
+			}
+			
+			if(args[0].equalsIgnoreCase("gui"))
+			{
+				if(sender instanceof Player)
+				{
+					Player p = (Player)sender;
+					p.openInventory(initMain(p));
+					return true;
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+}
+

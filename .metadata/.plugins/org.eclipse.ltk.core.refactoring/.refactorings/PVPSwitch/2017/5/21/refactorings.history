@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;PVPSwitch.java&apos; to &apos;PVPSwitch/src/pvpSwitch&apos;&#x0D;&#x0A;－ 原始项目：“PVPSwitch”&#x0D;&#x0A;－ 目标元素：“PVPSwitch/src/pvpSwitch”&#x0D;&#x0A;－ 原始元素：“pvpSwitch.PVPSwitch.java”" description="复制编译单元" destination="/src&lt;pvpSwitch" element1="/src&lt;pvpSwitch{PVPSwitch.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1495583006173" units="1" version="1.0"/>
+</session>
