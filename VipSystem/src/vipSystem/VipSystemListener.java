@@ -19,12 +19,12 @@ public class VipSystemListener implements Listener
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event)
     {
-		if(plugin.vipData.containsKey(event.getPlayer().getName()))
+    	VipPlayer vipPlayer = plugin.loadPlayerConfig(event.getPlayer().getUniqueId());
+		if(vipPlayer!=null)
 		{
-			if(plugin.vipData.get(event.getPlayer().getName()).isDeadline())
+			if(vipPlayer.isDeadline())
 			{
-				plugin.vipData.remove(event.getPlayer());
-				File file=new File(plugin.getDataFolder(),"/Data/"+event.getPlayer().getName()+".yml");
+				File file = new File(plugin.getDataFolder(),"/Data/"+event.getPlayer().getUniqueId()+".yml");
 				if(file.exists())
 					file.delete();
 				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "manuadd "+event.getPlayer().getName()+" "+plugin.defaultGroup);

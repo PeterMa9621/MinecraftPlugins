@@ -15,9 +15,10 @@ public class VipSystemAPI
 	
 	public String getLeftTime(Player p)
 	{
-		if(plugin.vipData.containsKey(p.getName()))
+		VipPlayer vipPlayer = plugin.loadPlayerConfig(p.getUniqueId());
+		if(vipPlayer!=null)
 		{
-			return plugin.vipData.get(p.getName()).getLeftTime();
+			return vipPlayer.getLeftTime();
 		}
 		else
 		{
@@ -27,9 +28,9 @@ public class VipSystemAPI
 	
 	public boolean removeVip(Player p)
 	{
-		if(plugin.vipData.containsKey(p.getName()))
+		VipPlayer vipPlayer = plugin.loadPlayerConfig(p.getUniqueId());
+		if(vipPlayer!=null)
 		{
-			plugin.vipData.remove(p.getName());
 			File file=new File(plugin.getDataFolder(),"/Data/"+p.getName()+".yml");
 			if(file.exists())
 				file.delete();
@@ -43,11 +44,10 @@ public class VipSystemAPI
 	
 	public String getVipGroupName(Player p)
 	{
-		if(plugin.vipData.containsKey(p.getName()))
+		VipPlayer vipPlayer = plugin.loadPlayerConfig(p.getUniqueId());
+		if(vipPlayer!=null)
 		{
-			VipPlayer vipPlayer;
-			vipPlayer = plugin.vipData.get(p.getName());
-			return plugin.vipGroups.get(vipPlayer.getVipGroup());
+			return vipPlayer.getVipGroup();
 		}
 		else
 		{
@@ -57,10 +57,9 @@ public class VipSystemAPI
 	
 	public int getLeftHour(Player p)
 	{
-		if(plugin.vipData.containsKey(p.getName()))
+		VipPlayer vipPlayer = plugin.loadPlayerConfig(p.getUniqueId());
+		if(vipPlayer!=null)
 		{
-			VipPlayer vipPlayer;
-			vipPlayer = plugin.vipData.get(p.getName());
 			return vipPlayer.getLeftHours();
 		}
 		else
