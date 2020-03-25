@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Copy element &apos;NPCListener.java&apos; to &apos;Dungeon/src/dungeon&apos;&#x0D;&#x0A;－ 原始项目：“Challenge”&#x0D;&#x0A;－ 目标元素：“Dungeon/src/dungeon”&#x0D;&#x0A;－ 原始元素：“challenge.NPCListener.java”" description="复制编译单元" destination="=Dungeon/src&lt;dungeon" element1="/src&lt;challenge{NPCListener.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1499678542871" units="1" version="1.0"/>
-</session>

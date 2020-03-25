@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Copy element &apos;FinishQuestListener.java&apos; to &apos;DailyQuest/src/dailyQuest&apos;&#x0D;&#x0A;－ 原始项目：“DailyQuest”&#x0D;&#x0A;－ 目标元素：“DailyQuest/src/dailyQuest”&#x0D;&#x0A;－ 原始元素：“dailyQuest.FinishQuestListener.java”" description="复制编译单元" destination="/src&lt;dailyQuest" element1="/src&lt;dailyQuest{FinishQuestListener.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1498134081455" units="1" version="1.0"/>
-</session>

@@ -1,5 +1,8 @@
 package vipSystem;
 
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.enchantments.EnchantmentWrapper;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -130,11 +133,11 @@ public class VipSystem extends JavaPlugin
 			config = load(file);
 
 			config.set("VIP1.Money", 3000);
-			config.set("VIP1.Items.1.ID", "264");
+			config.set("VIP1.Items.1.ID", "diamond");
 			config.set("VIP1.Items.1.Amount", 32);
 			config.set("VIP1.Items.1.DisplayName", "×êÊ¯");
 			config.set("VIP1.Items.1.Lore", "ÉñÆæ×êÊ¯");
-			config.set("VIP1.Items.1.Enchant.ID", 0);
+			config.set("VIP1.Items.1.Enchant.ID", "fortune");
 			config.set("VIP1.Items.1.Enchant.Level", 1);
 			config.set("VIP1.Items.1.HideEnchant", true);
 			
@@ -156,25 +159,21 @@ public class VipSystem extends JavaPlugin
 			int money = config.getInt(vipGroup + ".Money");
 			for(int i=0; config.contains(vipGroup + ".Items."+(i+1)); i++)
 			{
-				int id = 0;
-				int data = 0;
+				String id = "";
 				boolean hide = config.getBoolean(vipGroup + ".Items."+(i+1)+".HideEnchant");
-				if(config.getString(vipGroup + ".Items."+(i+1)+".ID").contains(":"))
-				{
-					id = Integer.valueOf(config.getString(vipGroup + ".Items."+(i+1)+".ID").split(":")[0]);
-					data = Integer.valueOf(config.getString(vipGroup + ".Items."+(i+1)+".ID").split(":")[1]);
+				if(config.getString(vipGroup + ".Items."+(i+1)+".ID").contains(":")) {
+					id = config.getString(vipGroup + ".Items."+(i+1)+".ID").split(":")[0];
 				}
-				else
-				{
-					id = Integer.valueOf(config.getString(vipGroup + ".Items."+(i+1)+".ID"));
+				else {
+					id = config.getString(vipGroup + ".Items."+(i+1)+".ID");
 				}
 				int amount = config.getInt(vipGroup + ".Items."+(i+1)+".Amount");
 				String name = config.getString(vipGroup + ".Items."+(i+1)+".DisplayName");
 				String lore = config.getString(vipGroup + ".Items."+(i+1)+".Lore");
-				int enchantID = config.getInt(vipGroup + ".Items."+(i+1)+".Enchant.ID");
+				String enchantID = config.getString(vipGroup + ".Items."+(i+1)+".Enchant.ID");
 				int level = config.getInt(vipGroup + ".Items."+(i+1)+".Enchant.Level");
-				
-				ItemStack item = new ItemStack(id, amount, (short) data);
+
+				ItemStack item = new ItemStack(Material.getMaterial(id.toUpperCase()), amount);
 				ItemMeta meta = item.getItemMeta();
 				if(name!=null)
 					meta.setDisplayName(name);
@@ -190,9 +189,10 @@ public class VipSystem extends JavaPlugin
 				if(hide==true)
 					meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 				item.setItemMeta(meta);
-				if(enchantID>=0 && level>0)
+
+				if(!enchantID.equalsIgnoreCase("") && level>0)
 				{
-					item.addUnsafeEnchantment(Enchantment.getById(enchantID), level);
+					item.addUnsafeEnchantment(EnchantmentWrapper.getByKey(NamespacedKey.minecraft(enchantID)), level);
 				}
 				items.add(item);
 			}
@@ -251,9 +251,9 @@ public class VipSystem extends JavaPlugin
 		}
 	}
 	
-	public ItemStack createItem(int ID, int quantity, int durability, String displayName, String lore)
+	public ItemStack createItem(String ID, int quantity, int durability, String displayName, String lore)
 	{
-		ItemStack item = new ItemStack(ID, quantity, (short)durability);
+		ItemStack item = new ItemStack(Material.getMaterial(ID), quantity, (short)durability);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(displayName);
 		ArrayList<String> loreList = new ArrayList<String>();
@@ -267,9 +267,9 @@ public class VipSystem extends JavaPlugin
 		return item;
 	}
 	
-	public ItemStack createItem(int ID, int quantity, int durability, String displayName)
+	public ItemStack createItem(String ID, int quantity, int durability, String displayName)
 	{
-		ItemStack item = new ItemStack(ID, quantity, (short)durability);
+		ItemStack item = new ItemStack(Material.getMaterial(ID), quantity, (short)durability);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(displayName);
 		item.setItemMeta(meta);

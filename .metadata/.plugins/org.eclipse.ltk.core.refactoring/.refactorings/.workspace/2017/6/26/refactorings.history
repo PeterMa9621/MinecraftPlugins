@@ -1,3 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">&#x0A;<refactoring comment="将Java 项目“MaxHealth”重命名为“MaxHeart”&#x0D;&#x0A;－ 原始元素：“MaxHealth”&#x0D;&#x0A;－ 重命名的元素：“MaxHealth”&#x0D;&#x0A;－ 更新对已重构元素的引用" description="重命名 Java 项目“MaxHealth”" flags="7" id="org.eclipse.jdt.ui.rename.java.project" input="=MaxHealth" name="MaxHeart" references="true" stamp="1498453428860" version="1.0"/>&#x0A;<refactoring comment="将Java 项目“Dungeon”重命名为“Dungeon1”&#x0D;&#x0A;－ 原始元素：“Dungeon”&#x0D;&#x0A;－ 重命名的元素：“Dungeon”&#x0D;&#x0A;－ 更新对已重构元素的引用" description="重命名 Java 项目“Dungeon”" flags="7" id="org.eclipse.jdt.ui.rename.java.project" input="=Dungeon" name="Dungeon1" references="true" stamp="1498696558544" version="1.0"/>
-</session>

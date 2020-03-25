@@ -12,7 +12,6 @@ import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 import net.citizensnpcs.api.CitizensAPI;
-import net.sacredlabyrinth.phaed.simpleclans.Clan;
 
 public class PVPSwitchListener implements Listener
 {
@@ -40,34 +39,12 @@ public class PVPSwitchListener implements Listener
 		return;
     }
 	
-	public boolean isRival(Player damager, Player victim)
-	{
-		if(plugin.core.getClanManager().getClanByPlayerUniqueId(damager.getUniqueId())!=null)
-		{
-			if(plugin.core.getClanManager().getClanByPlayerUniqueId(victim.getUniqueId())!=null)
-			{
-				Clan damagerClan = plugin.core.getClanManager().getClanByPlayerUniqueId(damager.getUniqueId());
-				Clan victimClan = plugin.core.getClanManager().getClanByPlayerUniqueId(victim.getUniqueId());
-				if(damagerClan.isWarring(victimClan))
-				{
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	
 	@EventHandler
 	public void onPlayerIsDamaged(EntityDamageByEntityEvent event)
     {
 		if(event.getEntity() instanceof Player && event.getDamager() instanceof Player)
 		{
 			if(((Player)event.getDamager()).hasPermission("pvpSwitch.bypass"))
-			{
-				return;
-			}
-
-			if(isRival((Player)event.getDamager(), (Player)event.getEntity()))
 			{
 				return;
 			}
@@ -130,10 +107,7 @@ public class PVPSwitchListener implements Listener
 			{
 				return;
 			}
-			if(isRival(damager, p))
-			{
-				return;
-			}
+
 			boolean otherPVP = false;
 			boolean DamagerPVP = false;
 			if(plugin.playerData.containsKey(p.getName()))

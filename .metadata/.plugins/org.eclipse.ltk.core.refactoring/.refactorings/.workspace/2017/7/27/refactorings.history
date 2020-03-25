@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="将Java 项目“WordFilter”重命名为“BannedWords”&#x0D;&#x0A;－ 原始元素：“WordFilter”&#x0D;&#x0A;－ 重命名的元素：“WordFilter”&#x0D;&#x0A;－ 更新对已重构元素的引用" description="重命名 Java 项目“WordFilter”" flags="7" id="org.eclipse.jdt.ui.rename.java.project" input="=WordFilter" name="BannedWords" references="true" stamp="1499397713365" version="1.0"/>
-</session>

@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -35,7 +36,7 @@ public class AntiXray extends JavaPlugin
 	SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
 	ArrayList<String> op = new ArrayList<String>();
 	
-	ArrayList<Integer> recipe = new ArrayList<Integer>();
+	ArrayList<String> recipe = new ArrayList<String>();
 	
 	public void onEnable()
 	{
@@ -69,51 +70,15 @@ public class AntiXray extends JavaPlugin
 		ShapedRecipe recipe = new ShapedRecipe(recoverItem);
 		recipe.shape(recipes);
 		ItemStack item = null;
-		if(this.recipe.get(0)!=0)
-		{
-			item = new ItemStack(this.recipe.get(0));
-			recipe.setIngredient('A', item.getData());
+
+		for(int i=0; i<9; i++) {
+			if(!this.recipe.get(i).equals("0"))
+			{
+				item = new ItemStack(Material.getMaterial(this.recipe.get(i)));
+				recipe.setIngredient((char)(i+65), item.getData());
+			}
 		}
-		if(this.recipe.get(1)!=0)
-		{
-			item = new ItemStack(this.recipe.get(1));
-			recipe.setIngredient('B', item.getData());
-		}
-		if(this.recipe.get(2)!=0)
-		{
-			item = new ItemStack(this.recipe.get(2));
-			recipe.setIngredient('C', item.getData());
-		}
-		if(this.recipe.get(3)!=0)
-		{
-			item = new ItemStack(this.recipe.get(3));
-			recipe.setIngredient('D', item.getData());
-		}
-		if(this.recipe.get(4)!=0)
-		{
-			item = new ItemStack(this.recipe.get(4));
-			recipe.setIngredient('E', item.getData());
-		}
-		if(this.recipe.get(5)!=0)
-		{
-			item = new ItemStack(this.recipe.get(5));
-			recipe.setIngredient('F', item.getData());
-		}
-		if(this.recipe.get(6)!=0)
-		{
-			item = new ItemStack(this.recipe.get(6));
-			recipe.setIngredient('G', item.getData());
-		}
-		if(this.recipe.get(7)!=0)
-		{
-			item = new ItemStack(this.recipe.get(7));
-			recipe.setIngredient('H', item.getData());
-		}
-		if(this.recipe.get(8)!=0)
-		{
-			item = new ItemStack(this.recipe.get(8));
-			recipe.setIngredient('I', item.getData());
-		}
+		
 		getServer().addRecipe(recipe);
 	}
 
@@ -374,12 +339,12 @@ public class AntiXray extends JavaPlugin
 		notify = config.getBoolean("Notify");
 		
 		// Get the information of the recover item
-		int id = config.getInt("RecoverItem.ID");
+		String id = config.getString("RecoverItem.ID");
 		String itemName = config.getString("RecoverItem.Name");
 		String itemLore = config.getString("RecoverItem.Lore");
 		recoverPoint = config.getInt("RecoverItem.Point");
-
-		recoverItem = new ItemStack(id);
+		
+		recoverItem = new ItemStack(Material.getMaterial(id.toUpperCase()));
 		ItemMeta meta = recoverItem.getItemMeta();
 		meta.setDisplayName(itemName);
 
@@ -429,7 +394,7 @@ public class AntiXray extends JavaPlugin
 		
 		for(String r:config.getString("RecoverItem.Recipe").split("-"))
 		{
-			recipe.add(Integer.valueOf(r));
+			recipe.add(r.toUpperCase());
 		}
 	}
 	

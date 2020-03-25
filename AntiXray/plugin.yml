@@ -1,6 +1,6 @@
 name: AntiXray
 main: antiXray.AntiXray
-version: 1.7
+version: '1.7'
 author: Jingyuan Ma
 commands:
   ax:

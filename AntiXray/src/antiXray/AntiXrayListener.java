@@ -64,7 +64,6 @@ public class AntiXrayListener implements Listener
 	@EventHandler
 	public void onPlayerBreakBlock(BlockBreakEvent event)
 	{
-
 		if(event.getPlayer().hasPermission("antiXray.bypass"))
 		{
 			return;
@@ -88,13 +87,13 @@ public class AntiXrayListener implements Listener
 			return;
 		}
 
-		if(!isExist(event.getPlayer().getItemInHand().getTypeId(), plugin.tools))
+		if(!isExist(event.getPlayer().getInventory().getItemInMainHand().getType().getId(), plugin.tools))
 		{
 			return;
 		}
 		
 		Player p = event.getPlayer();
-		int blockID = event.getBlock().getTypeId();
+		int blockID = event.getBlock().getType().getId();
 
 		int currentPoint = plugin.playerData.get(p.getName());
 

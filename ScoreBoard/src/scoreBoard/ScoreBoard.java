@@ -11,7 +11,6 @@ import checkInSystem.CheckInSystem;
 import dailyQuest.DailyQuest;
 import levelSystem.LevelSystem;
 import net.milkbowl.vault.economy.Economy;
-import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 import pvpSwitch.PVPSwitch;
 import vipSystem.VipSystem;
 

@@ -3,9 +3,6 @@ package pvpSwitch;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
-import net.sacredlabyrinth.phaed.simpleclans.managers.ClanManager;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -25,33 +22,6 @@ public class PVPSwitch extends JavaPlugin
 	
 	private PVPSwitchAPI api = new PVPSwitchAPI(this);
 	
-	SimpleClans core;
-	
-	private boolean hookSimpleClans()
-	{
-		try 
-		{
-            for (Plugin plugin : getServer().getPluginManager().getPlugins()) 
-            {
-                if (plugin instanceof SimpleClans) 
-                {
-                    this.core = (SimpleClans) plugin;
-                    return true;
-                }
-            }
-        } 
-		catch (NoClassDefFoundError e) 
-		{
-            return false;
-        }
-        return false;
-	}
-	
-	public ClanManager getClanManager()
-	{
-	    return this.core.getClanManager();
-	}
-	
 	public void onEnable() 
 	{
 		if(!new File(getDataFolder(),"Data").exists()) 
@@ -62,8 +32,7 @@ public class PVPSwitch extends JavaPlugin
 		{
 			new File(getDataFolder(),"Player").mkdirs();
 		}
-		if(hookSimpleClans()==false)
-			Bukkit.getConsoleSender().sendMessage("§a[PVPSwitch] §cSimpleClans未加载！");
+		
 		loadConfig();
 		getServer().getPluginManager().registerEvents(new PVPSwitchListener(this), this);
 		Bukkit.getConsoleSender().sendMessage("§a[PVPSwitch] §ePVP系统加载完毕");
@@ -188,14 +157,10 @@ public class PVPSwitch extends JavaPlugin
 						if(playerData.get(p.getName())==false)
 						{
 							playerData.put(p.getName(), true);
-							if(getClanManager().getClanByPlayerUniqueId(p.getUniqueId())!=null)
-								getClanManager().getClanPlayer(p).setFriendlyFire(true);
 							p.sendMessage("§a[PVP]§3 PVP已打开");
 						}
 						else
 						{
-							if(getClanManager().getClanByPlayerUniqueId(p.getUniqueId())!=null)
-								getClanManager().getClanPlayer(p).setFriendlyFire(false);
 							playerData.put(p.getName(), false);
 							p.sendMessage("§a[PVP]§3 PVP已关闭");
 						}
