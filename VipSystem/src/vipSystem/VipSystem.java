@@ -1,6 +1,9 @@
 package vipSystem;
 
 import me.lucko.luckperms.common.util.Uuids;
+import net.luckperms.api.model.user.User;
+import net.luckperms.api.model.user.UserManager;
+import net.luckperms.api.node.Node;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.EnchantmentWrapper;
@@ -11,12 +14,10 @@ import net.milkbowl.vault.economy.Economy;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -34,6 +35,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import net.luckperms.api.*;
+import vipSystem.util.Util;
+
+import static vipSystem.util.Util.getNewDate;
 
 public class VipSystem extends JavaPlugin
 {
@@ -45,8 +49,11 @@ public class VipSystem extends JavaPlugin
 	VipSystemAPI api = new VipSystemAPI(this);
 	
 	HashMap<String, VipReward> reward = new HashMap<String, VipReward>();
-	
+
+	ConfigLoader configLoader = new ConfigLoader(this);
+
 	public Economy economy;
+	public LuckPerms luckPerms;
 	
 	private boolean setupEconomy()
 	{
@@ -57,17 +64,33 @@ public class VipSystem extends JavaPlugin
 		}
 		return (economy!=null);
 	}
-	
+
+	private boolean setupLuckPerms()
+	{
+		RegisteredServiceProvider<LuckPerms> economyProvider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
+		if (economyProvider != null)
+		{
+			luckPerms = economyProvider.getProvider();
+		}
+		return (luckPerms!=null);
+	}
+
 	public void onEnable()
 	{
 		if(!new File(getDataFolder(),"Data").exists()) 
 		{
 			new File(getDataFolder(),"Data").mkdirs();
 		}
-		if(setupEconomy()==false)
+		if(!setupEconomy())
 			Bukkit.getConsoleSender().sendMessage("§a[vipSystem] §cVault插件未加载!");
-		loadConfig();
-		loadItems();
+		if(!setupLuckPerms()){
+			Bukkit.getConsoleSender().sendMessage("§a[vipSystem] §cLuckPerms插件未加载!");
+			Bukkit.getServicesManager().unregister(this);
+			return;
+		}
+
+		defaultGroup = configLoader.loadConfig(vipGroups);
+		configLoader.loadItems(vipGroups, reward);
 
 		getServer().getPluginManager().registerEvents(new VipSystemListener(this), this);
 		Bukkit.getConsoleSender().sendMessage("§a[vipSystem] §e会员系统加载完毕");
@@ -81,236 +104,6 @@ public class VipSystem extends JavaPlugin
 	public VipSystemAPI getAPI()
 	{
 		return api;
-	}
-	
-	public void loadConfig()
-	{
-		File file=new File(getDataFolder(),"config.yml");
-		FileConfiguration config;
-
-		if(!file.exists())
-		{
-			config = load(file);
-			ArrayList<String> vipGroups = new ArrayList<String>();
-			vipGroups.add("VIP1");
-			vipGroups.add("VIP2");
-			vipGroups.add("VIP3");
-			vipGroups.add("VIP4");
-			config.set("VipSystem.DefaultGroup", "default");
-			config.set("VipSystem.VIPGroups", vipGroups);
-			ArrayList<String> vipGroupsName = new ArrayList<String>();
-			vipGroupsName.add("初级会员");
-			vipGroupsName.add("中级会员");
-			vipGroupsName.add("高级会员");
-			vipGroupsName.add("至尊会员");
-			
-			config.set("VipSystem.VIPGroupsName", vipGroupsName);
-			
-			try {
-				config.save(file);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-			loadConfig();
-		}
-		config = load(file);
-		int index=0;
-		for(String vipGroup:config.getStringList("VipSystem.VIPGroups"))
-		{
-			vipGroups.put(vipGroup, config.getStringList("VipSystem.VIPGroupsName").get(index));
-			index++;
-		}
-
-		defaultGroup = config.getString("VipSystem.DefaultGroup");
-		return;
-	}
-	
-	public void loadItems()
-	{
-		File file=new File(getDataFolder(),"items.yml");
-		FileConfiguration config;
-
-		if(!file.exists())
-		{
-			config = load(file);
-
-			config.set("VIP1.Money", 3000);
-			config.set("VIP1.Items.1.ID", "diamond");
-			config.set("VIP1.Items.1.Amount", 32);
-			config.set("VIP1.Items.1.DisplayName", "钻石");
-			config.set("VIP1.Items.1.Lore", "神奇钻石");
-			config.set("VIP1.Items.1.Enchant.ID", "fortune");
-			config.set("VIP1.Items.1.Enchant.Level", 1);
-			config.set("VIP1.Items.1.HideEnchant", true);
-			
-			try {
-				config.save(file);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-			loadItems();
-			return;
-		}
-		
-		config = load(file);
-		
-		for(String vipGroup:vipGroups.keySet())
-		{
-			ArrayList<ItemStack> items = new ArrayList<ItemStack>();
-			int money = config.getInt(vipGroup + ".Money");
-			for(int i=0; config.contains(vipGroup + ".Items."+(i+1)); i++)
-			{
-				String id = "";
-				boolean hide = config.getBoolean(vipGroup + ".Items."+(i+1)+".HideEnchant");
-				if(config.getString(vipGroup + ".Items."+(i+1)+".ID").contains(":")) {
-					id = config.getString(vipGroup + ".Items."+(i+1)+".ID").split(":")[0];
-				}
-				else {
-					id = config.getString(vipGroup + ".Items."+(i+1)+".ID");
-				}
-				int amount = config.getInt(vipGroup + ".Items."+(i+1)+".Amount");
-				String name = config.getString(vipGroup + ".Items."+(i+1)+".DisplayName");
-				String lore = config.getString(vipGroup + ".Items."+(i+1)+".Lore");
-				String enchantID = config.getString(vipGroup + ".Items."+(i+1)+".Enchant.ID");
-				int level = config.getInt(vipGroup + ".Items."+(i+1)+".Enchant.Level");
-
-				ItemStack item = new ItemStack(Material.getMaterial(id.toUpperCase()), amount);
-				ItemMeta meta = item.getItemMeta();
-				if(name!=null)
-					meta.setDisplayName(name);
-				if(lore!=null)
-				{
-					ArrayList<String> itemLore = new ArrayList<String>();
-					for(String l:lore.split("%"))
-					{
-						itemLore.add(l);
-					}
-					meta.setLore(itemLore);
-				}
-				if(hide==true)
-					meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-				item.setItemMeta(meta);
-
-				if(!enchantID.equalsIgnoreCase("") && level>0)
-				{
-					item.addUnsafeEnchantment(EnchantmentWrapper.getByKey(NamespacedKey.minecraft(enchantID)), level);
-				}
-				items.add(item);
-			}
-			VipReward vipReward = new VipReward(items, money);
-			reward.put(vipGroup, vipReward);
-		}
-		
-		return;
-	}
-	
-	public VipPlayer loadPlayerConfig(UUID uniqueId)
-	{
-		File file = new File(getDataFolder(),"/Data/" + uniqueId.toString() + ".yml");
-		FileConfiguration config;
-		if (file.exists())
-		{
-			config = load(file);
-
-			String playerName = config.getString("PlayerName");
-			String regDate = config.getString( "RegisterDate");
-			String deadline = config.getString("DeadlineDate");
-			String vipGroup = config.getString("VIPGroup");
-
-			return new VipPlayer(uniqueId, playerName, LocalDateTime.parse(regDate), LocalDateTime.parse(deadline), vipGroup);
-		}
-		return null;
-	}
-
-	public void savePlayerConfig(VipPlayer vipPlayer)
-	{
-		UUID uniqueId = vipPlayer.getUniqueId();
-		File file=new File(getDataFolder(),"/Data/"+uniqueId.toString()+".yml");
-		FileConfiguration config;
-
-		config = load(file);
-
-		String playerName = vipPlayer.getName();
-		LocalDateTime regDate = vipPlayer.getRegDate();
-		LocalDateTime deadline = vipPlayer.getDeadline();
-		String vipGroup = vipPlayer.getVipGroup();
-
-		config.set("PlayerName", playerName);
-		config.set("RegisterDate", regDate.toString());
-		config.set("DeadlineDate", deadline.toString());
-		config.set("VIPGroup", vipGroup);
-
-		try {
-			config.save(file);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public ItemStack createItem(String ID, int quantity, int durability, String displayName, String lore)
-	{
-		ItemStack item = new ItemStack(Material.getMaterial(ID), quantity, (short)durability);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(displayName);
-		ArrayList<String> loreList = new ArrayList<String>();
-		for(String l:lore.split("%"))
-		{
-			loreList.add(l);
-		}
-		meta.setLore(loreList);
-		item.setItemMeta(meta);
-		
-		return item;
-	}
-	
-	public ItemStack createItem(String ID, int quantity, int durability, String displayName)
-	{
-		ItemStack item = new ItemStack(Material.getMaterial(ID), quantity, (short)durability);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(displayName);
-		item.setItemMeta(meta);
-		
-		return item;
-	}
-	
-	public FileConfiguration load(File file)
-	{
-        if (!(file.exists())) 
-        { //假如文件不存在
-        	try   //捕捉异常，因为有可能创建不成功
-        	{
-        		file.createNewFile();
-        	}
-        	catch(IOException e)
-        	{
-        		e.printStackTrace();
-        	}
-        }
-        return YamlConfiguration.loadConfiguration(file);
-	}
-	
-	public FileConfiguration load(String path)
-	{
-		File file=new File(path);
-		if(!file.exists())
-		{
-			try
-			{
-				file.createNewFile();
-			}
-			catch(IOException e)
-			{
-				e.printStackTrace();
-			}
-		}
-		return YamlConfiguration.loadConfiguration(new File(path));
-	}
-	
-	public static LocalDateTime getNewDate(LocalDateTime recentDate, int days)
-	{
-		return recentDate.plusDays(days);
 	}
 	
 	public boolean onCommand(CommandSender sender,Command cmd,String label,String[] args)  
@@ -376,8 +169,8 @@ public class VipSystem extends JavaPlugin
 					sender.sendMessage("§6[会员系统] §4你没有权限");
 					return true;
 				}
-				loadConfig();
-				loadItems();
+				defaultGroup = configLoader.loadConfig(vipGroups);
+				configLoader.loadItems(vipGroups, reward);
 				sender.sendMessage("§6[会员系统] §a配置重载完毕");
 				return true;
 			}
@@ -405,8 +198,8 @@ public class VipSystem extends JavaPlugin
 
 				Player p = Bukkit.getServer().getPlayer(args[1]);
 
-				VipPlayer vipPlayer = loadPlayerConfig(p.getUniqueId());
-				if(vipPlayer==null || !vipPlayer.isDeadline())
+				VipPlayer vipPlayer = configLoader.loadPlayerConfig(p.getUniqueId());
+				if(vipPlayer==null || vipPlayer.isDeadline())
 				{
 					sender.sendMessage("§6[会员系统] §c该玩家不是会员或会员已到期");
 					return true;
@@ -439,8 +232,8 @@ public class VipSystem extends JavaPlugin
 
 				Player p = Bukkit.getServer().getPlayer(args[1]);
 
-				VipPlayer vipPlayer = loadPlayerConfig(p.getUniqueId());
-				if(vipPlayer==null || !vipPlayer.isDeadline())
+				VipPlayer vipPlayer = configLoader.loadPlayerConfig(p.getUniqueId());
+				if(vipPlayer==null || vipPlayer.isDeadline())
 				{
 					sender.sendMessage("§6[会员系统] §c该玩家不是会员或会员已到期");
 					return true;
@@ -455,8 +248,12 @@ public class VipSystem extends JavaPlugin
 				LocalDateTime newDeadline = getNewDate(vipPlayer.getDeadline(), Integer.valueOf(args[2]));
 				vipPlayer.setDeadline(newDeadline);
 
-				savePlayerConfig(vipPlayer);
-				
+				try {
+					configLoader.savePlayerConfig(vipPlayer);
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+
 				sender.sendMessage("§6[会员系统] §e已为玩家§c"+args[1]+"§e增加了§a"+args[2]+"§e天会员");
 				if(Bukkit.getServer().getPlayer(args[1])!=null)
 				{
@@ -487,8 +284,8 @@ public class VipSystem extends JavaPlugin
 
 				Player p = Bukkit.getServer().getPlayer(args[1]);
 
-				VipPlayer vipPlayer = loadPlayerConfig(p.getUniqueId());
-				if(vipPlayer==null || !vipPlayer.isDeadline())
+				VipPlayer vipPlayer = configLoader.loadPlayerConfig(p.getUniqueId());
+				if(vipPlayer==null || vipPlayer.isDeadline())
 				{
 					sender.sendMessage("§6[会员系统] §c该玩家不是会员或会员已到期");
 					return true;
@@ -497,12 +294,24 @@ public class VipSystem extends JavaPlugin
 				File file=new File(getDataFolder(),"/Data/"+p.getUniqueId().toString()+".yml");
 				if(file.exists())
 					file.delete();
+
+				LuckPerms lp = LuckPermsProvider.get();
+				User lpUser = lp.getUserManager().getUser(p.getUniqueId());
+				lpUser.data().toMap().values().forEach(nodeList -> {
+					nodeList.forEach(node -> {
+						if(node.getKey().equalsIgnoreCase("group." + vipPlayer.getVipGroup())){
+							lpUser.data().remove(node);
+						}
+					});
+				});
+				lp.getUserManager().saveUser(lpUser);
+
 				sender.sendMessage("§6[会员系统] §e已移除玩家§c"+args[1]+"§e的会员");
 				if(Bukkit.getServer().getPlayer(args[1])!=null)
 				{
 					Bukkit.getServer().getPlayer(args[1]).sendMessage("§6[会员系统] §e你的会员已被移除");
 				}
-				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "manuadd "+args[1]+" "+defaultGroup);
+
 				return true;
 			}
 			
@@ -511,12 +320,12 @@ public class VipSystem extends JavaPlugin
 				if(sender instanceof Player)
 				{
 					Player p = (Player)sender;
-					if(loadPlayerConfig(p.getUniqueId())==null)
+					if(configLoader.loadPlayerConfig(p.getUniqueId())==null)
 					{
 						sender.sendMessage("§6[会员系统] §c你还不是会员");
 						return true;
 					}
-					VipPlayer vip = loadPlayerConfig(p.getUniqueId());
+					VipPlayer vip = configLoader.loadPlayerConfig(p.getUniqueId());
 					p.sendMessage("§6[会员系统] §e会员类型:§c"+vipGroups.get(vip.getVipGroup())+"§e,剩余会员时间:§a"+vip.getLeftDays()+"天,"+vip.getLeftHours()%24+"小时");
 				}
 				return true;
@@ -554,13 +363,17 @@ public class VipSystem extends JavaPlugin
 				String playerName = args[1];
 				String group = args[2];
 				Player p = Bukkit.getPlayer(playerName);
-				VipPlayer vipPlayer = loadPlayerConfig(p.getUniqueId());
+				VipPlayer vipPlayer = configLoader.loadPlayerConfig(p.getUniqueId());
 
 				if(vipPlayer!=null && vipPlayer.getVipGroup().equalsIgnoreCase(args[2]))
 				{
 					LocalDateTime newDeadlineDate = getNewDate(vipPlayer.getDeadline(), days);
 					vipPlayer.setDeadline(newDeadlineDate);
-					savePlayerConfig(vipPlayer);
+					try {
+						configLoader.savePlayerConfig(vipPlayer);
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}
 					Bukkit.getServer().getPlayer(args[1]).sendMessage("§6[会员系统] §e成功续费§c"+vipGroups.get(args[2])+" §e"+args[3]+"天");
 				}
 				else
@@ -568,7 +381,11 @@ public class VipSystem extends JavaPlugin
 					LocalDateTime recentDate = LocalDateTime.now();
 					LocalDateTime deadlineDate = getNewDate(recentDate, days);
 					vipPlayer = new VipPlayer(p.getUniqueId(), args[1], recentDate, deadlineDate, args[2]);
-					savePlayerConfig(vipPlayer);
+					try {
+						configLoader.savePlayerConfig(vipPlayer);
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}
 					p.sendMessage("§6[会员系统] §e成功开通§c"+vipGroups.get(args[2])+" §e"+args[3]+"天");
 					Bukkit.getServer().broadcastMessage("§6玩家§a"+args[1]+"§6成为§c"+vipGroups.get(args[2]));
 				}
@@ -591,7 +408,10 @@ public class VipSystem extends JavaPlugin
 					whoWantToBeVip.sendMessage("§6[会员系统] §a物品奖励已放入背包内，如果背包满了，则会掉落到地面上，请注意拾取。");
 				}
 
-				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "manuadd "+args[1]+" "+args[2]);
+				LuckPerms lp = LuckPermsProvider.get();
+				User lpUser = lp.getUserManager().getUser(p.getUniqueId());
+				lpUser.data().add(Node.builder("group." + group).build());
+				lp.getUserManager().saveUser(lpUser);
 				
 				if(sender instanceof Player)
 				{

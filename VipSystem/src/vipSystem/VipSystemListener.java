@@ -19,7 +19,8 @@ public class VipSystemListener implements Listener
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event)
     {
-    	VipPlayer vipPlayer = plugin.loadPlayerConfig(event.getPlayer().getUniqueId());
+    	VipPlayer vipPlayer = plugin.configLoader.loadPlayerConfig(event.getPlayer().getUniqueId());
+    	event.getPlayer().sendMessage(String.valueOf(vipPlayer.getLeftHours()));
 		if(vipPlayer!=null)
 		{
 			if(vipPlayer.isDeadline())
