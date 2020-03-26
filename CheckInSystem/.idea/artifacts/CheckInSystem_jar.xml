@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="CheckInSystem:jar">
+    <output-path>$PROJECT_DIR$/../../Project0/server/plugins</output-path>
+    <root id="archive" name="CheckInSystem.jar">
+      <element id="module-output" name="CheckInSystem" />
+    </root>
+  </artifact>
+</component>

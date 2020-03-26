@@ -1,6 +1,8 @@
 package checkInSystem;
 
-public class CheckInSystemAPI 
+import java.util.UUID;
+
+public class CheckInSystemAPI
 {
 	CheckInSystem plugin;
 	public CheckInSystemAPI(CheckInSystem plugin)
@@ -8,13 +10,13 @@ public class CheckInSystemAPI
 		this.plugin=plugin;
 	}
 	
-	public int getDays(String playerName)
+	public int getDays(UUID playerID)
 	{
-		return Integer.valueOf(plugin.playerData.get(playerName).get("days"));
+		return Integer.parseInt(plugin.playerData.get(playerID).get("days"));
 	}
 	
-	public boolean isCheckIn(String playerName)
+	public boolean isCheckIn(UUID playerID)
 	{
-		return plugin.isCheckIn.get(playerName);
+		return plugin.isCheckIn.get(playerID);
 	}
 }

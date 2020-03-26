@@ -1,5 +1,9 @@
 package checkInSystem;
 
+import checkInSystem.database.*;
+import checkInSystem.expansion.CheckInSystemExpansion;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -12,9 +16,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -25,7 +29,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.permissions.Permission;
 
 public class CheckInSystem extends JavaPlugin
 {
@@ -34,15 +37,18 @@ public class CheckInSystem extends JavaPlugin
 	ArrayList<ItemStack> itemList = new ArrayList<ItemStack>();
 	private ArrayList<String> describeList = new ArrayList<String>();
 
-	HashMap<String, HashMap<String, String>> playerData = new HashMap<String, HashMap<String, String>>();
+	public HashMap<UUID, HashMap<String, String>> playerData = new HashMap<>();
 
 	public boolean isEco = false;
 	public Economy economy;
-	HashMap<String, Boolean> isCheckIn = new HashMap<String, Boolean>();
+	public HashMap<UUID, Boolean> isCheckIn = new HashMap<>();
 	SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");//设置日期格式
 
+	public DatabaseType databaseType = DatabaseType.YML;
+
 	private CheckInSystemAPI api = new CheckInSystemAPI(this);
-	
+	private String createTableQuery = "create table if not exists check_in_system(id varchar(100), days varchar(10), last_date varchar(10), today_date varchar(10));";
+
 	public CheckInSystemAPI getAPI()
 	{
 		return api;
@@ -68,8 +74,14 @@ public class CheckInSystem extends JavaPlugin
 		{
 			getDataFolder().mkdir();
 		}
+
+		if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null){
+			new CheckInSystemExpansion(this).register();
+		}
+
+		Database.setCreateTableQuery(createTableQuery);
 		loadConfig();
-		loadPlayerConfig();
+
 		task();
 		getServer().getPluginManager().registerEvents(new CheckInSystemListener(this), this);
 		Bukkit.getConsoleSender().sendMessage("§a[CheckInSystem] §e签到系统加载完毕");
@@ -77,7 +89,6 @@ public class CheckInSystem extends JavaPlugin
 
 	public void onDisable() 
 	{
-		savePlayerConfig();
 		Bukkit.getConsoleSender().sendMessage("§a[CheckInSystem] §e签到系统卸载完毕");
 	}
 	
@@ -92,12 +103,12 @@ public class CheckInSystem extends JavaPlugin
 				{
 					for(Player p:Bukkit.getOnlinePlayers())
 					{
-						if(playerData.containsKey(p.getName()))
+						if(playerData.containsKey(p.getUniqueId()))
 						{
-							HashMap<String, String> data = playerData.get(p.getName());
+							HashMap<String, String> data = playerData.get(p.getUniqueId());
 							data.put("todayDate", date.format(new Date()));
-							playerData.put(p.getName(), data);
-							isCheckIn.put(p.getName(), false);
+							playerData.put(p.getUniqueId(), data);
+							isCheckIn.put(p.getUniqueId(), false);
 						}
 						
 					}
@@ -139,79 +150,68 @@ public class CheckInSystem extends JavaPlugin
 		return YamlConfiguration.loadConfiguration(new File(path));
 	}
 	
-	public void savePlayerConfig()
-	{
-		for(String playerName:playerData.keySet())
-		{
-			File file=new File(getDataFolder(), "/data/"+playerName+".yml");
-			FileConfiguration config;
-			
-			config = load(file);
-			
-			config.set("CheckIn.Days", playerData.get(playerName).get("days"));
-			config.set("CheckIn.LastDate", playerData.get(playerName).get("lastDate"));
-			config.set("CheckIn.TodayDate", playerData.get(playerName).get("todayDate"));
-			
-			try {
-				config.save(file);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+	public void savePlayerConfig(UUID uniqueId, Boolean isCheckIn, HashMap<String, String> data) throws IOException {
+		this.isCheckIn.put(uniqueId, isCheckIn);
+		this.playerData.put(uniqueId, data);
+
+		HashMap<String, Object> paths = new HashMap<String, Object>() {{
+			put("days", data.get("days"));
+			put("lastDate", data.get("lastDate"));
+			put("todayDate", data.get("todayDate"));
+		}};
+
+		ConfigStructure configStructure = new ConfigStructure(paths);
+
+		StorageInterface storage = Database.getInstance(databaseType, this);
+		storage.store(uniqueId, configStructure);
 	}
 	
-	public void loadPlayerConfig()
+	public void loadPlayerConfig(UUID uniqueId)
 	{
-		File file1=new File(getDataFolder(), "/data");
-		String[] fileName = file1.list();
-		for(String name:fileName)
-		{
-			//Bukkit.getConsoleSender().sendMessage("§a"+name+"加载成功");
-			String playerName = name.substring(0, name.length()-4);
-			
-			File file=new File(getDataFolder(), "/data/"+playerName+".yml");
-			FileConfiguration config;
-			
-			if(!file.exists())
-			{
-				//Bukkit.getConsoleSender().sendMessage("§a"+playerName+"不存在");
-				config = load(file);
-				HashMap<String, String> data = new HashMap<String, String>();
+		String todayDate = date.format(new Date());
+		HashMap<String, String> data;
+		String lastDate;
+		if(playerData.containsKey(uniqueId)){
+			data = playerData.get(uniqueId);
+			data.put("todayDate", todayDate);
+		} else {
+			StorageInterface storage = Database.getInstance(databaseType, this);
+
+			HashMap<String, Object> result = storage.get(uniqueId, new String[] {"days", "lastDate", "todayDate"});
+
+			if(result==null){
+				data = new HashMap<>();
 				data.put("days", "0");
 				data.put("lastDate", "0000-00-00");
-				data.put("todayDate", date.format(new Date()));
-				playerData.put(playerName, data);
-				isCheckIn.put(playerName, false);
+				data.put("todayDate", todayDate);
+				playerData.put(uniqueId, data);
+				isCheckIn.put(uniqueId, false);
 				return;
 			}
-			
-			config = load(file);
-			String lastDate = config.getString("CheckIn.LastDate");
-			String todayDate = date.format(new Date());
-			
-			HashMap<String, String> data = new HashMap<String, String>();
-			data.put("days", config.getString("CheckIn.Days"));
-			data.put("lastDate", lastDate);
-			data.put("todayDate", todayDate);
-			
-			if(lastDate.equalsIgnoreCase(todayDate))
-			{
-				isCheckIn.put(playerName, true);
+
+			data = new HashMap<>();
+			for(String key:result.keySet()){
+				data.put(key, (String)result.get(key));
 			}
-			else
-			{
-				isCheckIn.put(playerName, false);
-			}
-			
-			if(!todayDate.split("-")[1].equals(lastDate.split("-")[1]) || 
-					!todayDate.split("-")[0].equals(lastDate.split("-")[0]))
-			{
-				data.put("days", "0");
-			}
-			playerData.put(playerName, data);
-			//Bukkit.getConsoleSender().sendMessage("§a"+playerName+"加载成功");
+		}
+		lastDate = data.get("lastDate");
+		data.put("todayDate", todayDate);
+
+		if(lastDate.equalsIgnoreCase(todayDate))
+		{
+			isCheckIn.put(uniqueId, true);
+		}
+		else
+		{
+			isCheckIn.put(uniqueId, false);
 		}
 
+		if(!todayDate.split("-")[1].equals(lastDate.split("-")[1]) ||
+				!todayDate.split("-")[0].equals(lastDate.split("-")[0]))
+		{
+			data.put("days", "0");
+		}
+		playerData.put(uniqueId, data);
 	}
 	
 	public void loadConfig()
@@ -220,39 +220,38 @@ public class CheckInSystem extends JavaPlugin
 		FileConfiguration config;
 		if (!file.exists())
 		{
-			config = load(file);
+			HashMap<String, Object> data = new HashMap<>();
+			data.put("CheckIn.Database", "YML");
 			for(int i=0; i<31; i++)
 			{
-				config.set("CheckIn.Days."+(i+1)+".Describe", "§7奖品为绿宝石一个");
-				config.set("CheckIn.Days."+(i+1)+".Gift.TypeID", 263);
-				config.set("CheckIn.Days."+(i+1)+".Gift.Durability", 0);
-				config.set("CheckIn.Days."+(i+1)+".Gift.Amount", 1);
-				config.set("CheckIn.Days."+(i+1)+".Gift.Name", "§f未鉴定的宝石");
-				config.set("CheckIn.Days."+(i+1)+".Gift.Lore", "§e[未鉴定]%§6一块看起来普通的石头");
-				config.set("CheckIn.Days."+(i+1)+".Gift.Enchantment.ID", 0);
-				config.set("CheckIn.Days."+(i+1)+".Gift.Enchantment.Level", 1);
-				config.set("CheckIn.Days."+(i+1)+".Gift.HideEnchant", true);
-				config.set("CheckIn.Days."+(i+1)+".Money", 0);
-				config.set("CheckIn.Days."+(i+1)+".Command", null);
+				data.put("CheckIn.Days."+(i+1)+".Describe", "§7奖品为绿宝石一个");
+				data.put("CheckIn.Days."+(i+1)+".Gift.TypeID", "diamond");
+				data.put("CheckIn.Days."+(i+1)+".Gift.Amount", 1);
+				data.put("CheckIn.Days."+(i+1)+".Gift.Name", "§f未鉴定的宝石");
+				data.put("CheckIn.Days."+(i+1)+".Gift.Lore", "§e[未鉴定]%§6一块看起来普通的石头");
+				data.put("CheckIn.Days."+(i+1)+".Gift.Enchantment.ID", "fortune");
+				data.put("CheckIn.Days."+(i+1)+".Gift.Enchantment.Level", 1);
+				data.put("CheckIn.Days."+(i+1)+".Gift.HideEnchant", true);
+				data.put("CheckIn.Days."+(i+1)+".Money", 0);
+				data.put("CheckIn.Days."+(i+1)+".Command", null);
 			}
-			try 
-			{
-				config.save(file);
-			} 
-			catch (IOException e) 
-			{
+
+			StorageInterface storage = Database.getInstance(DatabaseType.YML, this);
+			try {
+				storage.store(new ConfigStructure(data));
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			
+
 			loadConfig();
 			return;
 		}
 		config = load(file);
-		int itemID = 0;
+		String itemID;
 		int itemAmount = 0;
 		int money = 0;
 		int itemDurability = 0;
-		int itemEnchantID = -1;
+		String itemEnchantID;
 		int itemEnchantLevel = 1;
 		String command = null;
 		String describe = null;
@@ -262,16 +261,17 @@ public class CheckInSystem extends JavaPlugin
 		itemList.clear();
 		moneyList.clear();
 		commandList.clear();
-		
+
+		databaseType = DatabaseType.valueOf(config.getString("CheckIn.Database").toUpperCase());
+
 		for(int i=0; i<31; i++)
 		{
 			describe = config.getString("CheckIn.Days."+(i+1)+".Describe").replaceAll("&", "§");
-			itemID = config.getInt("CheckIn.Days."+(i+1)+".Gift.TypeID");
-			itemDurability = config.getInt("CheckIn.Days."+(i+1)+".Gift.Durability");
+			itemID = config.getString("CheckIn.Days."+(i+1)+".Gift.TypeID").toUpperCase();
 			itemAmount = config.getInt("CheckIn.Days."+(i+1)+".Gift.Amount");
 			itemName = config.getString("CheckIn.Days."+(i+1)+".Gift.Name");
 			lore = config.getString("CheckIn.Days."+(i+1)+".Gift.Lore");
-			itemEnchantID = config.getInt("CheckIn.Days."+(i+1)+".Gift.Enchantment.ID");
+			itemEnchantID = config.getString("CheckIn.Days."+(i+1)+".Gift.Enchantment.ID");
 			itemEnchantLevel = config.getInt("CheckIn.Days."+(i+1)+".Gift.Enchantment.Level");
 			boolean hide = config.getBoolean("CheckIn.Days."+(i+1)+".Gift.HideEnchant");
 			
@@ -279,20 +279,20 @@ public class CheckInSystem extends JavaPlugin
 			command = config.getString("CheckIn.Days."+(i+1)+".Command");
 			ItemStack item = null;
 			if(itemName==null && lore==null)
-				item = new ItemStack(itemID, itemAmount, (short) itemDurability);
+				item = new ItemStack(Material.getMaterial(itemID), itemAmount);
 			else if(itemName==null && lore!=null)
-				item = createItem2(itemID, itemAmount, itemDurability, lore);
+				item = createItem2(itemID, itemAmount, lore);
 			else if(itemName!=null && lore==null)
-				item = createItem(itemID, itemAmount, itemDurability, itemName);
+				item = createItem(itemID, itemAmount, itemName);
 			else if(itemName!=null && lore!=null)
-				item = createItem(itemID, itemAmount, itemDurability, itemName, lore);
+				item = createItem(itemID, itemAmount, itemName, lore);
 			ItemMeta meta = item.getItemMeta();
 			if(hide==true)
 				meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 			item.setItemMeta(meta);
-			if(itemEnchantID>=0 && itemEnchantLevel>0)
+			if(itemEnchantID!=null && itemEnchantLevel>0)
 			{
-				item.addUnsafeEnchantment(Enchantment.getById(itemEnchantID), itemEnchantLevel);
+				item.addUnsafeEnchantment(Enchantment.getByKey(NamespacedKey.minecraft(itemEnchantID)), itemEnchantLevel);
 			}
 			describeList.add(describe);
 			itemList.add(item);
@@ -303,9 +303,9 @@ public class CheckInSystem extends JavaPlugin
 		
 	}
 	
-	public ItemStack createItem(int ID, int quantity, int durability, String displayName, String lore)
+	public ItemStack createItem(String ID, int quantity, String displayName, String lore)
 	{
-		ItemStack item = new ItemStack(ID, quantity, (short)durability);
+		ItemStack item = new ItemStack(Material.getMaterial(ID.toUpperCase()), quantity);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(displayName);
 		ArrayList<String> loreList = new ArrayList<String>();
@@ -319,9 +319,9 @@ public class CheckInSystem extends JavaPlugin
 		return item;
 	}
 	
-	public ItemStack createItem(int ID, int quantity, int durability, String displayName)
+	public ItemStack createItem(String ID, int quantity, String displayName)
 	{
-		ItemStack item = new ItemStack(ID, quantity, (short)durability);
+		ItemStack item = new ItemStack(Material.getMaterial(ID), quantity);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(displayName);
 		item.setItemMeta(meta);
@@ -329,9 +329,9 @@ public class CheckInSystem extends JavaPlugin
 		return item;
 	}
 	
-	public ItemStack createItem2(int ID, int quantity, int durability, String lore)
+	public ItemStack createItem2(String ID, int quantity, String lore)
 	{
-		ItemStack item = new ItemStack(ID, quantity, (short)durability);
+		ItemStack item = new ItemStack(Material.getMaterial(ID), quantity);
 		ItemMeta meta = item.getItemMeta();
 		ArrayList<String> loreList = new ArrayList<String>();
 		for(String l:lore.split("%"))
@@ -346,12 +346,12 @@ public class CheckInSystem extends JavaPlugin
 	
 	public Inventory init_gui(Player player)
 	{
-		int days = Integer.valueOf(playerData.get(player.getName()).get("days"));
+		int days = Integer.parseInt(playerData.get(player.getUniqueId()).get("days"));
 
 		Inventory inv = Bukkit.createInventory(player, 36, "签到");
 		for(int i=0; i<31; i++)
 		{
-			ItemStack item = new ItemStack(159, 1, (short)11);
+			ItemStack item = new ItemStack(Material.BLUE_TERRACOTTA, 1);
 			ItemMeta meta = item.getItemMeta();
 			ArrayList<String> lore = new ArrayList<String>();
 			meta.setDisplayName("§a第"+(i+1)+"天");
@@ -364,7 +364,7 @@ public class CheckInSystem extends JavaPlugin
 		
 		for(int i=0; i<days; i++)
 		{
-			ItemStack item = new ItemStack(159, 1, (short)0);
+			ItemStack item = new ItemStack(Material.WHITE_TERRACOTTA, 1);
 			ItemMeta meta = item.getItemMeta();
 			ArrayList<String> lore = new ArrayList<String>();
 			meta.setDisplayName("§d已签到");
@@ -375,14 +375,13 @@ public class CheckInSystem extends JavaPlugin
 			inv.setItem(i, item);
 		}
 		
-		if(this.isCheckIn.get(player.getName())==false)
+		if(!this.isCheckIn.get(player.getUniqueId()))
 		{
 			ItemStack item = inv.getItem(days);
 			ItemMeta meta = item.getItemMeta();
 			meta.setDisplayName("§e点击签到");
 			item.setItemMeta(meta);
-			item.setTypeId(159);
-			item.setDurability((short)1);
+			item.setType(Material.ORANGE_TERRACOTTA);
 			item.setAmount(days+1);
 			//item.addEnchantment(Enchantment.LUCK, 5);
 			inv.setItem(days, item);
@@ -441,7 +440,9 @@ public class CheckInSystem extends JavaPlugin
 			{
 				if(sender.isOp())
 				{
-					loadPlayerConfig();
+					for(Player p:Bukkit.getServer().getOnlinePlayers()){
+						loadPlayerConfig(p.getUniqueId());
+					}
 					sender.sendMessage("§6[签到系统] §a玩家配置已重载!");
 				}
 				else
