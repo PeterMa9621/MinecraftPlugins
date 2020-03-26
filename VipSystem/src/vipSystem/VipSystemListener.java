@@ -1,11 +1,13 @@
 package vipSystem;
 
-import java.io.File;
+import java.sql.SQLException;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+import vipSystem.util.Util;
 
 public class VipSystemListener implements Listener
 {
@@ -15,25 +17,23 @@ public class VipSystemListener implements Listener
 	{
 		this.plugin=plugin;
 	}
-	
+
 	@EventHandler
-	public void onPlayerJoin(PlayerJoinEvent event)
-    {
-    	VipPlayer vipPlayer = plugin.configLoader.loadPlayerConfig(event.getPlayer().getUniqueId());
-    	event.getPlayer().sendMessage(String.valueOf(vipPlayer.getLeftHours()));
+	public void onPlayerJoin(PlayerJoinEvent event) throws SQLException {
+		VipPlayer vipPlayer = plugin.configLoader.loadPlayerConfig(event.getPlayer().getUniqueId());
+
 		if(vipPlayer!=null)
 		{
 			if(vipPlayer.isDeadline())
 			{
-				File file = new File(plugin.getDataFolder(),"/Data/"+event.getPlayer().getUniqueId()+".yml");
-				if(file.exists())
-					file.delete();
-				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "manuadd "+event.getPlayer().getName()+" "+plugin.defaultGroup);
-				event.getPlayer().sendMessage("§6[会员系统] §e你的会员已到期");
+				try {
+					Util.removeVip(vipPlayer, plugin.configLoader, plugin.players);
+					event.getPlayer().sendMessage("§6[会员系统] §e你的会员已到期");
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
 			}
 		}
-		
-		return;
     }
 
 }

@@ -1,15 +1,27 @@
 package vipSystem.util;
 
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.LuckPermsProvider;
+import net.luckperms.api.model.user.User;
+import net.luckperms.api.node.Node;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import vipSystem.ConfigLoader;
+import vipSystem.VipPlayer;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.UUID;
 
 public class Util {
     static public FileConfiguration load(File file)
@@ -74,5 +86,44 @@ public class Util {
         item.setItemMeta(meta);
 
         return item;
+    }
+
+    public static void removeVip(VipPlayer vipPlayer, ConfigLoader configLoader, HashMap<UUID, VipPlayer> players) throws SQLException {
+        LuckPerms lp = LuckPermsProvider.get();
+        User lpUser = lp.getUserManager().getUser(vipPlayer.getUniqueId());
+
+        lpUser.data().toMap().values().forEach(nodeList -> {
+            nodeList.forEach(node -> {
+                if(node.getKey().equalsIgnoreCase("group." + vipPlayer.getVipGroup())){
+                    lpUser.data().remove(node);
+                }
+            });
+        });
+        lp.getUserManager().saveUser(lpUser);
+        players.remove(vipPlayer.getUniqueId());
+        configLoader.deletePlayerConfig(vipPlayer.getUniqueId());
+    }
+
+    public static void addVip(VipPlayer vipPlayer, ConfigLoader configLoader, HashMap<UUID, VipPlayer> players) throws SQLException {
+        LuckPerms lp = LuckPermsProvider.get();
+        User lpUser = lp.getUserManager().getUser(vipPlayer.getUniqueId());
+        if(lpUser == null){
+            lpUser = lp.getUserManager().loadUser(vipPlayer.getUniqueId()).join();
+        }
+        lpUser.data().add(Node.builder("group." + vipPlayer.getVipGroup()).build());
+        lp.getUserManager().saveUser(lpUser);
+
+        players.put(vipPlayer.getUniqueId(), vipPlayer);
+
+        configLoader.savePlayerConfig(vipPlayer);
+    }
+
+    public static UUID getPlayerUUID(String playerName) {
+        Player onlinePlayer = Bukkit.getServer().getPlayer(playerName);
+        if(onlinePlayer == null){
+            return Bukkit.getServer().getOfflinePlayer(playerName).getUniqueId();
+        } else {
+            return onlinePlayer.getUniqueId();
+        }
     }
 }

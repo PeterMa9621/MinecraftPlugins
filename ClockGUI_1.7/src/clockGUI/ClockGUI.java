@@ -1,5 +1,6 @@
 package clockGUI;
 
+import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -28,7 +29,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public class ClockGUI extends JavaPlugin
 {
-	public ItemStack clock = new ItemStack(Material.WATCH);
+	public ItemStack clock = new ItemStack(Material.CLOCK);
 
 	HashMap<Integer, String> guiNameList = new HashMap<Integer, String>();
 	
@@ -94,7 +95,7 @@ public class ClockGUI extends JavaPlugin
 		Bukkit.getConsoleSender().sendMessage("§a[ClockGUI] §e制作者QQ:920157557");
 	}
 	
-	public ItemStack setItem(ItemStack item, String name, ArrayList<String> lore, int ItemID)
+	public ItemStack setItem(ItemStack item, String name, ArrayList<String> lore, String itemID)
 	{
 		ItemMeta meta = item.getItemMeta();
 		if(name!=null)
@@ -108,9 +109,9 @@ public class ClockGUI extends JavaPlugin
 		}
 		item.setItemMeta(meta);
 
-		if(ItemID!=0)
+		if(itemID!=null)
 		{
-			item.setTypeId(ItemID);
+			item.setType(Material.getMaterial(itemID));
 		}
 		return item;
 	}
@@ -179,10 +180,10 @@ public class ClockGUI extends JavaPlugin
 			
 			config.set("GUI.0.Name", "§1我的世界钟表菜单");
 			config.set("GUI.0.Item.1.Position", 1);
-			config.set("GUI.0.Item.1.ItemID", "264");
+			config.set("GUI.0.Item.1.ItemID", "CLOCK");
 			config.set("GUI.0.Item.1.Name", "示例1");
 			config.set("GUI.0.Item.1.Lore", "这是第一行%这是第二行%这是第三行");
-			config.set("GUI.0.Item.1.Enchantment.ID", 0);
+			config.set("GUI.0.Item.1.Enchantment.ID", "fortune");
 			config.set("GUI.0.Item.1.Enchantment.Level", 1);
 			//config.set("GUI.0.Item.1.HideEnchant", true);
 			config.set("GUI.0.Item.1.Cost.Type", "Money");
@@ -194,7 +195,7 @@ public class ClockGUI extends JavaPlugin
 			config.set("GUI.0.Item.1.Function.Command.Use", false);
 			config.set("GUI.0.Item.1.Function.Command.Content", "/say 钟表菜单");
 			config.set("GUI.0.Item.2.Position", 10);
-			config.set("GUI.0.Item.2.ItemID", "397:1");
+			config.set("GUI.0.Item.2.ItemID", "CLOCK");
 			config.set("GUI.0.Item.2.Name", "示例2");
 			config.set("GUI.0.Item.2.Lore", "这是第一行%这是第二行%这是第三行");
 			config.set("GUI.0.Item.2.Cost.Type", "PlayerPoints");
@@ -207,13 +208,13 @@ public class ClockGUI extends JavaPlugin
 			// GUI Settings
 			config.set("GUI.1.Name", "第一个GUI");
 			config.set("GUI.1.Item.1.Position", 3);
-			config.set("GUI.1.Item.1.ItemID", "264");
+			config.set("GUI.1.Item.1.ItemID", "diamond");
 			config.set("GUI.1.Item.1.Name", "示例3");
 			config.set("GUI.1.Item.1.Lore", "这是第一行%这是第二行%这是第三行");
 			config.set("GUI.1.Item.1.Function.Command.Use", true);
 			config.set("GUI.1.Item.1.Function.Command.Content", "/say 另一个GUI");
 			config.set("GUI.1.Item.2.Position", 16);
-			config.set("GUI.1.Item.2.ItemID", "388");
+			config.set("GUI.1.Item.2.ItemID", "iron_pickaxe");
 			config.set("GUI.1.Item.2.Name", "示例4");
 			config.set("GUI.1.Item.2.Lore", "这是第一行%这是第二行%这是第三行");
 			config.set("GUI.1.Item.2.Function.Command.Use", true);
@@ -243,7 +244,7 @@ public class ClockGUI extends JavaPlugin
 		{
 			clockLore.add(i);
 		}
-		clock = setItem(clock, clockName, clockLore, 0);
+		clock = setItem(clock, clockName, clockLore, "CLOCK");
 
 		for(int i=0; config.contains("GUI."+i); i++)
 		{
@@ -253,7 +254,7 @@ public class ClockGUI extends JavaPlugin
 			
 			for(int x=0; config.contains("GUI."+i+".Item."+(x+1)); x++)
 			{
-				int enchantID = config.getInt("GUI."+i+".Item."+(x+1)+".Enchantment.ID");
+				String enchantID = config.getString("GUI."+i+".Item."+(x+1)+".Enchantment.ID");
 				int enchantLevel = config.getInt("GUI."+i+".Item."+(x+1)+".Enchantment.Level");
 				boolean hide = config.getBoolean("GUI."+i+".Item."+(x+1)+".HideEnchant");
 				
@@ -272,19 +273,12 @@ public class ClockGUI extends JavaPlugin
 				
 				ArrayList<String> commandList = new ArrayList<String>();
 				ItemStack item = null;
-				if(itemID.contains(":"))
-				{
-					int id = Integer.valueOf(itemID.split(":")[0]);
-					int damage = Integer.valueOf(itemID.split(":")[1]);
-					item = this.createItem(id, 1, damage, itemName, itemLore);
-				}
-				else
-				{
-					item = this.createItem(Integer.valueOf(itemID), 1, 0, itemName, itemLore);
-				}
+
+				item = this.createItem(itemID, 1, itemName, itemLore);
+
 				
-				if(enchantID>=0 && enchantLevel>0)
-					item.addUnsafeEnchantment(Enchantment.getById(enchantID), enchantLevel);
+				if(enchantID!=null && enchantLevel>0)
+					item.addUnsafeEnchantment(Enchantment.getByKey(NamespacedKey.minecraft(enchantID)), enchantLevel);
 				
 				Money money = null;
 				if(costType!=null)
@@ -367,9 +361,9 @@ public class ClockGUI extends JavaPlugin
 		return YamlConfiguration.loadConfiguration(new File(path));
 	}
 	
-	public ItemStack createItem(int ID, int quantity, int durability, String displayName, String lore)
+	public ItemStack createItem(String ID, int quantity, String displayName, String lore)
 	{
-		ItemStack item = new ItemStack(ID, quantity, (short)durability);
+		ItemStack item = new ItemStack(Material.getMaterial(ID.toUpperCase()), quantity);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(displayName);
 		ArrayList<String> loreList = new ArrayList<String>();

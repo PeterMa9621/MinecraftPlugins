@@ -71,7 +71,7 @@ public class EventListen implements Listener
 	@EventHandler
 	public void onPlayerClickInventory(InventoryClickEvent event)
 	{
-		if(plugin.guiNameList.containsValue(event.getInventory().getTitle()))
+		if(plugin.guiNameList.containsValue(event.getView().getTitle()))
 		{
 			Player p = (Player) event.getWhoClicked();
 			event.setCancelled(true);
@@ -85,7 +85,7 @@ public class EventListen implements Listener
 			int index = 0;
 			for(int i:plugin.guiNameList.keySet())
 			{
-				if(plugin.guiNameList.get(i).equalsIgnoreCase(event.getInventory().getTitle()))
+				if(plugin.guiNameList.get(i).equalsIgnoreCase(event.getView().getTitle()))
 				{
 					index = i;
 					break;

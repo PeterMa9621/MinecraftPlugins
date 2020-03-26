@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -35,8 +36,11 @@ public class ConfigLoader {
         this.plugin=plugin;
     }
 
-    public VipPlayer loadPlayerConfig(UUID uniqueId)
-    {
+    public VipPlayer loadPlayerConfig(UUID uniqueId) throws SQLException {
+        if(plugin.players.containsKey(uniqueId)){
+            return plugin.players.get(uniqueId);
+        }
+
         if(databaseType.equals(DatabaseType.YML)){
             File file = new File(plugin.getDataFolder(),"/Data/" + uniqueId.toString() + ".yml");
             FileConfiguration config;
@@ -51,12 +55,25 @@ public class ConfigLoader {
 
                 return new VipPlayer(uniqueId, playerName, LocalDateTime.parse(regDate), LocalDateTime.parse(deadline), vipGroup);
             }
-            return null;
         } else {
             Database MySQL = Database.getInstance();
-            String a = "";
-            return null;
+            String selectQuery = "SELECT id, player_name, DATE_FORMAT(register_date, '%Y-%m-%d %k:%i:%s') as register_date, " +
+                    "DATE_FORMAT(deadline_date, '%Y-%m-%d %k:%i:%s') as deadline_date, vip_group FROM vip_system where id = ? and is_expired = 0";
+            PreparedStatement stmt = MySQL.getConnection().prepareStatement(selectQuery);
+            stmt.setString(1, uniqueId.toString());
+            ResultSet resultSet = stmt.executeQuery();
+            if(resultSet.next()){
+                String playerName = resultSet.getString(2);
+                String registerDate = resultSet.getString(3);
+                String deadlineDate = resultSet.getString(4);
+                String vipGroup = resultSet.getString(5);
+                DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                VipPlayer vipPlayer = new VipPlayer(uniqueId, playerName, LocalDateTime.parse(registerDate, format), LocalDateTime.parse(deadlineDate, format), vipGroup);
+                plugin.players.put(uniqueId, vipPlayer);
+                return vipPlayer;
+            }
         }
+        return null;
     }
 
     public void savePlayerConfig(VipPlayer vipPlayer) throws SQLException {
@@ -84,7 +101,7 @@ public class ConfigLoader {
             }
         } else {
             Database MySQL = Database.getInstance();
-            String selectQuery = "Select count(*) from vip_system where id = ?";
+            String selectQuery = "Select * from vip_system where id = ?";
             PreparedStatement stmt = MySQL.getConnection().prepareStatement(selectQuery);
             stmt.setString(1, uniqueId.toString());
             ResultSet resultSet = stmt.executeQuery();
@@ -94,24 +111,40 @@ public class ConfigLoader {
             String deadlineDate = vipPlayer.getDeadline().format(format);
             Bukkit.getConsoleSender().sendMessage(String.valueOf(resultSet.getRow()));
             if(resultSet.next()){
-                String updateQuery = "Update vip_system set playerName = ?, registerDate = ?, deadlineDate = ?, vipGroup = ? where id = ?";
+                String updateQuery = "Update vip_system set player_name = ?, register_date = ?, deadline_date = ?, vip_group = ?, is_expired = ? where id = ?";
                 stmt = MySQL.getConnection().prepareStatement(updateQuery);
                 stmt.setString(1, vipPlayer.getName());
                 stmt.setString(2, registerDate);
                 stmt.setString(3, deadlineDate);
                 stmt.setString(4, vipPlayer.getVipGroup());
-                stmt.setString(5, uniqueId.toString());
+                stmt.setBoolean(5, false);
+                stmt.setString(6, uniqueId.toString());
                 stmt.executeUpdate();
             } else {
-                String insertQuery = "Insert into vip_system (id, playerName, registerDate, deadlineDate, vipGroup) values (?,?,?,?,?)";
+                String insertQuery = "Insert into vip_system (id, player_name, register_date, deadline_date, vip_group, is_expired) values (?,?,?,?,?,?)";
                 stmt = MySQL.getConnection().prepareStatement(insertQuery);
                 stmt.setString(1, uniqueId.toString());
                 stmt.setString(2, vipPlayer.getName());
                 stmt.setString(3, registerDate);
                 stmt.setString(4, deadlineDate);
                 stmt.setString(5, vipPlayer.getVipGroup());
+                stmt.setBoolean(6, false);
                 stmt.execute();
             }
+        }
+    }
+
+    public void deletePlayerConfig(UUID uniqueId) throws SQLException {
+        if(databaseType.equals(DatabaseType.YML)){
+            File file=new File(plugin.getDataFolder(), "/Data/"+uniqueId.toString()+".yml");
+            if(file.exists())
+                file.delete();
+        } else {
+            Database MySQL = Database.getInstance();
+            String deleteQuery = "Update vip_system set is_expired = 1 where id = ?;";
+            PreparedStatement stmt = MySQL.getConnection().prepareStatement(deleteQuery);
+            stmt.setString(1, uniqueId.toString());
+            stmt.executeUpdate();
         }
     }
 

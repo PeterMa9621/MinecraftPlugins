@@ -1,6 +1,7 @@
 package vipSystem;
 
 import java.io.File;
+import java.sql.SQLException;
 
 import org.bukkit.entity.Player;
 
@@ -13,8 +14,7 @@ public class VipSystemAPI
 		this.plugin=plugin;
 	}
 	
-	public String getLeftTime(Player p)
-	{
+	public String getLeftTime(Player p) throws SQLException {
 		VipPlayer vipPlayer = plugin.configLoader.loadPlayerConfig(p.getUniqueId());
 		if(vipPlayer!=null)
 		{
@@ -26,8 +26,7 @@ public class VipSystemAPI
 		}
 	}
 	
-	public boolean removeVip(Player p)
-	{
+	public boolean removeVip(Player p) throws SQLException {
 		VipPlayer vipPlayer = plugin.configLoader.loadPlayerConfig(p.getUniqueId());
 		if(vipPlayer!=null)
 		{
@@ -42,8 +41,7 @@ public class VipSystemAPI
 		}
 	}
 	
-	public String getVipGroupName(Player p)
-	{
+	public String getVipGroupName(Player p) throws SQLException {
 		VipPlayer vipPlayer = plugin.configLoader.loadPlayerConfig(p.getUniqueId());
 		if(vipPlayer!=null)
 		{
@@ -55,8 +53,7 @@ public class VipSystemAPI
 		}
 	}
 	
-	public int getLeftHour(Player p)
-	{
+	public int getLeftHour(Player p) throws SQLException {
 		VipPlayer vipPlayer = plugin.configLoader.loadPlayerConfig(p.getUniqueId());
 		if(vipPlayer!=null)
 		{

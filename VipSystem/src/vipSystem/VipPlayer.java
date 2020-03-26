@@ -51,61 +51,29 @@ public class VipPlayer
 		return vipGroup;
 	}
 	
-	public int getRegYear()
-	{
-		return regDate.getYear();
-	}
-	
-	public int getRegMonth()
-	{
-		return regDate.getMonthValue();
-	}
-	
-	public int getRegDay()
-	{
-		return regDate.getDayOfMonth();
-	}
-	
-	public int getRegHour()
-	{
-		return regDate.getHour();
-	}
-	
-	public int getDeadlineYear()
-	{
-		return deadline.getYear();
-	}
-	
-	public int getDeadlineMonth()
-	{
-		return deadline.getMonthValue();
-	}
-	
-	public int getDeadlineDay()
-	{
-		return deadline.getDayOfMonth();
-	}
-	
-	public int getDeadlineHour()
-	{
-		return deadline.getHour();
-	}
-	
 	public int getLeftHours()
 	{
-		Duration duration = Duration.between(regDate, deadline);
-		return (int)duration.toHours();
+		Duration duration = Duration.between(LocalDateTime.now(), deadline);
+		int hours = (int)duration.toHours();
+		return Math.max(hours, 0);
 	}
 	
 	public int getLeftDays()
 	{
-		Duration duration = Duration.between(regDate, deadline);
-		return (int)duration.toDays();
+		Duration duration = Duration.between(LocalDateTime.now(), deadline);
+		int days = (int)duration.toDays();
+		return Math.max(days, 0);
 	}
-	
+
+	public int getLeftMinutes(){
+		Duration duration = Duration.between(LocalDateTime.now(), deadline);
+		int minutes = (int)duration.toMinutes();
+		return Math.max(minutes, 0);
+	}
+
 	public boolean isDeadline()
 	{
-		if(getLeftHours()>0)
+		if(getLeftMinutes()>0)
 			return false;
 		return true;
 	}
@@ -118,9 +86,9 @@ public class VipPlayer
 	public String getLeftTime()
 	{	
 		if(getLeftDays()<=0)
-			return (getLeftDays()+"天,"+getLeftHours()%24+"小时");
+			return String.format("%d天%d小时%d分钟", getLeftDays(), getLeftHours()%24, getLeftMinutes()%60);
 		else
-			return (getLeftDays()+"天");
+			return String.format("%d天%d小时", getLeftDays(), getLeftHours()%24);
 	}
 
 }

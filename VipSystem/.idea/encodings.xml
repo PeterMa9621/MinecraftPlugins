@@ -4,5 +4,6 @@
     <file url="file://$PROJECT_DIR$/src/vipSystem/VipPlayer.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/vipSystem/VipSystem.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/vipSystem/VipSystemListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/vipSystem/VipSystemPlaceholderListener.java" charset="GBK" />
   </component>
 </project>

@@ -19,7 +19,7 @@ public class Database {
             connection= DriverManager.getConnection(
                     "jdbc:mysql://localhost:3306/" + Database.databaseName + "?useSSL=false", Database.userName, Database.password);
 
-            String createTableQuery = "create table if not exists vip_system(id varchar(100), playerName varchar(100), registerDate datetime, deadlineDate datetime , vipGroup varchar(30), primary key (id));";
+            String createTableQuery = "create table if not exists vip_system(id varchar(100), player_name varchar(100), register_date datetime, deadline_date datetime , vip_group varchar(30), is_expired tinyint, primary key (id));";
             Statement stmt = connection.createStatement();
             stmt.executeUpdate(createTableQuery);
         } catch(Exception e){

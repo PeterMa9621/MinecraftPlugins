@@ -1,0 +1,16 @@
+name: ClockGUI
+main: clockGUI.ClockGUI
+version: 1.2
+author: Jingyuan Ma
+commands:
+  clock:
+    description: Clock Command
+    usage: /clock
+    permission-message: §c无权执行！
+permissions: 
+  clock.op: 
+    default: op
+  clock.player: 
+    default: true
+  clock.bypass: 
+    default: op
