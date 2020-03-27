@@ -91,10 +91,10 @@ public class VipSystemExpansion extends PlaceholderExpansion {
                 if(vipPlayer!=null)
                     return plugin.vipGroups.get(vipPlayer.getVipGroup());
                 else
-                    return "鍏皯";
+                    return "公民";
             } catch (SQLException e) {
                 e.printStackTrace();
-                return "鍏皯";
+                return "公民";
             }
         }
 

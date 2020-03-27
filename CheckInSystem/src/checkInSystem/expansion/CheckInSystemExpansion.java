@@ -4,7 +4,6 @@ import checkInSystem.CheckInSystem;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 
-import java.sql.SQLException;
 import java.util.UUID;
 
 /**
@@ -91,12 +90,12 @@ public class CheckInSystemExpansion extends PlaceholderExpansion {
                 UUID uniqueId = player.getUniqueId();
                 plugin.loadPlayerConfig(uniqueId);
                 if(plugin.isCheckIn.get(uniqueId))
-                    return "å·²ç­¾åˆ°";
+                    return "&2ÒÑÇ©µ½";
                 else
-                    return "æœªç­¾åˆ°";
+                    return "&4Î´Ç©µ½";
             } catch (Exception e) {
                 e.printStackTrace();
-                return "æœªç­¾åˆ°";
+                return "&4Î´Ç©µ½";
             }
         }
 

@@ -47,7 +47,7 @@ public class CheckInSystem extends JavaPlugin
 	public DatabaseType databaseType = DatabaseType.YML;
 
 	private CheckInSystemAPI api = new CheckInSystemAPI(this);
-	private String createTableQuery = "create table if not exists check_in_system(id varchar(100), days varchar(10), last_date varchar(10), today_date varchar(10));";
+	private String createTableQuery = "create table if not exists check_in_system(id varchar(100), days varchar(10), last_date varchar(10), today_date varchar(10), primary key(id));";
 
 	public CheckInSystemAPI getAPI()
 	{
@@ -79,7 +79,7 @@ public class CheckInSystem extends JavaPlugin
 			new CheckInSystemExpansion(this).register();
 		}
 
-		Database.setCreateTableQuery(createTableQuery);
+		Database.setConnectionInfo("minecraft", "root", "mjy159357", createTableQuery);
 		loadConfig();
 
 		task();
@@ -106,7 +106,7 @@ public class CheckInSystem extends JavaPlugin
 						if(playerData.containsKey(p.getUniqueId()))
 						{
 							HashMap<String, String> data = playerData.get(p.getUniqueId());
-							data.put("todayDate", date.format(new Date()));
+							data.put("today_date", date.format(new Date()));
 							playerData.put(p.getUniqueId(), data);
 							isCheckIn.put(p.getUniqueId(), false);
 						}
@@ -156,8 +156,8 @@ public class CheckInSystem extends JavaPlugin
 
 		HashMap<String, Object> paths = new HashMap<String, Object>() {{
 			put("days", data.get("days"));
-			put("lastDate", data.get("lastDate"));
-			put("todayDate", data.get("todayDate"));
+			put("last_date", data.get("last_date"));
+			put("today_date", data.get("today_date"));
 		}};
 
 		ConfigStructure configStructure = new ConfigStructure(paths);
@@ -169,46 +169,40 @@ public class CheckInSystem extends JavaPlugin
 	public void loadPlayerConfig(UUID uniqueId)
 	{
 		String todayDate = date.format(new Date());
-		HashMap<String, String> data;
-		String lastDate;
 		if(playerData.containsKey(uniqueId)){
-			data = playerData.get(uniqueId);
-			data.put("todayDate", todayDate);
-		} else {
-			StorageInterface storage = Database.getInstance(databaseType, this);
-
-			HashMap<String, Object> result = storage.get(uniqueId, new String[] {"days", "lastDate", "todayDate"});
-
-			if(result==null){
-				data = new HashMap<>();
-				data.put("days", "0");
-				data.put("lastDate", "0000-00-00");
-				data.put("todayDate", todayDate);
-				playerData.put(uniqueId, data);
-				isCheckIn.put(uniqueId, false);
-				return;
-			}
-
-			data = new HashMap<>();
-			for(String key:result.keySet()){
-				data.put(key, (String)result.get(key));
-			}
+			HashMap<String, String> data = playerData.get(uniqueId);
+			String lastDate = data.get("last_date");
+			data.put("today_date", todayDate);
+			playerData.put(uniqueId, data);
+			isCheckIn.put(uniqueId, lastDate.equalsIgnoreCase(todayDate));
+			return;
 		}
-		lastDate = data.get("lastDate");
-		data.put("todayDate", todayDate);
 
-		if(lastDate.equalsIgnoreCase(todayDate))
-		{
-			isCheckIn.put(uniqueId, true);
-		}
-		else
-		{
+		StorageInterface storage = Database.getInstance(databaseType, this);
+		HashMap<String, Object> result = storage.get(uniqueId, new String[] {"days", "last_date", "today_date"});
+
+		if(result==null){
+			HashMap<String, String> data = new HashMap<>();
+			data.put("days", "0");
+			data.put("last_date", "0000-00-00");
+			data.put("today_date", todayDate);
+			playerData.put(uniqueId, data);
 			isCheckIn.put(uniqueId, false);
+			return;
 		}
+
+		HashMap<String, String> data = new HashMap<>();
+		for(String key:result.keySet()){
+			data.put(key, (String)result.get(key));
+		}
+
+		String lastDate = data.get("last_date");
+		data.put("today_date", todayDate);
+
+		isCheckIn.put(uniqueId, lastDate.equalsIgnoreCase(todayDate));
 
 		if(!todayDate.split("-")[1].equals(lastDate.split("-")[1]) ||
-				!todayDate.split("-")[0].equals(lastDate.split("-")[0]))
-		{
+				!todayDate.split("-")[0].equals(lastDate.split("-")[0])) {
 			data.put("days", "0");
 		}
 		playerData.put(uniqueId, data);

@@ -3,5 +3,6 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/src/checkInSystem/CheckInSystem.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/checkInSystem/CheckInSystemListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/checkInSystem/expansion/CheckInSystemExpansion.java" charset="GBK" />
   </component>
 </project>

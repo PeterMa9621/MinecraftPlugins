@@ -25,10 +25,11 @@ public class Database {
         }
     }
 
-    public static void setConnectionInfo(String databaseName, String userName, String password) {
+    public static void setConnectionInfo(String databaseName, String userName, String password, String createTableQuery) {
         Database.databaseName = databaseName;
         Database.userName = userName;
         Database.password = password;
+        Database.createTableQuery = createTableQuery;
     }
 
     public static void setCreateTableQuery(String createTableQuery){

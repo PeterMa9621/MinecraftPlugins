@@ -1,6 +1,5 @@
 package checkInSystem.database;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ConfigStructure {
