@@ -1,11 +1,7 @@
 package antiXray;
 
-import java.util.ArrayList;
-import java.util.Date;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -13,8 +9,10 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class AntiXrayListener implements Listener
 {
@@ -40,24 +38,7 @@ public class AntiXrayListener implements Listener
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event)
     {
-		if(!plugin.playerData.containsKey(event.getPlayer().getName()))
-		{
-			plugin.playerData.put(event.getPlayer().getName(), plugin.totalPoints);
-		}
-		else
-		{
-			if(!plugin.lastLogout.get(event.getPlayer().getName()).equalsIgnoreCase(plugin.date.format(new Date())))
-			{
-				plugin.playerData.put(event.getPlayer().getName(), plugin.totalPoints);
-			}
-		}
-		return;
-    }
-	
-	@EventHandler
-	public void onPlayerQuit(PlayerQuitEvent event)
-    {
-		plugin.lastLogout.put(event.getPlayer().getName(), plugin.date.format(new Date()));
+		plugin.loadPlayerConfig(event.getPlayer().getUniqueId());
 		return;
     }
 	
@@ -87,19 +68,19 @@ public class AntiXrayListener implements Listener
 			return;
 		}
 
-		if(!isExist(event.getPlayer().getInventory().getItemInMainHand().getType().getId(), plugin.tools))
+		if(!plugin.tools.contains(event.getPlayer().getInventory().getItemInMainHand().getType()))
 		{
 			return;
 		}
 		
 		Player p = event.getPlayer();
-		int blockID = event.getBlock().getType().getId();
+		Material blockID = event.getBlock().getType();
 
-		int currentPoint = plugin.playerData.get(p.getName());
+		int currentPoint = plugin.playerData.get(p.getUniqueId());
 
 		if(world.getRecoverInfo().containsKey(blockID))
 		{
-			if(world.getRecoverOnUse()==true)
+			if(world.getRecoverOnUse())
 			{
 				if(currentPoint+world.getRecoverInfo().get(blockID)<=plugin.totalPoints)
 				{
@@ -138,7 +119,7 @@ public class AntiXrayListener implements Listener
 			return;
 		}
 
-		plugin.playerData.put(p.getName(), currentPoint);
+		plugin.playerData.put(p.getUniqueId(), currentPoint);
 
 	}
 	
@@ -179,7 +160,7 @@ public class AntiXrayListener implements Listener
 			{
 				currentPoint += plugin.recoverPoint;
 			}
-			plugin.playerData.put(p.getName(), currentPoint);
+			plugin.playerData.put(p.getUniqueId(), currentPoint);
 			
 			String msg = plugin.message.get("RecoverPoints");
 			if(msg.contains("{recoverpoints}"))

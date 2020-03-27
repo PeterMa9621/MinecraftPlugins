@@ -1,5 +1,6 @@
 package antiXray;
 
+import antiXray.expansion.AntiXrayExpansion;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -9,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -21,21 +23,27 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
+import peterUtil.database.ConfigStructure;
+import peterUtil.database.Database;
+import peterUtil.database.DatabaseType;
+import peterUtil.database.StorageInterface;
 
 public class AntiXray extends JavaPlugin
 {
 	int totalPoints = 0;
+	int recoverPointPerMinute = 0;
 	boolean notify = false;
 	int recoverPoint = 0;
 	ItemStack recoverItem = null;
-	HashMap<String, Integer> playerData = new HashMap<String, Integer>();
-	HashMap<String, String> lastLogout = new HashMap<String, String>();
+	DatabaseType databaseType;
+	public HashMap<UUID, Integer> playerData = new HashMap<UUID, Integer>();
+	HashMap<UUID, String> lastLogin = new HashMap<UUID, String>();
 	HashMap<String, String> message = new HashMap<String, String>();
 	HashMap<String, Worlds> worlds = new HashMap<String, Worlds>();
-	ArrayList<Integer> tools = new ArrayList<Integer>();
+	ArrayList<Material> tools = new ArrayList<Material>();
 	SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
 	ArrayList<String> op = new ArrayList<String>();
-	
+
 	ArrayList<String> recipe = new ArrayList<String>();
 	
 	public void onEnable()
@@ -44,15 +52,44 @@ public class AntiXray extends JavaPlugin
 		{
 			new File(getDataFolder(),"Data").mkdirs();
 		}
+
+		if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null){
+			new AntiXrayExpansion(this).register();
+		}
+
+		String createTableQuery = "create table if not exists anti_xray(id varchar(100), points varchar(10), last_logout varchar(10));";
+		Database.setConnectionInfo("minecraft", "anti_xray", "root", "mjy159357", createTableQuery);
+
 		getOP();
 		loadConfig();
 		initRecoverItemRecipe();
 		loadMessageConfig();
-		loadPlayerConfig();
-		task();
+		recoverPointTask();
+
 		getServer().getPluginManager().registerEvents(new AntiXrayListener(this), this);
 		Bukkit.getConsoleSender().sendMessage("§a[AntiXray] §e限制挖矿系统加载完毕");
 		Bukkit.getConsoleSender().sendMessage("§a[AntiXray] §e制作者QQ:920157557");
+	}
+
+	public void recoverPointTask()
+	{
+		new BukkitRunnable()
+		{
+			public void run()
+			{
+				if(recoverPointPerMinute > 0){
+					for(UUID uniqueId:playerData.keySet())
+					{
+						int currentPoint = playerData.get(uniqueId);
+						if(currentPoint < totalPoints){
+							currentPoint += recoverPointPerMinute;
+							playerData.put(uniqueId, Math.min(currentPoint, totalPoints));
+						}
+						Bukkit.getConsoleSender().sendMessage("Recover " + recoverPointPerMinute + " point for " + uniqueId.toString());
+					}
+				}
+			}
+		}.runTaskTimer(this, 0L, 1200L);
 	}
 
 	public void onDisable()
@@ -128,31 +165,17 @@ public class AntiXray extends JavaPlugin
 	
 	public void saveConfig()
 	{
-		for(String name:playerData.keySet())
+		StorageInterface database = Database.getInstance(databaseType, this);
+
+		for(UUID uniqueId:playerData.keySet())
 		{
-			File file = new File(getDataFolder(), "/data/"+name+".yml");
-			FileConfiguration config;
-			config = load(file);
-			config.set("AntiXray.Points", playerData.get(name));
-			config.set("LastLogout", lastLogout.get(name));
+			HashMap<String, Object> data = new HashMap<String, Object>() {{
+				put("points", playerData.get(uniqueId));
+				put("last_login", lastLogin.get(uniqueId));
+			}};
+			ConfigStructure configStructure = new ConfigStructure(data);
 			try {
-				config.save(file);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		for(Player p:Bukkit.getOnlinePlayers())
-		{
-			File file=new File(getDataFolder(),"/data/" + p.getName()+ ".yml");
-			FileConfiguration config;
-			
-			config = load(file);
-			
-			config.set("LastLogout", date.format(new Date()));
-			
-			try {
-				config.save(file);
+				database.store(uniqueId, configStructure);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -171,43 +194,33 @@ public class AntiXray extends JavaPlugin
 		}
 	}
 	
-	public void loadPlayerConfig()
+	public void loadPlayerConfig(UUID uuid)
 	{
-		File file1=new File(getDataFolder(), "/Data");
-		String[] fileName = file1.list();
-		for(String name:fileName)
-		{
-			File file=new File(getDataFolder(),"/data/"+name+".yml");
-			FileConfiguration config;
-			if (file.exists())
-			{
-				config = load(file);
-				
-				config.set("TodayDate", date.format(new Date()));
-				try {
-					config.save(file);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-
-				if(config.getString("LastLogout")!=null)
-				{
-					if(!config.getString("LastLogout").equalsIgnoreCase(config.getString("TodayDate")))
-					{
-						config.set("AntiXray.Points", totalPoints);
-					}
-					lastLogout.put(name, config.getString("LastLogout"));
-				}
-				try {
-					config.save(file);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				playerData.put(name, config.getInt("AntiXray.Points"));
+		String todayDate = date.format(new Date());
+		String lastLogin;
+		if(playerData.containsKey(uuid)){
+			lastLogin = this.lastLogin.get(uuid);
+		} else {
+			StorageInterface database = Database.getInstance(databaseType, this);
+			HashMap<String, Object> result = database.get(uuid, new String[] {"points", "last_login"});
+			if(result==null){
+				playerData.put(uuid, totalPoints);
+				this.lastLogin.put(uuid, "0000-00-00");
+				return;
 			}
+
+			lastLogin = (String) result.get("last_login");
+
+			playerData.put(uuid, (Integer) result.get("points"));
 		}
+
+		if(!lastLogin.equalsIgnoreCase(todayDate)){
+			playerData.put(uuid, totalPoints);
+		}
+		this.lastLogin.put(uuid, todayDate);
 	}
-	
+
+	/*
 	public void task()
 	{
 		new BukkitRunnable()
@@ -226,6 +239,8 @@ public class AntiXray extends JavaPlugin
 			}
 		}.runTaskTimer(this, 0L, 20L);
 	}
+
+	 */
 	
 	public void loadMessageConfig()
 	{
@@ -286,16 +301,17 @@ public class AntiXray extends JavaPlugin
 		if(!file.exists())
 		{
 			config = load(file);
-
+			config.set("Database", "YML");
+			config.set("RecoverPointPerMinute", 30);
 			config.set("Points", 600);
 			
-			config.set("RecoverItem.ID", 266);
+			config.set("RecoverItem.ID", "gold_ingot");
 			config.set("RecoverItem.Point", 100);
 			config.set("RecoverItem.Name", "§2矿工玉米");
 			config.set("RecoverItem.Lore", "§a这是一瓶神奇的玉米%§a右键吃掉它可以增加100挖矿点数");
-			config.set("RecoverItem.Recipe", "0-266-0-266-266-266-0-266-0");
+			config.set("RecoverItem.Recipe", "0-gold_ingot-0-gold_ingot-gold_ingot-gold_ingot-0-gold_ingot-0");
 			
-			config.set("ToolsLimit", "257,270,274,278,285");
+			config.set("ToolsLimit", "iron_pickaxe,wooden_pickaxe,stone_pickaxe,diamond_pickaxe,golden_pickaxe");
 			
 			config.set("Worlds", "world,world_nether");
 			
@@ -303,23 +319,23 @@ public class AntiXray extends JavaPlugin
 			
 			//====================================================
 			
-			config.set("world.BlockInfo", "14:10,15:5,56:30,129:50");
+			config.set("world.BlockInfo", "gold_ore:10,iron_ore:5,diamond_ore:30,emerald_ore:50");
 			
 			config.set("world.HeightUnlimit", 60);
 			
 			config.set("world.RecoverPointByBreakingBlock.OnUse", false);
 			
-			config.set("world.RecoverPointByBreakingBlock.BlockInfo", "1:1,2:1");
+			config.set("world.RecoverPointByBreakingBlock.BlockInfo", "stone:1,grass_block:1");
 			
 			//====================================================
 			
-			config.set("world_nether.BlockInfo", "89:10");
+			config.set("world_nether.BlockInfo", "glowstone:10");
 			
 			config.set("world_nether.HeightUnlimit", 80);
 			
 			config.set("world_nether.RecoverPointByBreakingBlock.OnUse", false);
 			
-			config.set("world_nether.RecoverPointByBreakingBlock.BlockInfo", "87:1");
+			config.set("world_nether.RecoverPointByBreakingBlock.BlockInfo", "soul_sand:1");
 			
 			try {
 				config.save(file);
@@ -328,11 +344,16 @@ public class AntiXray extends JavaPlugin
 			}
 			
 			loadConfig();
+			return;
 		}
 		
 		tools.clear();
 		
 		config = load(file);
+
+		databaseType = DatabaseType.valueOf(config.getString("Database", "YML"));
+		recoverPointPerMinute = config.getInt("RecoverPointPerMinute", 30);
+
 		// Get the total points
 		totalPoints = config.getInt("Points");
 		
@@ -360,36 +381,36 @@ public class AntiXray extends JavaPlugin
 		// Get different worlds' settings
 		for(String w:config.getString("Worlds").split(","))
 		{
-			HashMap<Integer, Integer> blocks = new HashMap<Integer, Integer>();
-			HashMap<Integer, Integer> blocksForRecover = new HashMap<Integer, Integer>();
+			HashMap<Material, Integer> blocks = new HashMap<>();
+			HashMap<Material, Integer> blocksForRecover = new HashMap<>();
 			String blockInfo = config.getString(w+".BlockInfo");
 			String RecoverBlock = config.getString(w+".RecoverPointByBreakingBlock.BlockInfo");
 			boolean recoverBlock = config.getBoolean(w+".RecoverPointByBreakingBlock.OnUse");
 			int heightUnlimit = config.getInt(w+".HeightUnlimit");
 			
-			int blockID = 0;
+			String blockID = "";
 			int blockPoint = 0;
 			for(String i:blockInfo.split(","))
 			{
-				blockID = Integer.valueOf(i.split(":")[0]);
+				blockID = i.split(":")[0].toUpperCase();
 				blockPoint = Integer.valueOf(i.split(":")[1]);
-				blocks.put(blockID, blockPoint);
+				blocks.put(Material.valueOf(blockID), blockPoint);
 			}
 			
 			for(String i:RecoverBlock.split(","))
 			{
-				blockID = Integer.valueOf(i.split(":")[0]);
+				blockID = i.split(":")[0].toUpperCase();
 				blockPoint = Integer.valueOf(i.split(":")[1]);
-				blocksForRecover.put(blockID, blockPoint);
+				blocksForRecover.put(Material.valueOf(blockID), blockPoint);
 			}
 			
 			Worlds world = new Worlds(w, blocks, heightUnlimit, recoverBlock, blocksForRecover);
 			worlds.put(w, world);
 		}
 		
-		for(String i:config.getString("ToolsLimit").split(","))
+		for(String tool:config.getString("ToolsLimit").split(","))
 		{
-			tools.add(Integer.valueOf(i));
+			tools.add(Material.getMaterial(tool.toUpperCase()));
 		}
 		
 		for(String r:config.getString("RecoverItem.Recipe").split("-"))
@@ -440,7 +461,7 @@ public class AntiXray extends JavaPlugin
 				if(sender instanceof Player)
 				{
 					Player p = (Player)sender;
-					int currentPoint = playerData.get(p.getName());
+					int currentPoint = playerData.get(p.getUniqueId());
 					if(HowManyPoints.contains("{points}"))
 						HowManyPoints = HowManyPoints.replace("{points}", String.valueOf(currentPoint));
 					p.sendMessage(HowManyPoints);
@@ -539,7 +560,7 @@ public class AntiXray extends JavaPlugin
 							return true;
 						}
 						int previousPoint = playerData.get(args[1]);
-						playerData.put(args[1], previousPoint+Integer.valueOf(args[2]));
+						playerData.put(p.getUniqueId(), previousPoint+Integer.valueOf(args[2]));
 						if(GivePlayerPoints.contains("{player}"))
 							GivePlayerPoints = GivePlayerPoints.replace("{player}", args[1]);
 						if(GivePlayerPoints.contains("{givepoints}"))
@@ -596,7 +617,7 @@ public class AntiXray extends JavaPlugin
 							sender.sendMessage(CannotFindPlayer);
 							return true;
 						}
-						playerData.put(args[1], totalPoints);
+						playerData.put(p.getUniqueId(), totalPoints);
 						if(ResetPlayer.contains("{player}"))
 							ResetPlayer = ResetPlayer.replace("{player}", args[1]);
 						sender.sendMessage(ResetPlayer);
@@ -613,11 +634,7 @@ public class AntiXray extends JavaPlugin
 			}
 			return true;
 		}
-
 		return false;
-		
 	}
-	
-	
 }
 

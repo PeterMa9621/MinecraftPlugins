@@ -1,15 +1,18 @@
 package antiXray;
 
+
+import org.bukkit.Material;
+
 import java.util.HashMap;
 
 public class Worlds 
 {
 	String worldName = "";
-	HashMap<Integer, Integer> blockInfo = new HashMap<Integer, Integer>();
+	HashMap<Material, Integer> blockInfo;
 	int heightLimit = 0;
 	boolean recoverOnUse = false;
-	HashMap<Integer, Integer> recoverInfo = new HashMap<Integer, Integer>();
-	public Worlds(String worldName, HashMap<Integer, Integer> blockInfo, int heightLimit,boolean recoverOnUse , HashMap<Integer, Integer> recoverInfo)
+	HashMap<Material, Integer> recoverInfo;
+	public Worlds(String worldName, HashMap<Material, Integer> blockInfo, int heightLimit,boolean recoverOnUse , HashMap<Material, Integer> recoverInfo)
 	{
 		this.worldName=worldName;
 		this.blockInfo=blockInfo;
@@ -23,7 +26,7 @@ public class Worlds
 		return worldName;
 	}
 	
-	public HashMap<Integer, Integer> getBlockInfo()
+	public HashMap<Material, Integer> getBlockInfo()
 	{
 		return blockInfo;
 	}
@@ -38,7 +41,7 @@ public class Worlds
 		return recoverOnUse;
 	}
 	
-	public HashMap<Integer, Integer> getRecoverInfo()
+	public HashMap<Material, Integer> getRecoverInfo()
 	{
 		return recoverInfo;
 	}

@@ -3,5 +3,6 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/src/antiXray/AntiXray.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/antiXray/AntiXrayListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/antiXray/expansion/AntiXrayExpansion.java" charset="GBK" />
   </component>
 </project>
