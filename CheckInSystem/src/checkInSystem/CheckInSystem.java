@@ -1,24 +1,10 @@
 package checkInSystem;
 
-import checkInSystem.database.*;
 import checkInSystem.expansion.CheckInSystemExpansion;
+import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
-
-import net.milkbowl.vault.economy.Economy;
-
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.UUID;
-
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -29,6 +15,20 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
+import peterUtil.database.Database;
+import peterUtil.database.DatabaseType;
+import peterUtil.database.StorageInterface;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.UUID;
 
 public class CheckInSystem extends JavaPlugin
 {
@@ -45,9 +45,9 @@ public class CheckInSystem extends JavaPlugin
 	SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");//设置日期格式
 
 	public DatabaseType databaseType = DatabaseType.YML;
+	private StorageInterface database;
 
 	private CheckInSystemAPI api = new CheckInSystemAPI(this);
-	private String createTableQuery = "create table if not exists check_in_system(id varchar(100), days varchar(10), last_date varchar(10), today_date varchar(10), primary key(id));";
 
 	public CheckInSystemAPI getAPI()
 	{
@@ -79,8 +79,11 @@ public class CheckInSystem extends JavaPlugin
 			new CheckInSystemExpansion(this).register();
 		}
 
-		Database.setConnectionInfo("minecraft", "root", "mjy159357", createTableQuery);
 		loadConfig();
+
+		database = Database.getInstance(databaseType, this);
+		String createTableQuery = "create table if not exists check_in_system(id varchar(100), days varchar(10), last_date varchar(10), today_date varchar(10), primary key(id));";
+		database.connect("minecraft", "check_in_system" , "root", "mjy159357", createTableQuery);
 
 		task();
 		getServer().getPluginManager().registerEvents(new CheckInSystemListener(this), this);
@@ -160,10 +163,8 @@ public class CheckInSystem extends JavaPlugin
 			put("today_date", data.get("today_date"));
 		}};
 
-		ConfigStructure configStructure = new ConfigStructure(paths);
 
-		StorageInterface storage = Database.getInstance(databaseType, this);
-		storage.store(uniqueId, configStructure);
+		database.store(uniqueId, paths);
 	}
 	
 	public void loadPlayerConfig(UUID uniqueId)
@@ -178,8 +179,7 @@ public class CheckInSystem extends JavaPlugin
 			return;
 		}
 
-		StorageInterface storage = Database.getInstance(databaseType, this);
-		HashMap<String, Object> result = storage.get(uniqueId, new String[] {"days", "last_date", "today_date"});
+		HashMap<String, Object> result = database.get(uniqueId, new String[] {"days", "last_date", "today_date"});
 
 		if(result==null){
 			HashMap<String, String> data = new HashMap<>();
@@ -214,25 +214,25 @@ public class CheckInSystem extends JavaPlugin
 		FileConfiguration config;
 		if (!file.exists())
 		{
+			config = load(file);
 			HashMap<String, Object> data = new HashMap<>();
-			data.put("CheckIn.Database", "YML");
+			config.set("CheckIn.Database", "YML");
 			for(int i=0; i<31; i++)
 			{
-				data.put("CheckIn.Days."+(i+1)+".Describe", "§7奖品为绿宝石一个");
-				data.put("CheckIn.Days."+(i+1)+".Gift.TypeID", "diamond");
-				data.put("CheckIn.Days."+(i+1)+".Gift.Amount", 1);
-				data.put("CheckIn.Days."+(i+1)+".Gift.Name", "§f未鉴定的宝石");
-				data.put("CheckIn.Days."+(i+1)+".Gift.Lore", "§e[未鉴定]%§6一块看起来普通的石头");
-				data.put("CheckIn.Days."+(i+1)+".Gift.Enchantment.ID", "fortune");
-				data.put("CheckIn.Days."+(i+1)+".Gift.Enchantment.Level", 1);
-				data.put("CheckIn.Days."+(i+1)+".Gift.HideEnchant", true);
-				data.put("CheckIn.Days."+(i+1)+".Money", 0);
-				data.put("CheckIn.Days."+(i+1)+".Command", null);
+				config.set("CheckIn.Days."+(i+1)+".Describe", "§7奖品为绿宝石一个");
+				config.set("CheckIn.Days."+(i+1)+".Gift.TypeID", "diamond");
+				config.set("CheckIn.Days."+(i+1)+".Gift.Amount", 1);
+				config.set("CheckIn.Days."+(i+1)+".Gift.Name", "§f未鉴定的宝石");
+				config.set("CheckIn.Days."+(i+1)+".Gift.Lore", "§e[未鉴定]%§6一块看起来普通的石头");
+				config.set("CheckIn.Days."+(i+1)+".Gift.Enchantment.ID", "fortune");
+				config.set("CheckIn.Days."+(i+1)+".Gift.Enchantment.Level", 1);
+				config.set("CheckIn.Days."+(i+1)+".Gift.HideEnchant", true);
+				config.set("CheckIn.Days."+(i+1)+".Money", 0);
+				config.set("CheckIn.Days."+(i+1)+".Command", null);
 			}
 
-			StorageInterface storage = Database.getInstance(DatabaseType.YML, this);
 			try {
-				storage.store(new ConfigStructure(data));
+				config.save(file);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

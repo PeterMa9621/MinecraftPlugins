@@ -1,6 +1,7 @@
 package pvpSwitch;
 
 import org.bukkit.entity.Player;
+import pvpSwitch.model.PvpPlayer;
 
 public class PVPSwitchAPI
 {
@@ -15,33 +16,45 @@ public class PVPSwitchAPI
 	{
 		if(player==null)
 			return;
-		plugin.bannedPlayer.put(player.getName(), true);
+
+		PvpPlayer pvpPlayer = plugin.playerData.get(player.getUniqueId());
+		pvpPlayer.setBanned(true);
+		plugin.playerData.put(player.getUniqueId(), pvpPlayer);
 	}
 	
 	public void unbanPlayer(Player player)
 	{
 		if(player==null)
 			return;
-		plugin.bannedPlayer.put(player.getName(), false);
+
+		PvpPlayer pvpPlayer = plugin.playerData.get(player.getUniqueId());
+		pvpPlayer.setBanned(false);
+		plugin.playerData.put(player.getUniqueId(), pvpPlayer);
 	}
 	
 	public void switchOnPVP(Player player)
 	{
 		if(player==null)
 			return;
-		plugin.playerData.put(player.getName(), true);
+
+		PvpPlayer pvpPlayer = plugin.playerData.get(player.getUniqueId());
+		pvpPlayer.setPvp(true);
+		plugin.playerData.put(player.getUniqueId(), pvpPlayer);
 	}
 	
 	public void switchOffPVP(Player player)
 	{
 		if(player==null)
 			return;
-		plugin.playerData.put(player.getName(), false);
+
+		PvpPlayer pvpPlayer = plugin.playerData.get(player.getUniqueId());
+		pvpPlayer.setPvp(false);
+		plugin.playerData.put(player.getUniqueId(), pvpPlayer);
 	}
 	
 	public boolean getPVPState(Player player)
 	{
-		return plugin.playerData.get(player.getName());
+		return plugin.playerData.get(player.getUniqueId()).canPvp();
 	}
 }
 

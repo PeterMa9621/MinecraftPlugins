@@ -12,18 +12,23 @@ import java.util.UUID;
 
 public class MYSQLStorage implements StorageInterface{
     private JavaPlugin plugin;
-    private String tableName;
     private Connection connection;
     private Statement statement;
 
-    public MYSQLStorage(JavaPlugin plugin, String tableName, String databaseName, String userName, String password, String createTableQuery){
+    private String tableName = "";
+
+
+    public MYSQLStorage(JavaPlugin plugin){
         this.plugin = plugin;
+    }
+
+    public void connect(String databaseName, String tableName, String userName, String password, String createTableQuery) {
         this.tableName = tableName;
 
         try{
             Class.forName("com.mysql.jdbc.Driver");
             connection = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/" + databaseName + "?useSSL=false", userName, password);
+                    "jdbc:mysql://localhost:3306/" + databaseName + "?allowPublicKeyRetrieval=true&useSSL=false", userName, password);
 
             statement = connection.createStatement();
             statement.executeUpdate(createTableQuery);
@@ -37,9 +42,8 @@ public class MYSQLStorage implements StorageInterface{
     }
 
     @Override
-    public void store(UUID uniqueId, ConfigStructure configStructure) throws IOException {
-        HashMap<String, Object> data = configStructure.getData();
-        data.put("id", uniqueId.toString());
+    public void store(UUID uniqueId, HashMap<String, Object> data) throws IOException {
+        //data.put("id", uniqueId.toString());
 
         String[] keys = data.keySet().toArray(new String[0]);
         Object[] values = new Object[keys.length];
@@ -58,10 +62,11 @@ public class MYSQLStorage implements StorageInterface{
             for(int i=0; i<keys.length; i++){
                 statement.setObject(i+1, values[i]);
             }
+            statement.setObject(keys.length + 1, uniqueId.toString());
             statement.execute();
         } catch (SQLException e) {
             QueryBuilderInterface updateQueryBuilder = QueryBuilderFactory.getUpdateQueryBuilder();
-            updateQueryBuilder = updateQueryBuilder.from(tableName).set(keys);
+            updateQueryBuilder = updateQueryBuilder.from(tableName).set(keys).where(new String[] {"id"});
             query = updateQueryBuilder.getQuery();
             Bukkit.getConsoleSender().sendMessage(query);
             PreparedStatement statement;
@@ -70,6 +75,7 @@ public class MYSQLStorage implements StorageInterface{
                 for(int i=0; i<keys.length; i++){
                     statement.setObject(i+1, values[i]);
                 }
+                statement.setString(keys.length+1, uniqueId.toString());
                 statement.executeUpdate();
             } catch (SQLException ex) {
                 ex.printStackTrace();
@@ -101,7 +107,4 @@ public class MYSQLStorage implements StorageInterface{
         }
         return null;
     }
-
-    @Override
-    public void store(ConfigStructure configStructure) throws IOException { }
 }

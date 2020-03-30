@@ -79,57 +79,57 @@ public class ChatBubble extends JavaPlugin
 		Inventory inv = Bukkit.createInventory(p, 18, "§1聊§2天§3气§4泡§5颜§6色§7切§8换");
 		
 
-		ItemStack color = createItem(35, 1, 11, "§1点击切换深蓝色");
+		ItemStack color = createItem(Material.BLUE_WOOL, 1, "§1点击切换深蓝色");
 		inv.setItem(0, color);
 
-		color = createItem(35, 1, 13, "§2点击切换深绿色");
+		color = createItem(Material.GREEN_WOOL, 1, "§2点击切换深绿色");
 		inv.setItem(1, color);
 
-		color = createItem(35, 1, 9, "§3点击切换青色");
+		color = createItem(Material.CYAN_WOOL, 1, "§3点击切换青色");
 		inv.setItem(2, color);
 
-		color = createItem(35, 1, 14, "§4点击切换深红色");
+		color = createItem(Material.RED_WOOL, 1, "§4点击切换深红色");
 		inv.setItem(3, color);
 		
-		color = createItem(35, 1, 10, "§5点击切换紫色");
+		color = createItem(Material.PURPLE_WOOL, 1, "§5点击切换紫色");
 		inv.setItem(4, color);
 		
-		color = createItem(35, 1, 1, "§6点击切换橙色");
+		color = createItem(Material.ORANGE_WOOL, 1, "§6点击切换橙色");
 		inv.setItem(5, color);
 		
-		color = createItem(35, 1, 8, "§7点击切换灰色");
+		color = createItem(Material.LIGHT_GRAY_WOOL, 1, "§7点击切换灰色");
 		inv.setItem(6, color);
 		
-		color = createItem(35, 1, 7, "§8点击切换黑色");
+		color = createItem(Material.BLACK_WOOL, 1, "§8点击切换黑色");
 		inv.setItem(7, color);
 		
-		color = createItem(159, 1, 11, "§9点击切换淡蓝色");
+		color = createItem(Material.LIGHT_BLUE_WOOL, 1, "§9点击切换淡蓝色");
 		inv.setItem(8, color);
 		
-		color = createItem(35, 1, 5, "§a点击切换淡绿色");
+		color = createItem(Material.LIME_WOOL, 1, "§a点击切换淡绿色");
 		inv.setItem(9, color);
 		
-		color = createItem(35, 1, 3, "§b点击切换淡青色");
+		color = createItem(Material.LIGHT_BLUE_CONCRETE, 1, "§b点击切换淡青色");
 		inv.setItem(10, color);
 		
-		color = createItem(159, 1, 14, "§c点击切换淡红色");
+		color = createItem(Material.BROWN_WOOL, 1, "§c点击切换淡红色");
 		inv.setItem(11, color);
 		
-		color = createItem(35, 1, 6, "§d点击切换粉红色");
+		color = createItem(Material.PINK_WOOL, 1, "§d点击切换粉红色");
 		inv.setItem(12, color);
 		
-		color = createItem(159, 1, 4, "§e点击切换黄色");
+		color = createItem(Material.YELLOW_WOOL, 1, "§e点击切换黄色");
 		inv.setItem(13, color);
 		
-		color = createItem(35, 1, 0, "§f点击切换白色");
+		color = createItem(Material.WHITE_WOOL, 1, "§f点击切换白色");
 		inv.setItem(14, color);
 
 		return inv;
 	}
 	
-	public ItemStack createItem(int ID, int quantity, int durability, String displayName)
+	public ItemStack createItem(Material material, int quantity, String displayName)
 	{
-		ItemStack item = new ItemStack(ID, quantity, (short)durability);
+		ItemStack item = new ItemStack(material, quantity);
 
 		ItemMeta meta = item.getItemMeta();
 

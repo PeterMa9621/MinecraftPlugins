@@ -42,14 +42,14 @@ public class ChatBubbleListener implements Listener
 	    	
 	    	String msg = event.getMessage();
 	    	if(event.getMessage().contains("[i]"))
-	    		msg = msg.replace("[i]", "Â§aÂ§l[ç‰©å“ä¿¡æ¯]");
+	    		msg = msg.replace("[i]", "¡ìa¡ìl[ÎïÆ·ĞÅÏ¢]");
 	    	if(event.getMessage().contains("{item}"))
-	    		msg = msg.replace("{item}", "Â§aÂ§l[ç‰©å“ä¿¡æ¯]");
+	    		msg = msg.replace("{item}", "¡ìa¡ìl[ÎïÆ·ĞÅÏ¢]");
 	    	
 	    	if(plugin.playerData.containsKey(p.getName()))
-	    		holo.appendTextLine("Â§eèŠå¤©Â§bÂ§l-> " + plugin.playerData.get(p.getName()) + msg);
+	    		holo.appendTextLine("¡ìeÁÄÌì¡ìb¡ìl-> " + plugin.playerData.get(p.getName()) + msg);
 	    	else
-	    		holo.appendTextLine("Â§eèŠå¤©Â§bÂ§l-> " + msg);
+	    		holo.appendTextLine("¡ìeÁÄÌì¡ìb¡ìl-> " + msg);
 	    	
 	    	int id = new BukkitRunnable()
 	    	{
@@ -75,7 +75,7 @@ public class ChatBubbleListener implements Listener
 	@EventHandler
 	public void onPlayerClickGui(InventoryClickEvent event)
     {
-		if(event.getInventory().getTitle().equalsIgnoreCase("Â§1èŠÂ§2å¤©Â§3æ°”Â§4æ³¡Â§5é¢œÂ§6è‰²Â§7åˆ‡Â§8æ¢"))
+		if(event.getView().getTitle().equalsIgnoreCase("¡ì1ÁÄ¡ì2Ìì¡ì3Æø¡ì4Åİ¡ì5ÑÕ¡ì6É«¡ì7ÇĞ¡ì8»»"))
 		{
 			Player p = (Player)event.getWhoClicked();
 			event.setCancelled(true);
@@ -83,66 +83,66 @@ public class ChatBubbleListener implements Listener
 				return;
 			if(event.getRawSlot()==0)
 			{
-				plugin.playerData.put(p.getName(), "Â§1");
+				plugin.playerData.put(p.getName(), "¡ì1");
 			}
 			else if(event.getRawSlot()==1)
 			{
-				plugin.playerData.put(p.getName(), "Â§2");
+				plugin.playerData.put(p.getName(), "¡ì2");
 			}
 			else if(event.getRawSlot()==2)
 			{
-				plugin.playerData.put(p.getName(), "Â§3");
+				plugin.playerData.put(p.getName(), "¡ì3");
 			}
 			else if(event.getRawSlot()==3)
 			{
-				plugin.playerData.put(p.getName(), "Â§4");
+				plugin.playerData.put(p.getName(), "¡ì4");
 			}
 			else if(event.getRawSlot()==4)
 			{
-				plugin.playerData.put(p.getName(), "Â§5");
+				plugin.playerData.put(p.getName(), "¡ì5");
 			}
 			else if(event.getRawSlot()==5)
 			{
-				plugin.playerData.put(p.getName(), "Â§6");
+				plugin.playerData.put(p.getName(), "¡ì6");
 			}
 			else if(event.getRawSlot()==6)
 			{
-				plugin.playerData.put(p.getName(), "Â§7");
+				plugin.playerData.put(p.getName(), "¡ì7");
 			}
 			else if(event.getRawSlot()==7)
 			{
-				plugin.playerData.put(p.getName(), "Â§8");
+				plugin.playerData.put(p.getName(), "¡ì8");
 			}
 			else if(event.getRawSlot()==8)
 			{
-				plugin.playerData.put(p.getName(), "Â§9");
+				plugin.playerData.put(p.getName(), "¡ì9");
 			}
 			else if(event.getRawSlot()==9)
 			{
-				plugin.playerData.put(p.getName(), "Â§a");
+				plugin.playerData.put(p.getName(), "¡ìa");
 			}
 			else if(event.getRawSlot()==10)
 			{
-				plugin.playerData.put(p.getName(), "Â§b");
+				plugin.playerData.put(p.getName(), "¡ìb");
 			}
 			else if(event.getRawSlot()==11)
 			{
-				plugin.playerData.put(p.getName(), "Â§c");
+				plugin.playerData.put(p.getName(), "¡ìc");
 			}
 			else if(event.getRawSlot()==12)
 			{
-				plugin.playerData.put(p.getName(), "Â§d");
+				plugin.playerData.put(p.getName(), "¡ìd");
 			}
 			else if(event.getRawSlot()==13)
 			{
-				plugin.playerData.put(p.getName(), "Â§e");
+				plugin.playerData.put(p.getName(), "¡ìe");
 			}
 			else if(event.getRawSlot()==14)
 			{
-				plugin.playerData.put(p.getName(), "Â§f");
+				plugin.playerData.put(p.getName(), "¡ìf");
 			}
 			p.closeInventory();
-			p.sendMessage("Â§6åˆ‡æ¢"+plugin.playerData.get(p.getName())+"é¢œè‰²"+"Â§6æˆåŠŸ!");
+			p.sendMessage("¡ì6ÇĞ»»"+plugin.playerData.get(p.getName())+"ÑÕÉ«"+"¡ì6³É¹¦!");
 		}
     }
 		

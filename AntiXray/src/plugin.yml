@@ -3,6 +3,8 @@ main: antiXray.AntiXray
 version: '1.8'
 api-version: '1.14'
 author: Jingyuan Ma
+depend:
+  - PeterUtil
 commands:
   ax:
     description: used to limit the quantity of mineral

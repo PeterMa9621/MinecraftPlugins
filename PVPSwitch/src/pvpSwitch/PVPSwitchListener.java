@@ -12,6 +12,7 @@ import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 import net.citizensnpcs.api.CitizensAPI;
+import pvpSwitch.model.PvpPlayer;
 
 public class PVPSwitchListener implements Listener
 {
@@ -27,16 +28,7 @@ public class PVPSwitchListener implements Listener
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event)
     {
-		if(!plugin.playerData.containsKey(event.getPlayer().getName()))
-		{
-			plugin.playerData.put(event.getPlayer().getName(), false);
-		}
-		
-		if(!plugin.bannedPlayer.containsKey(event.getPlayer().getName()))
-		{
-			plugin.bannedPlayer.put(event.getPlayer().getName(), false);
-		}
-		return;
+		plugin.loadPlayerConfig(event.getPlayer().getUniqueId());
     }
 	
 	@EventHandler
@@ -50,14 +42,16 @@ public class PVPSwitchListener implements Listener
 			}
 
 			boolean otherPVP = false;
-			boolean DamagerPVP = false;
-			if(plugin.playerData.containsKey(((Player)event.getEntity()).getName()))
+			boolean damagerPVP = false;
+			if(plugin.playerData.containsKey(((Player)event.getEntity()).getUniqueId()))
 			{
-				otherPVP = plugin.playerData.get(((Player)event.getEntity()).getName());
+				PvpPlayer otherPvpPlayer = plugin.playerData.get(((Player)event.getEntity()).getUniqueId());
+				otherPVP = otherPvpPlayer.canPvp();
 			}
 			if(plugin.playerData.containsKey(((Player)event.getDamager()).getName()))
 			{
-				DamagerPVP = plugin.playerData.get(((Player)event.getDamager()).getName());
+				PvpPlayer damagerPvpPlayer = plugin.playerData.get(((Player)event.getDamager()).getUniqueId());
+				damagerPVP = damagerPvpPlayer.canPvp();
 			}
 			/*
 			if(plugin.getClanManager().getClanByPlayerUniqueId(((Player)event.getDamager()).getUniqueId())!=null)
@@ -77,20 +71,19 @@ public class PVPSwitchListener implements Listener
 				}
 			}
 			*/
-			if(DamagerPVP==false)
+			if(!damagerPVP)
 			{
 				event.setCancelled(true);
 				event.setDamage(0);
 				return;
 			}
-			else if(otherPVP==false)
+			else if(!otherPVP)
 			{
 				event.setCancelled(true);
 				event.setDamage(0);
 				((Player)event.getDamager()).sendMessage("§a[PVP]§3 对方已关闭PVP");
 				return;
 			}
-			
 		}
 		else if(event.getEntity() instanceof Player && event.getDamager().getType().equals(EntityType.ARROW))
 		{
@@ -110,13 +103,13 @@ public class PVPSwitchListener implements Listener
 
 			boolean otherPVP = false;
 			boolean DamagerPVP = false;
-			if(plugin.playerData.containsKey(p.getName()))
+			if(plugin.playerData.containsKey(p.getUniqueId()))
 			{
-				otherPVP = plugin.playerData.get(p.getName());
+				otherPVP = plugin.playerData.get(p.getUniqueId()).canPvp();
 			}
-			if(plugin.playerData.containsKey(damager.getName()))
+			if(plugin.playerData.containsKey(damager.getUniqueId()))
 			{
-				DamagerPVP = plugin.playerData.get(damager.getName());
+				DamagerPVP = plugin.playerData.get(damager.getUniqueId()).canPvp();
 			}
 			
 			if(DamagerPVP==false)

@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="PVPSwitch:jar">
+    <output-path>$PROJECT_DIR$/../../Project0/server/plugins</output-path>
+    <root id="archive" name="PVPSwitch.jar">
+      <element id="module-output" name="PVPSwitch" />
+    </root>
+  </artifact>
+</component>

@@ -1,0 +1,18 @@
+name: PVPSwitch
+main: pvpSwitch.PVPSwitch
+version: '1.3'
+api-version: '1.14'
+author: Jingyuan Ma
+depend: [Citizens, PeterUtil]
+commands:
+  pvp:
+    description: used to switch if allow to pvp
+    usage: /pvp
+    permission-message: §c无权执行！
+permissions: 
+  pvpSwitch.op: 
+    default: op
+  pvpSwitch.player: 
+    default: true
+  pvpSwitch.bypass: 
+    default: op

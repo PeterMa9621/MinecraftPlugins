@@ -1,0 +1,13 @@
+name: PeterHelper
+main: peterHelper.PeterHelper
+version: '1.0'
+api-version: '1.14'
+author: Jingyuan Ma
+commands:
+  ph:
+    description: helper plugin
+    usage: /ph
+    permission-message: §c无权执行！
+permissions: 
+  peterHelper.op:
+    default: op

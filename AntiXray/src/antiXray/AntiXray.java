@@ -1,19 +1,9 @@
 package antiXray;
 
 import antiXray.expansion.AntiXrayExpansion;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
-
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.UUID;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -23,10 +13,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
-import peterUtil.database.ConfigStructure;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import peterUtil.database.Database;
 import peterUtil.database.DatabaseType;
 import peterUtil.database.StorageInterface;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.UUID;
 
 public class AntiXray extends JavaPlugin
 {
@@ -36,6 +35,7 @@ public class AntiXray extends JavaPlugin
 	int recoverPoint = 0;
 	ItemStack recoverItem = null;
 	DatabaseType databaseType;
+	StorageInterface database;
 	public HashMap<UUID, Integer> playerData = new HashMap<UUID, Integer>();
 	HashMap<UUID, String> lastLogin = new HashMap<UUID, String>();
 	HashMap<String, String> message = new HashMap<String, String>();
@@ -57,11 +57,13 @@ public class AntiXray extends JavaPlugin
 			new AntiXrayExpansion(this).register();
 		}
 
-		String createTableQuery = "create table if not exists anti_xray(id varchar(100), points varchar(10), last_logout varchar(10));";
-		Database.setConnectionInfo("minecraft", "anti_xray", "root", "mjy159357", createTableQuery);
-
 		getOP();
 		loadConfig();
+
+		database = Database.getInstance(databaseType, this);
+		String createTableQuery = "create table if not exists anti_xray(id varchar(100), points varchar(10), last_login varchar(10), primary key(id));";
+		database.connect("minecraft", "anti_xray", "root", "mjy159357", createTableQuery);
+
 		initRecoverItemRecipe();
 		loadMessageConfig();
 		recoverPointTask();
@@ -104,7 +106,7 @@ public class AntiXray extends JavaPlugin
 		String [] recipes = {"ABC",
 							 "DEF",
 							 "GHI"};
-		ShapedRecipe recipe = new ShapedRecipe(recoverItem);
+		ShapedRecipe recipe = new ShapedRecipe(NamespacedKey.minecraft("antixray"), recoverItem);
 		recipe.shape(recipes);
 		ItemStack item = null;
 
@@ -165,17 +167,15 @@ public class AntiXray extends JavaPlugin
 	
 	public void saveConfig()
 	{
-		StorageInterface database = Database.getInstance(databaseType, this);
-
 		for(UUID uniqueId:playerData.keySet())
 		{
 			HashMap<String, Object> data = new HashMap<String, Object>() {{
 				put("points", playerData.get(uniqueId));
 				put("last_login", lastLogin.get(uniqueId));
 			}};
-			ConfigStructure configStructure = new ConfigStructure(data);
+
 			try {
-				database.store(uniqueId, configStructure);
+				database.store(uniqueId, data);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -201,17 +201,16 @@ public class AntiXray extends JavaPlugin
 		if(playerData.containsKey(uuid)){
 			lastLogin = this.lastLogin.get(uuid);
 		} else {
-			StorageInterface database = Database.getInstance(databaseType, this);
 			HashMap<String, Object> result = database.get(uuid, new String[] {"points", "last_login"});
 			if(result==null){
 				playerData.put(uuid, totalPoints);
-				this.lastLogin.put(uuid, "0000-00-00");
+				this.lastLogin.put(uuid, todayDate);
 				return;
 			}
 
 			lastLogin = (String) result.get("last_login");
 
-			playerData.put(uuid, (Integer) result.get("points"));
+			playerData.put(uuid, Integer.valueOf((String) result.get("points")));
 		}
 
 		if(!lastLogin.equalsIgnoreCase(todayDate)){

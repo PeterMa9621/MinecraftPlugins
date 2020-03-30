@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public interface StorageInterface {
-    public void store(UUID uniqueId, ConfigStructure configStructure) throws IOException;
-
-    public void store(ConfigStructure configStructure) throws IOException;
+    public void store(UUID uniqueId, HashMap<String, Object> data) throws IOException;
 
     public HashMap<String, Object> get(UUID uniqueId, String[] keys);
+
+    public void connect(String databaseName, String tableName, String userName, String password, String createTableQuery);
 }

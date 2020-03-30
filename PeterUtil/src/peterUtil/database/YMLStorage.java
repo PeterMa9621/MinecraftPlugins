@@ -19,29 +19,19 @@ public class YMLStorage implements StorageInterface{
             file.mkdir();
     }
 
-    public FileConfiguration getConfig(UUID uniqueId){
+    @Override
+    public void connect(String databaseName, String tableName, String userName, String password, String createTableQuery) {
+
+    }
+
+    public void store(UUID uniqueId, HashMap<String, Object> data) throws IOException {
         File file = new File(this.dataFolderPath, "/data/"+uniqueId.toString()+".yml");
 
-        return load(file);
-    }
-
-    public void store(UUID uniqueId, ConfigStructure configStructure) throws IOException {
-        File file = new File(this.dataFolderPath, "/data/"+uniqueId.toString()+".yml");
-
-        _store(file, configStructure);
-    }
-
-    public void store(ConfigStructure configStructure) throws IOException {
-        File file = new File(this.dataFolderPath, "config.yml");
-
-        _store(file, configStructure);
-    }
-
-    private void _store(File file, ConfigStructure configStructure) throws IOException {
         FileConfiguration config = load(file);
 
-        ConfigStructureBuilder builder = new ConfigStructureBuilder(config, configStructure);
-        builder.build();
+        for(String key:data.keySet()){
+            config.set(key, data.get(key));
+        }
 
         config.save(file);
     }
