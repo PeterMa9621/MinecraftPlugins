@@ -4,10 +4,9 @@ import java.util.HashMap;
 
 import org.bukkit.entity.Player;
 
-import queueSystem.Queue;
-
 public class DpsAPI 
 {
+	/*
 	Dps plugin;
 	public DpsAPI(Dps plugin)
 	{
@@ -41,6 +40,8 @@ public class DpsAPI
 	{
 		plugin.removeDps(p);
 	}
+
+	 */
 	
 	/*
 	public void startDpsModule(Player p)
@@ -52,7 +53,7 @@ public class DpsAPI
 		}
 	}
 	*/
-	
+	/*
 	public void putIntoOtherQueue(Player p, String queueName)
 	{
 		plugin.getDps(p, queueName);
@@ -62,4 +63,6 @@ public class DpsAPI
 	{
 		plugin.getDps(queue);
 	}
+
+	 */
 }

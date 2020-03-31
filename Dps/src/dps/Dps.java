@@ -23,26 +23,23 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 
-import queueSystem.Queue;
-import queueSystem.QueueSystem;
 import scoreBoard.ScoreBoard;
 
 public class Dps extends JavaPlugin
 {
-	ScoreBoard scoreBoard;
-	QueueSystem queueSystem;
+	public static ScoreBoard scoreBoard;
 	
 	/**
 	 *  This hash map is used to store every group's name and its members' data which includes the damage that
 	 *  every member did.
 	 */
-	HashMap<String, HashMap<String, Double>> groupDps = new HashMap<String, HashMap<String, Double>>();
+	//HashMap<String, HashMap<String, Double>> groupDps = new HashMap<String, HashMap<String, Double>>();
 	
 	/**
 	 *  This hash map stores every player's name that is using dps module and the value is this player's
 	 *  group's name.
 	 */
-	HashMap<String, String> singleDps = new HashMap<String, String>();
+	//HashMap<String, String> singleDps = new HashMap<String, String>();
 	
 	//ArrayList<String> whoNeedDps = new ArrayList<String>();
 	
@@ -53,14 +50,7 @@ public class Dps extends JavaPlugin
 	
 	HashMap<String, HashMap<String, Integer>> groupRank = new HashMap<String, HashMap<String, Integer>>();
 	
-	DpsAPI api = new DpsAPI(this);
-	
-	private boolean hookQueueSystem()
-    {
-	    final Plugin plugin = this.getServer().getPluginManager().getPlugin("QueueSystem");
-	    queueSystem = QueueSystem.class.cast(plugin);
-	    return queueSystem != null; 
-	}
+	//DpsAPI api = new DpsAPI(this);
 	
 	private boolean hookScoreBoard()
     {
@@ -75,16 +65,12 @@ public class Dps extends JavaPlugin
 		{
 			getDataFolder().mkdir();
 		}
-		if(hookScoreBoard()==false)
+		if(!hookScoreBoard())
 		{
 			Bukkit.getConsoleSender().sendMessage("§a[Dps] §cScoreBoard未加载");
 			return;
 		}
-		if(hookQueueSystem()==false)
-		{
-			Bukkit.getConsoleSender().sendMessage("§a[Dps] §cQueueSystem未加载");
-			return;
-		}
+
 		getServer().getPluginManager().registerEvents(new DpsListener(this), this);
 		Bukkit.getConsoleSender().sendMessage("§a[Dps] §eDps已加载");
 	}
@@ -93,11 +79,14 @@ public class Dps extends JavaPlugin
 	{
 		Bukkit.getConsoleSender().sendMessage("§a[Dps] §eDps已卸载");
 	}
-	
+
+	/*
 	public DpsAPI getAPI()
 	{
 		return api;
 	}
+
+	 */
 
 	public FileConfiguration load(File file)
 	{
@@ -148,7 +137,7 @@ public class Dps extends JavaPlugin
 				}
 				return true;
 			}
-			
+			/*
 			if(args[0].equalsIgnoreCase("put"))
 			{
 				if(sender.isOp())
@@ -172,11 +161,13 @@ public class Dps extends JavaPlugin
 					}
 				}
 			}
-			
+
 			if(args[0].equalsIgnoreCase("start"))
 			{
+
 				if(args.length==1)
 				{
+
 					if(sender.isOp() && sender instanceof Player)
 					{
 						Player p = (Player)sender;
@@ -195,6 +186,7 @@ public class Dps extends JavaPlugin
 							p.sendMessage("§a[DPS系统] §c请先组队！");
 						}
 					}
+
 				}
 				else if(args.length==2)
 				{
@@ -234,7 +226,9 @@ public class Dps extends JavaPlugin
 				}
 				return true;
 			}
-			
+
+
+			 */
 			/*
 			if(args[0].equalsIgnoreCase("open"))
 			{
@@ -272,7 +266,8 @@ public class Dps extends JavaPlugin
 		}
 		return false;
 	}
-	
+
+	/*
 	public void clearData(Player p)
 	{
 		stopTask(p);
@@ -321,7 +316,7 @@ public class Dps extends JavaPlugin
 			}
 			groupDps.put(leader.getName(), memberData);	
 		}
-		/*
+
 		if(!whoNeedDps.contains(p.getName()))
 		{
 			whoNeedDps.add(p.getName());
@@ -329,7 +324,7 @@ public class Dps extends JavaPlugin
 			scoreBoard.getAPI().stopScoreBoard(p);
 			runTask(p);
 		}
-		*/
+
 	}
 	
 	public void removeDps(Player p)
@@ -350,6 +345,8 @@ public class Dps extends JavaPlugin
 			stopTask(p);
 		}
 	}
+
+
 	
 	public int getRank(Player p)
 	{
@@ -370,7 +367,7 @@ public class Dps extends JavaPlugin
 			dpsTask.remove(p.getName());
 		}
 	}
-	
+	*/
 	/*
 	public void removeDps(Queue queue)
 	{
@@ -440,7 +437,7 @@ public class Dps extends JavaPlugin
 		} ,5*20, 40));
 	}
 	*/
-	
+	/*
 	private void runTask(Player p)
 	{
 		dpsTask.add(p.getName());
@@ -456,36 +453,9 @@ public class Dps extends JavaPlugin
 		}.runTaskTimer(this, 0L, 40L);
 	}
 	
-	private void displayDpsBoard(Player p) 
-	{
-		String teamName = singleDps.get(p.getName());
-		
-		HashMap<String, Double> data = groupDps.get(teamName);
-		
-		Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
 
-        Objective randomObjective = scoreboard.registerNewObjective("scoreboard1", "dummy1");
-    	String title = "§7总输出比";
-		
-    	randomObjective.setDisplayName(title);
-    	randomObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
-    	int number = data.size();
-    	if(data.size()>15)
-    		number = 15;
-    	List<Map.Entry<String, Double>> list = sort(data);
-    	int j=0;
-    	HashMap<String, Integer> rankData = new HashMap<String, Integer>();
-	    for (Map.Entry<String, Double> mapping : list) 
-	    {
-	    	rankData.put(mapping.getKey(), (j+1));
-	    	String content = String.format("§e%s §f- §2%.2f", mapping.getKey(), mapping.getValue());
 
-    		randomObjective.getScore(content).setScore(number-j);
-    		j++;
-	    }
-	    this.groupRank.put(teamName, rankData);
-    	p.setScoreboard(scoreboard);
-	}
+	 */
 	
 	/*
 	private void displayDpsBoard(Queue queue) 
@@ -547,21 +517,6 @@ public class Dps extends JavaPlugin
 	}
 	*/
 	
-	public List<Map.Entry<String, Double>> sort(HashMap<String, Double> map)
-	{
-	    //将map.entrySet()转换成list  
-	    List<Map.Entry<String, Double>> list = new ArrayList<Map.Entry<String, Double>>(map.entrySet());  
-	    Collections.sort(list, new Comparator<Map.Entry<String, Double>>() {  
-	        //降序排序  
-	        @Override  
-	        public int compare(Entry<String, Double> o1, Entry<String, Double> o2) {  
-	            //return o1.getValue().compareTo(o2.getValue());  
-	            return o2.getValue().compareTo(o1.getValue());  
-	        }  
-	    });
-	    
-	    return list;
 
-	}
 	
 }

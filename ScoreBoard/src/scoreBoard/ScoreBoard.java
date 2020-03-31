@@ -1,18 +1,20 @@
 package scoreBoard;
 
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
-
-import checkInSystem.CheckInSystem;
-import dailyQuest.DailyQuest;
-import levelSystem.LevelSystem;
-import net.milkbowl.vault.economy.Economy;
-import pvpSwitch.PVPSwitch;
-import vipSystem.VipSystem;
+import me.clip.placeholderapi.PlaceholderAPI;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,43 +23,15 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 
-import org.black_ixx.playerpoints.PlayerPoints;
-import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
-
-public class ScoreBoard extends JavaPlugin
+public class ScoreBoard extends JavaPlugin implements Listener
 {
-	Calendar cal = new GregorianCalendar();
-    int year = cal.get(Calendar.YEAR);
-    int month = cal.get(Calendar.MONTH) + 1;
-    int day = cal.get(Calendar.DAY_OF_MONTH);
-    String playername = getName();
     boolean useSecond = false;
     int time = 1;
     int interval = 5;
-    
-    
-    
+
     ArrayList<ArrayList<String>> scoreBoardInfo = new ArrayList<ArrayList<String>>();
     
     ScoreBoardAPI api = new ScoreBoardAPI(this);
-    
-    public boolean isEco = false;
-    
-    //==================Plugin's API==================
-    private Economy economy;
-    private CheckInSystem checkInSystem;
-    private PlayerPoints playerPoints;
-    private PVPSwitch pvpSwitch;
-    private VipSystem vipSystem;
-    private DailyQuest dailyQuest;
-    private SimpleClans core;
-    private LevelSystem levelSystem;
-    //==================Plugin's API==================
     
     HashMap<String, Integer> task = new HashMap<String, Integer>();
 	
@@ -66,118 +40,27 @@ public class ScoreBoard extends JavaPlugin
     	return api;
     }
     
-	private boolean hookSimpleClans()
-	{
-		try 
-		{
-            for (Plugin plugin : getServer().getPluginManager().getPlugins()) 
-            {
-                if (plugin instanceof SimpleClans) 
-                {
-                    this.core = (SimpleClans) plugin;
-                    return true;
-                }
-            }
-        } 
-		catch (NoClassDefFoundError e) 
-		{
-            return false;
-        }
-        return false;
-	}
-    
-	private boolean hookLevelSystem() 
+    private void hookPlaceHolderAPI()
     {
-	    final Plugin plugin = this.getServer().getPluginManager().getPlugin("LevelSystem");
-	    levelSystem = LevelSystem.class.cast(plugin);
-	    return levelSystem != null; 
-	}
-	
-    private boolean hookPlayerPoints() 
-    {
-	    final Plugin plugin = this.getServer().getPluginManager().getPlugin("PlayerPoints");
-	    playerPoints = PlayerPoints.class.cast(plugin);
-	    return playerPoints != null; 
-	}
-    
-    private boolean hookCheckInSystem() 
-    {
-	    final Plugin plugin = this.getServer().getPluginManager().getPlugin("CheckInSystem");
-	    checkInSystem = CheckInSystem.class.cast(plugin);
-	    return checkInSystem != null; 
-	}
-    
-    private boolean hookPVPSwitch() 
-    {
-	    final Plugin plugin = this.getServer().getPluginManager().getPlugin("PVPSwitch");
-	    pvpSwitch = PVPSwitch.class.cast(plugin);
-	    return pvpSwitch != null; 
-	}
-    
-    private boolean hookVipSystem() 
-    {
-	    final Plugin plugin = this.getServer().getPluginManager().getPlugin("VipSystem");
-	    vipSystem = VipSystem.class.cast(plugin);
-	    return vipSystem != null;
-	}
-    
-    private boolean hookDailyQuest() 
-    {
-	    final Plugin plugin = this.getServer().getPluginManager().getPlugin("DailyQuest");
-	    dailyQuest = DailyQuest.class.cast(plugin);
-	    return dailyQuest != null;
-	}
-    
-	private boolean setupEconomy()
-	{
-		RegisteredServiceProvider<Economy> economyProvider = Bukkit.getServicesManager().getRegistration(Economy.class);
-		if (economyProvider != null)
-		{
-			economy = economyProvider.getProvider();
+		if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+			/*
+			 * We register the EventListeneres here, when PlaceholderAPI is installed.
+			 * Since all events are in the main class (this class), we simply use "this"
+			 */
+			Bukkit.getPluginManager().registerEvents(this, this);
+			Bukkit.getConsoleSender().sendMessage("Found PlaceholderAPI");
 		}
-		return (economy!=null);
 	}
     
 	public void onEnable() 
 	{
-		if(Bukkit.getPluginManager().getPlugin("Vault")!=null)
-		{
-			isEco=setupEconomy();
-		}
-		if(hookPlayerPoints()==false)
-		{
-			Bukkit.getConsoleSender().sendMessage("§a[ScoreBoard] §cPlayerPoints未加载");
-		}
-		if(hookCheckInSystem()==false)
-		{
-			Bukkit.getConsoleSender().sendMessage("§a[ScoreBoard] §cCheckInSystem未加载");
-		}
-		if(hookPVPSwitch()==false)
-		{
-			Bukkit.getConsoleSender().sendMessage("§a[ScoreBoard] §cPVPSwitch未加载");
-		}
-		if(hookVipSystem()==false)
-		{
-			Bukkit.getConsoleSender().sendMessage("§a[ScoreBoard] §cVipSystem未加载");
-		}
-		if(hookDailyQuest()==false)
-		{
-			Bukkit.getConsoleSender().sendMessage("§a[ScoreBoard] §cDailyQuest未加载");
-		}
-		if(hookSimpleClans()==false)
-		{
-			Bukkit.getConsoleSender().sendMessage("§a[ScoreBoard] §cSimpleClans未加载");
-		}
-		if(hookLevelSystem()==false)
-		{
-			Bukkit.getConsoleSender().sendMessage("§a[ScoreBoard] §cLevelSystem未加载");
-		}
 		if(!getDataFolder().exists()) 
 		{
 			getDataFolder().mkdir();
 		}
+		hookPlaceHolderAPI();
 		loadConfig();
-		getServer().getPluginManager().registerEvents(new ScoreBoardListener(this), this);
+		getServer().getPluginManager().registerEvents(this, this);
 		Bukkit.getConsoleSender().sendMessage("§a[ScoreBoard] §e记分板系统加载完成");
 	}
 
@@ -193,8 +76,6 @@ public class ScoreBoard extends JavaPlugin
 		if (!file.exists())
 		{
 			config = load(file);
-			config.set("Variable", "{player}玩家名，{checkInDays}签到天数，{judgeCheckIn}是否签到，"
-					+ "{playerPoints}点券数量，{money}金币数量，{pvpSwitch}是否可PVP");
 			config.set("ScoreBoard.Time", 5);
 			config.set("ScoreBoard.1.Title", "§7欢迎进入我的世界");
 			config.set("ScoreBoard.2.Title", "§7个人信息");
@@ -243,8 +124,11 @@ public class ScoreBoard extends JavaPlugin
 		if(scoreBoardInfo.size()==2)
 			useSecond = true;
 		interval = config.getInt("ScoreBoard.Time");
-		return;
-		
+
+		for(Player p:Bukkit.getOnlinePlayers()){
+			runTask(p);
+		}
+
 	}
 
 	public FileConfiguration load(File file)
@@ -287,218 +171,48 @@ public class ScoreBoard extends JavaPlugin
 			{
 				public void run()
 				{
-					if(useSecond==true)
+					if(useSecond)
 					{
 						if(time==1)
 						{
-							displayYourGameBoard1(p);
+							displayYourGameBoard(p, 0);
 							time=2;
 						}
 						else
 						{
-							displayYourGameBoard2(p);
+							displayYourGameBoard(p, 1);
 							time=1;
 						}
 					}
 					else
 					{
-						displayYourGameBoard1(p);
+						displayYourGameBoard(p, 0);
 					}
 				}
 			} ,5*20, interval*20));
 		}
 	}
 	
-	public void displayYourGameBoard1(Player p)
+	public void displayYourGameBoard(Player p, int index)
     {
-		
 		Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-		
+		ArrayList<String> lines = scoreBoardInfo.get(index);
         
-        Objective randomObjective = scoreboard.registerNewObjective("scoreboard1", "dummy1");
-    	String title = scoreBoardInfo.get(0).get(0);
+        Objective randomObjective = scoreboard.registerNewObjective("scoreboard"+(index+1), "dummy"+(index+1));
+    	String title = lines.get(0);
     	
-    	if(title.contains("{player}"))
-    		title = title.replace("{player}", p.getName());
-    	
-    	if(title.contains("{checkInDays}"))
-    		title = title.replace("{checkInDays}", String.valueOf(checkInSystem.getAPI().getDays(p.getName())));
-    	
-    	if(title.contains("{judgeCheckIn}"))
-    		if(checkInSystem.getAPI().isCheckIn(p.getName())==true)
-    			title = title.replace("{judgeCheckIn}", "已");
-    		else
-    			title = title.replace("{judgeCheckIn}", "未");
-    	
-    	if(title.contains("{playerPoints}"))
-    		title = title.replace("{playerPoints}", String.valueOf(playerPoints.getAPI().look(p.getName())));
-    	
-    	if(title.contains("{money}"))
-    		title = title.replace("{money}", String.valueOf(economy.getBalance(p.getName())));
+    	title = PlaceholderAPI.setPlaceholders(p, title);
 		
     	randomObjective.setDisplayName(title);
     	randomObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
-    	for(int j=0; j<this.scoreBoardInfo.get(0).size()-1; j++)
+    	for(int j=0; j<lines.size()-1; j++)
     	{
-    		String content = scoreBoardInfo.get(0).get(j+1);
-    		
-    		
-    		if(content.contains("{player}"))
-    			content = content.replace("{player}", p.getName());
-        	
-    		if(content.contains("{checkInDays}"))
-        		content = content.replace("{checkInDays}", String.valueOf(checkInSystem.getAPI().getDays(p.getName())));
-        	
-        	if(content.contains("{judgeCheckIn}"))
-        		if(checkInSystem.getAPI().isCheckIn(p.getName())==true)
-        			content = content.replace("{judgeCheckIn}", "已");
-        		else
-        			content = content.replace("{judgeCheckIn}", "未");
-        	
-        	if(content.contains("{playerPoints}"))
-        		content = content.replace("{playerPoints}", String.valueOf(playerPoints.getAPI().look(p.getName())));
-        	
-        	if(content.contains("{money}"))
-        		content = content.replace("{money}", String.valueOf(economy.getBalance(p.getName())));
-        	
-        	if(content.contains("{pvpState}"))
-        		if(pvpSwitch.getAPI().getPVPState(p)==true)
-        			content = content.replace("{pvpState}", "开");
-        		else
-        			content = content.replace("{pvpState}", "关");
-        	
-        	if(content.contains("{vipGroup}"))
-        		if(vipSystem.getAPI().getVipGroupName(p)==null)
-        			content = content.replace("{vipGroup}", "§f§l普通玩家");
-        		else
-        			content = content.replace("{vipGroup}", vipSystem.getAPI().getVipGroupName(p));
-        	
-        	if(content.contains("{vipTime}"))
-        		if(vipSystem.getAPI().getLeftHour(p)==0)
-    			{
-    				vipSystem.getAPI().removeVip(p);
-    				content = content.replace("{vipTime}", " ");
-    			}
-    			else
-    				content = content.replace("{vipTime}", vipSystem.getAPI().getLeftTime(p));
-        	
-        	if(content.contains("{dailyQuest}"))
-        		if(dailyQuest.getAPI().getHowMnayQuestLeft(p)!=0)
-        			content = content.replace("{dailyQuest}", "剩余日常任务:§c§l"+dailyQuest.getAPI().getHowMnayQuestLeft(p));
-        		else
-        			content = content.replace("{dailyQuest}", "日常任务已全部完成");
-        	
-        	if(content.contains("{simpleClans}"))
-        		if(core.getClanManager().getClanByPlayerName(p.getName())==null)
-        			content = content.replace("{simpleClans}", "§b§l你还没有家族");
-        		else
-        		{
-        			String clanTag = core.getClanManager().getClanByPlayerName(p.getName()).getTagLabel(false);
-        			clanTag = clanTag.substring(3, clanTag.length()-3);
-        			content = content.replace("{simpleClans}", clanTag);
-        		}
-        	
-        	if(content.contains("{level}"))
-        		content = content.replace("{level}", String.valueOf(levelSystem.getAPI().getLevel(p)));
+    		String content = lines.get(j+1);
+    		content = PlaceholderAPI.setPlaceholders(p, content);
         	
     		randomObjective.getScore(content).setScore(15-j);
     	}
     	p.setScoreboard(scoreboard);
-    }
-	
-	public void displayYourGameBoard2(Player p)
-    {
-		
-		Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-        p.setScoreboard(scoreboard);
-        
-        Objective randomObjective = scoreboard.registerNewObjective("scoreboard2", "dummy2");
-    	String title = scoreBoardInfo.get(1).get(0);
-    	
-    	if(title.contains("{player}"))
-    		title = title.replace("{player}", p.getName());
-    	
-    	if(title.contains("{checkInDays}"))
-    		title = title.replace("{checkInDays}", String.valueOf(checkInSystem.getAPI().getDays(p.getName())));
-    	
-    	if(title.contains("{judgeCheckIn}"))
-    		if(checkInSystem.getAPI().isCheckIn(p.getName())==true)
-    			title = title.replace("{judgeCheckIn}", "已");
-    		else
-    			title = title.replace("{judgeCheckIn}", "未");
-    	
-    	if(title.contains("{playerPoints}"))
-    		title = title.replace("{playerPoints}", String.valueOf(playerPoints.getAPI().look(p.getName())));
-    	
-    	if(title.contains("{money}"))
-    		title = title.replace("{money}", String.valueOf(economy.getBalance(p.getName())));
-    	randomObjective.setDisplayName(title);
-    	randomObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
-    	
-    	for(int j=0; j<this.scoreBoardInfo.get(1).size()-1; j++)
-    	{
-    		String content = scoreBoardInfo.get(1).get(j+1);
-    		
-    		if(content.contains("{player}"))
-    			content = content.replace("{player}", p.getName());
-        	
-    		if(content.contains("{checkInDays}"))
-        		content = content.replace("{checkInDays}", String.valueOf(checkInSystem.getAPI().getDays(p.getName())));
-        	
-        	if(content.contains("{judgeCheckIn}"))
-        		if(checkInSystem.getAPI().isCheckIn(p.getName())==true)
-        			content = content.replace("{judgeCheckIn}", "已");
-        		else
-        			content = content.replace("{judgeCheckIn}", "未");
-        	
-        	if(content.contains("{playerPoints}"))
-        		content = content.replace("{playerPoints}", String.valueOf(playerPoints.getAPI().look(p.getName())));
-        	
-        	if(content.contains("{money}"))
-        		content = content.replace("{money}", String.valueOf(economy.getBalance(p.getName())));
-        	
-        	if(content.contains("{pvpState}"))
-        		if(pvpSwitch.getAPI().getPVPState(p)==true)
-        			content = content.replace("{pvpState}", "开");
-        		else
-        			content = content.replace("{pvpState}", "关");
-        	
-        	if(content.contains("{vipGroup}"))
-        		if(vipSystem.getAPI().getVipGroupName(p)==null)
-        			content = content.replace("{vipGroup}", "§f普通玩家");
-        		else
-        			content = content.replace("{vipGroup}", "§c"+vipSystem.getAPI().getVipGroupName(p)+",剩余时间:"+vipSystem.getAPI().getLeftTime(p));
-        	
-        	if(content.contains("{vipTime}"))
-        		if(vipSystem.getAPI().getLeftHour(p)==0)
-    			{
-    				vipSystem.getAPI().removeVip(p);
-    				content = content.replace("{vipTime}", " ");
-    			}
-    			else
-    				content = content.replace("{vipTime}", vipSystem.getAPI().getLeftTime(p));
-        	
-        	if(content.contains("{dailyQuest}"))
-        		if(dailyQuest.getAPI().getHowMnayQuestLeft(p)!=0)
-        			content = content.replace("{dailyQuest}", "剩余日常任务:§c§l"+dailyQuest.getAPI().getHowMnayQuestLeft(p));
-        		else
-        			content = content.replace("{dailyQuest}", "日常任务已全部完成");
-        	
-        	if(content.contains("{simpleClans}"))
-        		if(core.getClanManager().getClanByPlayerName(p.getName())==null)
-        			content = content.replace("{simpleClans}", "§b§l你还没有家族");
-        		else
-        		{
-        			String clanTag = core.getClanManager().getClanByPlayerName(p.getName()).getTagLabel(false);
-        			clanTag = clanTag.substring(3, clanTag.length()-3);
-        			content = content.replace("{simpleClans}", clanTag);
-        		}
-        	
-        	if(content.contains("{level}"))
-        		content = content.replace("{level}", String.valueOf(levelSystem.getAPI().getLevel(p)));
-    		randomObjective.getScore(content).setScore(15-j);
-    	}
-
     }
 	
 	public boolean onCommand(CommandSender sender,Command cmd,String label,String[] args)  
@@ -521,7 +235,7 @@ public class ScoreBoard extends JavaPlugin
 			{
 				if(sender.isOp())
 				{
-					displayYourGameBoard1((Player)sender);
+					displayYourGameBoard((Player)sender, 0);
 				}
 			}
 			
@@ -529,7 +243,7 @@ public class ScoreBoard extends JavaPlugin
 			{
 				if(sender.isOp())
 				{
-					displayYourGameBoard2((Player)sender);
+					displayYourGameBoard((Player)sender, 1);
 				}
 			}
 			
@@ -538,8 +252,8 @@ public class ScoreBoard extends JavaPlugin
 				if(sender.isOp())
 				{
 					loadConfig();
-					displayYourGameBoard1((Player)sender);
-					if(this.useSecond==true)
+					displayYourGameBoard((Player)sender, 0);
+					if(this.useSecond)
 						time=2;
 					sender.sendMessage("§a[记分板系统] 配置重载成功!");
 				}
@@ -550,7 +264,21 @@ public class ScoreBoard extends JavaPlugin
 		return false;
 		
 	}
-	
-	
+
+	@EventHandler
+	public void onPlayerQuit(PlayerQuitEvent event)
+	{
+		if(task.containsKey(event.getPlayer().getName()))
+		{
+			getServer().getScheduler().cancelTask(task.get(event.getPlayer().getName()));
+			task.remove(event.getPlayer().getName());
+		}
+	}
+
+	@EventHandler
+	public void onPlayerJoin(PlayerJoinEvent event)
+	{
+		runTask(event.getPlayer());
+	}
 }
 

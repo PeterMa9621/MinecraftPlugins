@@ -1,6 +1,6 @@
 name: VipSystem
 main: vipSystem.VipSystem
-version: '1.1'
+version: '1.1.1'
 api-version: '1.14'
 softdepend: [PlaceholderAPI]
 author: Jingyuan Ma

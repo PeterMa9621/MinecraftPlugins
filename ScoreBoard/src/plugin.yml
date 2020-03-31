@@ -1,0 +1,15 @@
+name: ScoreBoard
+main: scoreBoard.ScoreBoard
+version: '1.1'
+api-version: '1.14'
+author: Jingyuan Ma
+commands:
+  score:
+    description: ScoreBoard Commands
+    usage: /score
+    permission-message: §c无权执行！
+permissions: 
+  scoreBoard.op: 
+    default: op
+  scoreBoard.player: 
+    default: true

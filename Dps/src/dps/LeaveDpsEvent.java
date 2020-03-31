@@ -21,11 +21,13 @@ public class LeaveDpsEvent extends Event implements Cancellable {
     {
         return p;
     }
-    
+    /*
     public int getRank()
     {
     	return plugin.getRank(p);
     }
+
+     */
 
     @Override
     public HandlerList getHandlers() 

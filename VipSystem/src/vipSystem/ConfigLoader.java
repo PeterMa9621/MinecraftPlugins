@@ -57,8 +57,8 @@ public class ConfigLoader {
             }
         } else {
             Database MySQL = Database.getInstance();
-            String selectQuery = "SELECT id, player_name, DATE_FORMAT(register_date, '%Y-%m-%d %k:%i:%s') as register_date, " +
-                    "DATE_FORMAT(deadline_date, '%Y-%m-%d %k:%i:%s') as deadline_date, vip_group FROM vip_system where id = ? and is_expired = 0";
+            String selectQuery = "SELECT id, player_name, DATE_FORMAT(register_date, '%Y-%m-%d %H:%i:%s') as register_date, " +
+                    "DATE_FORMAT(deadline_date, '%Y-%m-%d %H:%i:%s') as deadline_date, vip_group FROM vip_system where id = ? and is_expired = 0";
             PreparedStatement stmt = MySQL.getConnection().prepareStatement(selectQuery);
             stmt.setString(1, uniqueId.toString());
             ResultSet resultSet = stmt.executeQuery();

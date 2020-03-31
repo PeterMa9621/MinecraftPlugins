@@ -1,6 +1,14 @@
 package dps;
 
+import de.erethon.dungeonsxl.event.gameworld.GameWorldStartGameEvent;
+import de.erethon.dungeonsxl.event.gameworld.GameWorldUnloadEvent;
+import de.erethon.dungeonsxl.game.Game;
+import de.erethon.dungeonsxl.player.DInstancePlayer;
+import dps.listener.PlayerListener;
+import dps.model.DpsPlayer;
+import dps.util.ScoreBoardUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -8,11 +16,18 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import scoreBoard.ScoreBoard;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.UUID;
 
 public class DpsListener implements Listener
 {
 	private Dps plugin;
-	
+
+	private HashMap<UUID, HashMap<UUID, DpsPlayer>> dpsData = new HashMap<>();
+
 	public DpsListener(Dps plugin)
 	{
 		this.plugin=plugin;
@@ -23,17 +38,22 @@ public class DpsListener implements Listener
     {
 		if(event.getEntity() instanceof Player)
 			return;
+		UUID currentWorldId = event.getDamager().getWorld().getUID();
 		if(event.getDamager() instanceof Player)
 		{
-			if(plugin.singleDps.containsKey(event.getDamager().getName()))
-			{
-				Player damager = (Player)event.getDamager();
-				String teamName = plugin.singleDps.get(damager.getName());
-				
-				double damage = plugin.groupDps.get(teamName).get(damager.getName());
+			if(dpsData.containsKey(currentWorldId)){
+				HashMap<UUID, DpsPlayer> players = dpsData.get(currentWorldId);
+				if(players.containsKey(event.getDamager().getUniqueId()))
+				{
+					Player damager = (Player)event.getDamager();
+					DpsPlayer dpsPlayer = players.get(damager.getUniqueId());
 
-				plugin.groupDps.get(teamName).put(damager.getName(), damage + (event.getDamage()/3.0));
+					double dpsScore = dpsPlayer.getDpsScore() + (event.getDamage()/3.0);
+
+					dpsPlayer.setDpsScore(dpsScore);
+				}
 			}
+
 		}
 		else if(event.getDamager().getType().equals(EntityType.ARROW))
 		{
@@ -41,15 +61,15 @@ public class DpsListener implements Listener
 				return;
 			if(Bukkit.getPlayer(event.getDamager().getCustomName())==null)
 				return;
-			if(plugin.singleDps.containsKey(event.getDamager().getCustomName()))
+			HashMap<UUID, DpsPlayer> players = dpsData.get(currentWorldId);
+			Player damager = Bukkit.getPlayer(event.getDamager().getCustomName());
+			assert damager != null;
+			if(players.containsKey(damager.getUniqueId()))
 			{
-				Player damager = Bukkit.getPlayer(event.getDamager().getCustomName());
-				
-				String teamName = plugin.singleDps.get(damager.getName());
-				
-				double damage = plugin.groupDps.get(teamName).get(damager.getName());
+				DpsPlayer dpsPlayer = players.get(damager.getUniqueId());
+				double dpsScore = dpsPlayer.getDpsScore() + (event.getDamage()/3.0);
 
-				plugin.groupDps.get(teamName).put(damager.getName(), damage + (event.getDamage()/3.0));
+				dpsPlayer.setDpsScore(dpsScore);
 			}
 		}
     }
@@ -57,7 +77,12 @@ public class DpsListener implements Listener
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent event)
     {
-		plugin.clearData(event.getPlayer());
+    	Player player = event.getPlayer();
+		UUID currentWorldId = player.getWorld().getUID();
+		if(dpsData.containsKey(currentWorldId)){
+			HashMap<UUID, DpsPlayer> dpsPlayers = dpsData.get(currentWorldId);
+			dpsPlayers.remove(player.getUniqueId());
+		}
     }
 	
 	/*
@@ -81,6 +106,34 @@ public class DpsListener implements Listener
 		{
 			event.getProjectile().setCustomName(event.getEntity().getName());
 		}
-		return;
     }
+
+    @EventHandler
+	public void onDungeonStart(GameWorldStartGameEvent event) {
+		Bukkit.getConsoleSender().sendMessage("Dungeon Start");
+		Game game = event.getGame();
+
+		HashMap<UUID, DpsPlayer> dpsPlayers = new HashMap<>();
+		PlayerListener playerListener = new PlayerListener(dpsPlayers);
+		game.getPlayers().forEach(player -> {
+			Dps.scoreBoard.getAPI().stopScoreBoard(player);
+			DpsPlayer dpsPlayer = new DpsPlayer(player, 0d, true, playerListener);
+
+			dpsPlayers.put(player.getUniqueId(), dpsPlayer);
+		});
+		UUID worldId = game.getWorld().getWorld().getUID();
+		dpsData.put(worldId, dpsPlayers);
+
+		ScoreBoardUtil.displayDpsBoard(dpsPlayers);
+	}
+
+	@EventHandler
+	public void onDungeonEnd(GameWorldUnloadEvent event) {
+		Bukkit.getConsoleSender().sendMessage("Dungeon End, players: " + event.getGameWorld().getPlayers().size());
+		dpsData.remove(event.getGameWorld().getWorld().getUID());
+		event.getGameWorld().getPlayers().forEach(dInstancePlayer -> {
+			Player player = dInstancePlayer.getPlayer();
+			Dps.scoreBoard.getAPI().restartSocreBoard(player);
+		});
+	}
 }

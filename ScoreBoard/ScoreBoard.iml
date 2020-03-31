@@ -21,110 +21,26 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="inheritedJdk" />
-    <orderEntry type="module-library">
-      <library name="craftbukkit-1.10.2-R0.1-SNAPSHOT-latest.jar">
-        <CLASSES>
-          <root url="file://C:/用户目录/Desktop/马竞元文件夹/MinecraftServer/Server-1.10.2 Bukkit/craftbukkit-1.10.2-R0.1-SNAPSHOT-latest.jar" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="Vault.jar">
-        <CLASSES>
-          <root url="file://C:/用户目录/Desktop/马竞元文件夹/MinecraftServer/PaperSpigot-1.10.2/plugins/Vault.jar" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="PlayerPoints.jar">
-        <CLASSES>
-          <root url="file://C:/用户目录/Desktop/马竞元文件夹/MinecraftServer/PaperSpigot-1.10.2/plugins/PlayerPoints.jar" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="PVPSwitch.jar">
-        <CLASSES>
-          <root url="file://C:/用户目录/Desktop/马竞元文件夹/MinecraftServer/PaperSpigot-1.10.2/plugins/PVPSwitch.jar" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="CheckInSystem.jar">
-        <CLASSES>
-          <root url="file://C:/用户目录/Desktop/马竞元文件夹/MinecraftServer/PaperSpigot-1.10.2/plugins/CheckInSystem.jar" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="DailyQuest.jar">
-        <CLASSES>
-          <root url="file://C:/用户目录/Desktop/马竞元文件夹/MinecraftServer/PaperSpigot-1.10.2/plugins/DailyQuest.jar" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="SimpleClans.jar">
-        <CLASSES>
-          <root url="file://C:/用户目录/Desktop/马竞元文件夹/MinecraftServer/PaperSpigot-1.10.2/plugins/SimpleClans.jar" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="VipSystem.jar">
-        <CLASSES>
-          <root url="file://C:/用户目录/Desktop/马竞元文件夹/MinecraftServer/PaperSpigot-1.10.2/plugins/VipSystem.jar" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="LevelSystem.jar">
-        <CLASSES>
-          <root url="file://C:/用户目录/Desktop/马竞元文件夹/MinecraftServer/PaperSpigot-1.10.2/plugins/LevelSystem.jar" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
+    <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/../craftbukkit-1.14.4-R0.1-SNAPSHOT.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../craftbukkit-1.14.4-R0.1-SNAPSHOT.jar!/" />
+        </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="CheckInSystem" />
-    <orderEntry type="module" module-name="DailyQuest" />
-    <orderEntry type="module" module-name="LevelSystem" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../PaperSpigot-1.10.2/plugins/Vault.jar!/" />
+          <root url="jar://$MODULE_DIR$/../PlaceholderAPI-2.10.4.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="PVPSwitch" />
-    <orderEntry type="module" module-name="VipSystem" />
   </component>
 </module>
