@@ -19,7 +19,7 @@ public class ScoreBoardUtil {
 
         Objective randomObjective = scoreboard.registerNewObjective("scoreboard1", "dummy1");
         String title = "¡ì7×ÜÊä³öÅÅÐÐ";
-        Bukkit.getConsoleSender().sendMessage(title);
+
         randomObjective.setDisplayName(title);
         randomObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
         int number = dpsPlayers.size();
@@ -46,7 +46,6 @@ public class ScoreBoardUtil {
         }
 
         for(DpsPlayer dpsPlayer:dpsPlayers.values()){
-            Bukkit.getConsoleSender().sendMessage(scoreboard.toString());
             dpsPlayer.getPlayer().setScoreboard(scoreboard);
         }
     }
@@ -58,7 +57,6 @@ public class ScoreBoardUtil {
         //½µÐòÅÅÐò
         list.sort((o1, o2) -> {
             //return o1.getValue().compareTo(o2.getValue());
-            Bukkit.getConsoleSender().sendMessage(o1.getValue().toString());
             return o2.getValue().compareTo(o1.getValue());
         });
 

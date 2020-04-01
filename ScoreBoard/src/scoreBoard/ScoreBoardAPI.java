@@ -13,12 +13,12 @@ public class ScoreBoardAPI
 	{
 		if(plugin.task.containsKey(p.getName()))
 		{
-			plugin.getServer().getScheduler().cancelTask(plugin.task.get(p.getName()));
+			plugin.task.get(p.getName()).cancel();
 			plugin.task.remove(p.getName());
 		}
 	}
 	
-	public void restartSocreBoard(Player p)
+	public void restartScoreBoard(Player p)
 	{
 		if(!plugin.task.containsKey(p.getName()))
 		{

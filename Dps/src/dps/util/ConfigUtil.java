@@ -1,13 +1,20 @@
 package dps.util;
 
 import dps.Dps;
+import dps.rewardBox.Reward;
+import dps.rewardBox.RewardBoxManager;
 import dps.rewardBox.RewardTable;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ConfigUtil {
@@ -18,8 +25,11 @@ public class ConfigUtil {
             config = load(file);
             for(int i=0; i<3; i++){
                 for(int j=0; j<4; j++){
-                    config.set("test"+(i+1)+"."+(j+1)+".cmd", "give {{player}} diamond " + j);
+                    config.set("test"+(i+1)+"."+(j+1)+".cmd", "give %player% diamond " + j);
                     config.set("test"+(i+1)+"."+(j+1)+".chance", 0.25);
+                    config.set("test"+(i+1)+"."+(j+1)+".icon.id", Material.DIAMOND_SWORD.toString());
+                    config.set("test"+(i+1)+"."+(j+1)+".icon.displayName", "神剑");
+                    config.set("test"+(i+1)+"."+(j+1)+".icon.model", 1);
                 }
             }
 
@@ -33,19 +43,30 @@ public class ConfigUtil {
         }
 
         config = load(file);
+        RewardBoxManager.rewards.clear();
         int numDungeon = 0;
         int numReward = 0;
         for(String dungeonName:config.getKeys(false)){
             numDungeon ++;
-            HashMap<String, Double> rewards = new HashMap<>();
+            ArrayList<Reward> rewards = new ArrayList<>();
             for(int i=0; config.contains(dungeonName+"."+(i+1)); i++){
                 numReward ++;
                 String cmd = config.getString(dungeonName+"."+(i+1)+".cmd", "");
                 double chance = config.getDouble(dungeonName+"."+(i+1)+".chance", 0d);
-                rewards.put(cmd, chance);
+                Material material = Material.getMaterial(config.getString(dungeonName+"."+(i+1)+".icon.id", Material.WHITE_WOOL.toString()));
+                String displayName = config.getString(dungeonName+"."+(i+1)+".icon.displayName", "§e已领取奖励");
+                int customModelData = config.getInt(dungeonName+"."+(i+1)+".icon.model", 1);
+                ItemStack itemStack = new ItemStack(material);
+                ItemMeta meta = itemStack.getItemMeta();
+                meta.setDisplayName(displayName.replaceAll("&", "§"));
+                meta.setCustomModelData(customModelData);
+                meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+                itemStack.setItemMeta(meta);
+                Reward reward = new Reward(chance, itemStack, cmd);
+                rewards.add(reward);
             }
             RewardTable rewardTable = new RewardTable(dungeonName, rewards);
-            Dps.rewards.put(dungeonName, rewardTable);
+            RewardBoxManager.rewards.put(dungeonName, rewardTable);
         }
         Bukkit.getConsoleSender().sendMessage("§a[Dps] §e已加载" + numDungeon + "个副本,共" + numReward + "个奖励");
     }

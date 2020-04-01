@@ -114,32 +114,31 @@ public class DpsListener implements Listener
 
     @EventHandler
 	public void onDungeonStart(GameWorldStartGameEvent event) {
-		Bukkit.getConsoleSender().sendMessage("Dungeon Start");
 		Game game = event.getGame();
+		final String dungeonName = game.getDungeon().getName();
+		final UUID worldId = game.getWorld().getWorld().getUID();
 		Collection<Player> players = game.getPlayers();
 		HashMap<UUID, DpsPlayer> dpsPlayers = new HashMap<>();
 		PlayerListener playerListener = new PlayerListener(dpsPlayers);
 		players.forEach(player -> {
 			Dps.scoreBoard.getAPI().stopScoreBoard(player);
-			DpsPlayer dpsPlayer = new DpsPlayer(player, 0d, true, playerListener);
+			DpsPlayer dpsPlayer = new DpsPlayer(player, 0d, true, worldId, dungeonName, playerListener);
 			dpsPlayer.setGroupSize(players.size());
 			dpsPlayers.put(player.getUniqueId(), dpsPlayer);
 		});
-		UUID worldId = game.getWorld().getWorld().getUID();
-		dpsData.put(worldId, dpsPlayers);
 
+		dpsData.put(worldId, dpsPlayers);
 		ScoreBoardUtil.displayDpsBoard(dpsPlayers);
 	}
 
 	@EventHandler
 	public void onDungeonEnd(GameWorldUnloadEvent event) {
-		Bukkit.getConsoleSender().sendMessage(event.getGameWorld().getName());
 		World world = event.getGameWorld().getWorld();
 
 		dpsData.remove(world.getUID());
 		if(pendingDpsPlayers.containsKey(world.getUID())){
 			pendingDpsPlayers.get(world.getUID()).forEach(dpsPlayer -> {
-				Dps.scoreBoard.getAPI().restartSocreBoard(dpsPlayer.getPlayer());
+				Dps.scoreBoard.getAPI().restartScoreBoard(dpsPlayer.getPlayer());
 				RewardBoxManager.showRewardBox(dpsPlayer);
 			});
 			pendingDpsPlayers.remove(world.getUID());
@@ -148,8 +147,6 @@ public class DpsListener implements Listener
 
 	@EventHandler
 	public void onFinishDungeon(DGamePlayerFinishEvent event) {
-		Bukkit.getConsoleSender().sendMessage("Dungeon End, player: " + event.getDPlayer().getPlayer().getName());
-		Bukkit.getConsoleSender().sendMessage("Dungeon End, world: " + event.getDPlayer().getWorld().getName());
 		UUID wordId = event.getDPlayer().getWorld().getUID();
 		DpsPlayer dpsPlayer = dpsData.get(wordId).get(event.getDPlayer().getPlayer().getUniqueId());
 
@@ -166,6 +163,6 @@ public class DpsListener implements Listener
 
 	@EventHandler
 	public void onPlayerEscape(DGamePlayerEscapeEvent event) {
-		Dps.scoreBoard.getAPI().restartSocreBoard(event.getDPlayer().getPlayer());
+		Dps.scoreBoard.getAPI().restartScoreBoard(event.getDPlayer().getPlayer());
 	}
 }

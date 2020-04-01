@@ -11,6 +11,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
@@ -33,7 +35,7 @@ public class ScoreBoard extends JavaPlugin implements Listener
     
     ScoreBoardAPI api = new ScoreBoardAPI(this);
     
-    HashMap<String, Integer> task = new HashMap<String, Integer>();
+    HashMap<String, BukkitTask> task = new HashMap<>();
 	
     public ScoreBoardAPI getAPI()
     {
@@ -167,7 +169,7 @@ public class ScoreBoard extends JavaPlugin implements Listener
 	{
 		if(!task.containsKey(p.getName()))
 		{
-			task.put(p.getName(), getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable()
+			task.put(p.getName(), new BukkitRunnable()
 			{
 				public void run()
 				{
@@ -189,7 +191,7 @@ public class ScoreBoard extends JavaPlugin implements Listener
 						displayYourGameBoard(p, 0);
 					}
 				}
-			} ,5*20, interval*20));
+			}.runTaskTimer(this, 0, interval*20));
 		}
 	}
 	
@@ -270,7 +272,7 @@ public class ScoreBoard extends JavaPlugin implements Listener
 	{
 		if(task.containsKey(event.getPlayer().getName()))
 		{
-			getServer().getScheduler().cancelTask(task.get(event.getPlayer().getName()));
+			task.get(event.getPlayer().getName()).cancel();
 			task.remove(event.getPlayer().getName());
 		}
 	}

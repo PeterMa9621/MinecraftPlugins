@@ -31,7 +31,6 @@ import scoreBoard.ScoreBoard;
 public class Dps extends JavaPlugin
 {
 	public static ScoreBoard scoreBoard;
-	public static HashMap<String, RewardTable> rewards = new HashMap<>();
 	/**
 	 *  This hash map is used to store every group's name and its members' data which includes the damage that
 	 *  every member did.
@@ -109,6 +108,12 @@ public class Dps extends JavaPlugin
 					sender.sendMessage("§a/dps put [玩家名] [队伍名] §3将该玩家放入另一个队伍中");
 				}
 				return true;
+			}
+
+			if(args.length > 0){
+				if(args[0].equalsIgnoreCase("reload")){
+					ConfigUtil.loadConfig(this);
+				}
 			}
 			return true;
 		}

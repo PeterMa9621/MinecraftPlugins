@@ -3,6 +3,8 @@ package dps.model;
 import dps.listener.DpsPlayerListener;
 import org.bukkit.entity.Player;
 
+import java.util.UUID;
+
 public class DpsPlayer {
     private Player player;
     private Double dpsScore;
@@ -10,12 +12,17 @@ public class DpsPlayer {
     private DpsPlayerListener dpsListener;
     private Integer rank = 1;
     private Integer groupSize = 1;
+    private UUID dungeonId;
+    private int numRewards;
+    private String dungeonName;
 
-    public DpsPlayer(Player player, Double dpsScore, Boolean isInDpsMode, DpsPlayerListener dpsListener) {
+    public DpsPlayer(Player player, Double dpsScore, Boolean isInDpsMode, UUID dungeonId, String dungeonName, DpsPlayerListener dpsListener) {
         this.player = player;
         this.dpsScore = dpsScore;
         this.isInDpsMode = isInDpsMode;
         this.dpsListener = dpsListener;
+        this.dungeonId = dungeonId;
+        this.dungeonName = dungeonName;
     }
 
     public void clearDpsScore() {
@@ -59,5 +66,21 @@ public class DpsPlayer {
 
     public void setGroupSize(Integer groupSize) {
         this.groupSize = groupSize;
+    }
+
+    public UUID getDungeonId() {
+        return dungeonId;
+    }
+
+    public void setNumRewards(int numRewards) {
+        this.numRewards = numRewards;
+    }
+
+    public int getNumRewards() {
+        return numRewards;
+    }
+
+    public String getDungeonName() {
+        return dungeonName;
     }
 }
