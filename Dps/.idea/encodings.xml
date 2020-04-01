@@ -3,6 +3,9 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/src/dps/Dps.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/dps/DpsListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/dps/rewardBox/RewardBoxListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/dps/rewardBox/RewardBoxManager.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/dps/util/ConfigUtil.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/dps/util/ScoreBoardUtil.java" charset="GBK" />
   </component>
 </project>

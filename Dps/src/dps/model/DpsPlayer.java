@@ -8,7 +8,8 @@ public class DpsPlayer {
     private Double dpsScore;
     private Boolean isInDpsMode;
     private DpsPlayerListener dpsListener;
-    private Integer rank = -1;
+    private Integer rank = 1;
+    private Integer groupSize = 1;
 
     public DpsPlayer(Player player, Double dpsScore, Boolean isInDpsMode, DpsPlayerListener dpsListener) {
         this.player = player;
@@ -50,5 +51,13 @@ public class DpsPlayer {
 
     public void setRank(Integer rank) {
         this.rank = rank;
+    }
+
+    public Integer getGroupSize() {
+        return groupSize;
+    }
+
+    public void setGroupSize(Integer groupSize) {
+        this.groupSize = groupSize;
     }
 }

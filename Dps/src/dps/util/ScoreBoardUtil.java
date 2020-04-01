@@ -27,21 +27,24 @@ public class ScoreBoardUtil {
             number = 15;
 
         HashMap<DpsPlayer, Double> data = new HashMap<>();
-
+        dpsPlayers.forEach((uuid, dpsPlayer) -> data.put(dpsPlayer, dpsPlayer.getDpsScore()));
         List<Map.Entry<DpsPlayer, Double>> list = sort(data);
         int j=0;
         for (Map.Entry<DpsPlayer, Double> mapping : list)
         {
-            if(j>15)
+            if(j>14){
+                randomObjective.getScore("...").setScore(0);
                 break;
+            }
+
             DpsPlayer dpsPlayer = mapping.getKey();
             dpsPlayer.setRank(j+1);
             String content = String.format("¡ìe%s ¡ìf- ¡ì2%.2f", dpsPlayer.getPlayer().getName(), mapping.getValue());
-            Bukkit.getConsoleSender().sendMessage(content);
+
             randomObjective.getScore(content).setScore(number-j);
             j++;
         }
-        randomObjective.getScore("content").setScore(15);
+
         for(DpsPlayer dpsPlayer:dpsPlayers.values()){
             Bukkit.getConsoleSender().sendMessage(scoreboard.toString());
             dpsPlayer.getPlayer().setScoreboard(scoreboard);
@@ -52,14 +55,11 @@ public class ScoreBoardUtil {
     {
         //½«map.entrySet()×ª»»³Élist
         List<Map.Entry<DpsPlayer, Double>> list = new ArrayList<Map.Entry<DpsPlayer, Double>>(map.entrySet());
-        list.sort(new Comparator<Map.Entry<DpsPlayer, Double>>() {
-            //½µÐòÅÅÐò
-            @Override
-            public int compare(Map.Entry<DpsPlayer, Double> o1, Map.Entry<DpsPlayer, Double> o2) {
-                //return o1.getValue().compareTo(o2.getValue());
-                Bukkit.getConsoleSender().sendMessage(o1.getValue().toString());
-                return o2.getValue().compareTo(o1.getValue());
-            }
+        //½µÐòÅÅÐò
+        list.sort((o1, o2) -> {
+            //return o1.getValue().compareTo(o2.getValue());
+            Bukkit.getConsoleSender().sendMessage(o1.getValue().toString());
+            return o2.getValue().compareTo(o1.getValue());
         });
 
         return list;

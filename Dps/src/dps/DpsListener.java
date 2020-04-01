@@ -1,11 +1,13 @@
 package dps;
 
+import de.erethon.dungeonsxl.event.dplayer.instance.game.DGamePlayerEscapeEvent;
+import de.erethon.dungeonsxl.event.dplayer.instance.game.DGamePlayerFinishEvent;
 import de.erethon.dungeonsxl.event.gameworld.GameWorldStartGameEvent;
 import de.erethon.dungeonsxl.event.gameworld.GameWorldUnloadEvent;
 import de.erethon.dungeonsxl.game.Game;
-import de.erethon.dungeonsxl.player.DInstancePlayer;
 import dps.listener.PlayerListener;
 import dps.model.DpsPlayer;
+import dps.rewardBox.RewardBoxManager;
 import dps.util.ScoreBoardUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -16,9 +18,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import scoreBoard.ScoreBoard;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -27,6 +29,8 @@ public class DpsListener implements Listener
 	private Dps plugin;
 
 	private HashMap<UUID, HashMap<UUID, DpsPlayer>> dpsData = new HashMap<>();
+
+	private HashMap<UUID, ArrayList<DpsPlayer>> pendingDpsPlayers = new HashMap<>();
 
 	public DpsListener(Dps plugin)
 	{
@@ -112,13 +116,13 @@ public class DpsListener implements Listener
 	public void onDungeonStart(GameWorldStartGameEvent event) {
 		Bukkit.getConsoleSender().sendMessage("Dungeon Start");
 		Game game = event.getGame();
-
+		Collection<Player> players = game.getPlayers();
 		HashMap<UUID, DpsPlayer> dpsPlayers = new HashMap<>();
 		PlayerListener playerListener = new PlayerListener(dpsPlayers);
-		game.getPlayers().forEach(player -> {
+		players.forEach(player -> {
 			Dps.scoreBoard.getAPI().stopScoreBoard(player);
 			DpsPlayer dpsPlayer = new DpsPlayer(player, 0d, true, playerListener);
-
+			dpsPlayer.setGroupSize(players.size());
 			dpsPlayers.put(player.getUniqueId(), dpsPlayer);
 		});
 		UUID worldId = game.getWorld().getWorld().getUID();
@@ -129,11 +133,39 @@ public class DpsListener implements Listener
 
 	@EventHandler
 	public void onDungeonEnd(GameWorldUnloadEvent event) {
-		Bukkit.getConsoleSender().sendMessage("Dungeon End, players: " + event.getGameWorld().getPlayers().size());
-		dpsData.remove(event.getGameWorld().getWorld().getUID());
-		event.getGameWorld().getPlayers().forEach(dInstancePlayer -> {
-			Player player = dInstancePlayer.getPlayer();
-			Dps.scoreBoard.getAPI().restartSocreBoard(player);
-		});
+		Bukkit.getConsoleSender().sendMessage(event.getGameWorld().getName());
+		World world = event.getGameWorld().getWorld();
+
+		dpsData.remove(world.getUID());
+		if(pendingDpsPlayers.containsKey(world.getUID())){
+			pendingDpsPlayers.get(world.getUID()).forEach(dpsPlayer -> {
+				Dps.scoreBoard.getAPI().restartSocreBoard(dpsPlayer.getPlayer());
+				RewardBoxManager.showRewardBox(dpsPlayer);
+			});
+			pendingDpsPlayers.remove(world.getUID());
+		}
+	}
+
+	@EventHandler
+	public void onFinishDungeon(DGamePlayerFinishEvent event) {
+		Bukkit.getConsoleSender().sendMessage("Dungeon End, player: " + event.getDPlayer().getPlayer().getName());
+		Bukkit.getConsoleSender().sendMessage("Dungeon End, world: " + event.getDPlayer().getWorld().getName());
+		UUID wordId = event.getDPlayer().getWorld().getUID();
+		DpsPlayer dpsPlayer = dpsData.get(wordId).get(event.getDPlayer().getPlayer().getUniqueId());
+
+		ArrayList<DpsPlayer> players;
+		if(!pendingDpsPlayers.containsKey(wordId)) {
+			players = new ArrayList<>();
+		} else {
+			players = pendingDpsPlayers.get(wordId);
+		}
+
+		players.add(dpsPlayer);
+		pendingDpsPlayers.put(wordId, players);
+	}
+
+	@EventHandler
+	public void onPlayerEscape(DGamePlayerEscapeEvent event) {
+		Dps.scoreBoard.getAPI().restartSocreBoard(event.getDPlayer().getPlayer());
 	}
 }
