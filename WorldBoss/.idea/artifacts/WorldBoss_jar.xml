@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="WorldBoss:jar">
+    <output-path>$PROJECT_DIR$/../../Project0/server/plugins</output-path>
+    <root id="archive" name="WorldBoss.jar">
+      <element id="module-output" name="WorldBoss" />
+    </root>
+  </artifact>
+</component>

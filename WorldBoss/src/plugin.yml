@@ -1,0 +1,17 @@
+name: WorldBoss
+main: com.peter.worldBoss.WorldBoss
+version: '1.0'
+api-version: '1.14'
+author: Jingyuan Ma
+depend:
+  - DungeonsXL
+softdepend:
+  - PlaceholderAPI
+commands:
+  worldboss:
+    description: world boss helper
+    usage: /worldboss
+    permission-message: §c无权执行！
+permissions: 
+  worldBoss.op:
+    default: op

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/src/antiXray/AntiXray.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/antiXray/AntiXrayListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/antiXray/expansion/AntiXrayExpansion.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/peter/worldBoss/WorldBoss.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/peter/worldBoss/WorldBoss.java" charset="GBK" />
+  </component>
+</project>
