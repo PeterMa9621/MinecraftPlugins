@@ -8,9 +8,9 @@ depend:
 softdepend:
   - PlaceholderAPI
 commands:
-  worldboss:
+  boss:
     description: world boss helper
-    usage: /worldboss
+    usage: /boss
     permission-message: §c无权执行！
 permissions: 
   worldBoss.op:
