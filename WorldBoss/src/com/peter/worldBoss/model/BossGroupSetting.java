@@ -7,11 +7,13 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
 public class BossGroupSetting {
     private String groupName;
@@ -22,14 +24,16 @@ public class BossGroupSetting {
     private Boolean hasNotified = false;
     private String startGameCmd;
     private Boolean isComingSoon = false;
-    private int minuteBefore = 1;
+    private int minuteBefore = 10;
+    private ArrayList<BukkitTask> tasks = new ArrayList<>();
     private WorldBoss plugin;
 
-    public BossGroupSetting(String groupName, String startTimeString, int dayOfWeek, String startGameCmd, WorldBoss plugin) {
+    public BossGroupSetting(String groupName, String startTimeString, int dayOfWeek, String startGameCmd, int minuteBefore, WorldBoss plugin) {
         this.groupName = groupName;
         this.startTime = LocalTime.parse(startTimeString, DateTimeFormatter.ofPattern("HH:mm"));
         this.dayOfWeek = dayOfWeek;
         this.startGameCmd = startGameCmd;
+        this.minuteBefore = minuteBefore;
         this.plugin = plugin;
     }
 
@@ -89,6 +93,11 @@ public class BossGroupSetting {
         this.isComingSoon = isComingSoon;
     }
 
+    public void stopTasks() {
+        for(BukkitTask task:this.tasks)
+            task.cancel();
+    }
+
     public Boolean isStartedToday() {
         if(this.prevStartTime==null)
             return false;
@@ -97,6 +106,15 @@ public class BossGroupSetting {
         int todayDayOfYear = now.getDayOfYear();
         int prevStartDayOfYear = prevStartTime.getDayOfYear();
         return todayDayOfYear == prevStartDayOfYear;
+    }
+
+    public Boolean isTodayBossActivity() {
+        LocalDateTime now = LocalDateTime.now();
+        int nowDayOfWeek = now.getDayOfWeek().getValue();
+        if(this.dayOfWeek!=0 && nowDayOfWeek != this.dayOfWeek){
+            return false;
+        }
+        return true;
     }
 
     public Boolean canStart() {
@@ -136,7 +154,7 @@ public class BossGroupSetting {
             int[] delay = new int[] {5,6,7,8,9};
             for(int i = 0; i<minutes.length; i++){
                 int finalI = i;
-                new BukkitRunnable() {
+                BukkitTask task = new BukkitRunnable() {
                     @Override
                     public void run() {
                         hasNotified = false;
@@ -144,6 +162,7 @@ public class BossGroupSetting {
                         plugin.getServer().spigot().broadcast(textComponent);
                     }
                 }.runTaskLater(plugin, 20*60*delay[i]);
+                tasks.add(task);
             }
             hasNotified = true;
         }

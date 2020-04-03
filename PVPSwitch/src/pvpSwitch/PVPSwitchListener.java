@@ -43,16 +43,17 @@ public class PVPSwitchListener implements Listener
 
 			boolean otherPVP = false;
 			boolean damagerPVP = false;
-			if(plugin.playerData.containsKey(((Player)event.getEntity()).getUniqueId()))
+			if(plugin.playerData.containsKey((event.getEntity()).getUniqueId()))
 			{
-				PvpPlayer otherPvpPlayer = plugin.playerData.get(((Player)event.getEntity()).getUniqueId());
+				PvpPlayer otherPvpPlayer = plugin.playerData.get((event.getEntity()).getUniqueId());
 				otherPVP = otherPvpPlayer.canPvp();
 			}
-			if(plugin.playerData.containsKey(((Player)event.getDamager()).getName()))
+			if(plugin.playerData.containsKey((event.getDamager()).getUniqueId()))
 			{
 				PvpPlayer damagerPvpPlayer = plugin.playerData.get(((Player)event.getDamager()).getUniqueId());
 				damagerPVP = damagerPvpPlayer.canPvp();
 			}
+
 			/*
 			if(plugin.getClanManager().getClanByPlayerUniqueId(((Player)event.getDamager()).getUniqueId())!=null)
 			{
@@ -81,7 +82,7 @@ public class PVPSwitchListener implements Listener
 			{
 				event.setCancelled(true);
 				event.setDamage(0);
-				((Player)event.getDamager()).sendMessage("§a[PVP]§3 对方已关闭PVP");
+				event.getDamager().sendMessage("§a[PVP]§3 对方已关闭PVP");
 				return;
 			}
 		}
@@ -102,23 +103,23 @@ public class PVPSwitchListener implements Listener
 			}
 
 			boolean otherPVP = false;
-			boolean DamagerPVP = false;
+			boolean damagerPVP = false;
 			if(plugin.playerData.containsKey(p.getUniqueId()))
 			{
 				otherPVP = plugin.playerData.get(p.getUniqueId()).canPvp();
 			}
 			if(plugin.playerData.containsKey(damager.getUniqueId()))
 			{
-				DamagerPVP = plugin.playerData.get(damager.getUniqueId()).canPvp();
+				damagerPVP = plugin.playerData.get(damager.getUniqueId()).canPvp();
 			}
 			
-			if(DamagerPVP==false)
+			if(!damagerPVP)
 			{
 				event.setCancelled(true);
 				event.setDamage(0);
 				return;
 			}
-			else if(otherPVP==false)
+			else if(!otherPVP)
 			{
 				event.setCancelled(true);
 				event.setDamage(0);

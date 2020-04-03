@@ -5,6 +5,7 @@ import com.peter.worldBoss.model.BossGroup;
 import com.peter.worldBoss.model.BossGroupSetting;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemFlag;
@@ -21,6 +22,7 @@ public class ConfigManager {
         FileConfiguration config;
         if(!file.exists()){
             config = load(file);
+            config.set("minuteBefore", 10);
             for(int i=0; i<3; i++){
                 config.set("group"+(i+1) + ".name", "boss" + (i+1));
                 config.set("group"+(i+1) + ".displayName", "Boss No." + (i+1));
@@ -39,12 +41,17 @@ public class ConfigManager {
             return;
         }
 
+        for(BossGroupSetting setting: WorldBoss.bossGroupSetting.values()){
+            setting.stopTasks();
+        }
         WorldBoss.bossGroupSetting.clear();
         WorldBoss.bossGroups.clear();
         config = load(file);
-
+        int minuteBefore = config.getInt("minuteBefore", 10);
         int numGroup = 0;
         for(String group:config.getKeys(false)){
+            if(group.equalsIgnoreCase("minuteBefore"))
+                continue;
             String name = config.getString(group + ".name");
             String displayName = config.getString(group + ".displayName", "");
             String startGameCmd = config.getString(group + ".startGameCmd");
@@ -56,7 +63,7 @@ public class ConfigManager {
             }
 
             String startTime = config.getString(group + ".time");
-            BossGroupSetting bossGroupSetting = new BossGroupSetting(name, startTime, day, startGameCmd, plugin);
+            BossGroupSetting bossGroupSetting = new BossGroupSetting(name, startTime, day, startGameCmd, minuteBefore, plugin);
             bossGroupSetting.setDisplayName(displayName);
             WorldBoss.bossGroupSetting.put(name, bossGroupSetting);
             numGroup ++;

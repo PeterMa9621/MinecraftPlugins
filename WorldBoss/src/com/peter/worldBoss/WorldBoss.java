@@ -75,14 +75,16 @@ public class WorldBoss extends JavaPlugin
 	}
 
 	public void runTimerToCheckBeginTime() {
-		new BukkitRunnable() {
+		timer = new BukkitRunnable() {
 			@Override
 			public void run() {
 				LocalDateTime now = LocalDateTime.now();
 				for(BossGroupSetting setting:bossGroupSetting.values()){
-					if(setting.isStartedToday()){
+					if(!setting.isTodayBossActivity())
 						continue;
-					}
+					if(setting.isStartedToday())
+						continue;
+
 					setting.notifyPlayers(WorldBoss.this);
 					if(setting.canStart()){
 						setting.setPrevStartTime(now);

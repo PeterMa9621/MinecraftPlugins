@@ -45,6 +45,7 @@ public class GuiManager {
                 }
                 inventory.setItem(count, icon);
             }
+            count++;
         }
 
         ItemStack refresh = Util.createItem(Material.PAPER, refreshTitle, 19);
