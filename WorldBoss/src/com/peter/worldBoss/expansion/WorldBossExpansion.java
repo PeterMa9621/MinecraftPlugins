@@ -52,7 +52,7 @@ public class WorldBossExpansion extends PlaceholderExpansion {
      */
     @Override
     public String getIdentifier(){
-        return "com/peter";
+        return "world_boss";
     }
 
     /**

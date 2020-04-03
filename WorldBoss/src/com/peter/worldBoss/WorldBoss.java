@@ -4,6 +4,7 @@ import com.peter.worldBoss.WorldBossListener;
 import com.peter.worldBoss.config.ConfigManager;
 import com.peter.worldBoss.expansion.WorldBossExpansion;
 
+import com.peter.worldBoss.gui.GuiListener;
 import com.peter.worldBoss.gui.GuiManager;
 import com.peter.worldBoss.model.BossGroup;
 import com.peter.worldBoss.model.BossGroupSetting;
@@ -16,6 +17,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
@@ -34,7 +36,9 @@ public class WorldBoss extends JavaPlugin
 		}
 		ConfigManager.loadConfig(this);
 		getServer().getPluginManager().registerEvents(new WorldBossListener(this), this);
+		getServer().getPluginManager().registerEvents(new GuiListener(this), this);
 		runTimerToCheckBeginTime();
+		GuiManager.plugin = this;
 		Bukkit.getConsoleSender().sendMessage("§a[WorldBoss] §eWorldBoss loaded");
 	}
 
@@ -54,6 +58,7 @@ public class WorldBoss extends JavaPlugin
 			} else {
 				if(args[0].equalsIgnoreCase("reload")){
 					ConfigManager.loadConfig(this);
+					sender.addAttachment(this, "dxl.group", true);
 					sender.sendMessage("§6[WorldBoss] §3重载配置成功!");
 					return true;
 				} else if(args[0].equalsIgnoreCase("help")){
@@ -83,10 +88,11 @@ public class WorldBoss extends JavaPlugin
 						setting.setPrevStartTime(now);
 						Bukkit.broadcastMessage("§6[WorldBoss] §2世界BOSS活动§5" + setting.getDisplayName() + "§2开始了!");
 						BossGroup bossGroup = bossGroups.get(setting.getGroupName());
-						if(bossGroup!=null)
+						if(bossGroup!=null){
 							bossGroup.startGame(setting.getStartGameCmd(), WorldBoss.this);
+							bossGroups.remove(bossGroup.getGroupName());
+						}
 					}
-
 				}
 			}
 		}.runTaskTimer(this, 0, 200);

@@ -39,8 +39,8 @@ public class ConfigManager {
             return;
         }
 
-        plugin.bossGroupSetting.clear();
-        plugin.bossGroups.clear();
+        WorldBoss.bossGroupSetting.clear();
+        WorldBoss.bossGroups.clear();
         config = load(file);
 
         int numGroup = 0;
@@ -56,9 +56,9 @@ public class ConfigManager {
             }
 
             String startTime = config.getString(group + ".time");
-            BossGroupSetting bossGroupSetting = new BossGroupSetting(name, startTime, day, startGameCmd);
+            BossGroupSetting bossGroupSetting = new BossGroupSetting(name, startTime, day, startGameCmd, plugin);
             bossGroupSetting.setDisplayName(displayName);
-            plugin.bossGroupSetting.put(name, bossGroupSetting);
+            WorldBoss.bossGroupSetting.put(name, bossGroupSetting);
             numGroup ++;
         }
         Bukkit.getConsoleSender().sendMessage("§a[WorldBoss] §e已加载" + numGroup + "个Boss队伍");

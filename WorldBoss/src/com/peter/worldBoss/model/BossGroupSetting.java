@@ -1,9 +1,14 @@
 package com.peter.worldBoss.model;
 
 import com.peter.worldBoss.WorldBoss;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -17,12 +22,15 @@ public class BossGroupSetting {
     private Boolean hasNotified = false;
     private String startGameCmd;
     private Boolean isComingSoon = false;
+    private int minuteBefore = 1;
+    private WorldBoss plugin;
 
-    public BossGroupSetting(String groupName, String startTimeString, int dayOfWeek, String startGameCmd) {
+    public BossGroupSetting(String groupName, String startTimeString, int dayOfWeek, String startGameCmd, WorldBoss plugin) {
         this.groupName = groupName;
         this.startTime = LocalTime.parse(startTimeString, DateTimeFormatter.ofPattern("HH:mm"));
         this.dayOfWeek = dayOfWeek;
         this.startGameCmd = startGameCmd;
+        this.plugin = plugin;
     }
 
     public String getGroupName() {
@@ -114,10 +122,15 @@ public class BossGroupSetting {
         int nowHour = now.getHour();
         int nowMinute = now.getMinute();
 
-        LocalTime tenMinutesBefore = this.startTime.minusMinutes(10);
+        LocalTime tenMinutesBefore = this.startTime.minusMinutes(minuteBefore);
         if(nowHour == tenMinutesBefore.getHour() && nowMinute == tenMinutesBefore.getMinute() && !hasNotified){
             this.isComingSoon = true;
-            Bukkit.broadcastMessage("§6[WorldBoss] §2世界BOSS活动§5" + displayName + "§2将在" + 10 + "分钟后开始!");
+            //TextComponent msg = new TextComponent("§6[WorldBoss] §2世界BOSS活动§5" + displayName + "§2将在" + 10 + "分钟后开始!");
+            String announcement = "§6[WorldBoss] §2世界BOSS活动§5%s§2将在%d分钟后开始!§d§n点击打开活动界面";
+            TextComponent textComponent = new TextComponent(String.format(announcement, displayName, minuteBefore));
+            textComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("§2点击打开活动界面!").create()));
+            textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/boss"));
+            plugin.getServer().spigot().broadcast(textComponent);
 
             int[] minutes = new int[] {5,4,3,2,1};
             int[] delay = new int[] {5,6,7,8,9};
@@ -127,7 +140,8 @@ public class BossGroupSetting {
                     @Override
                     public void run() {
                         hasNotified = false;
-                        Bukkit.broadcastMessage("§6[WorldBoss] §2世界BOSS活动§5" + displayName + "§2将在" + (minutes[finalI]) + "分钟后开始!");
+                        textComponent.setText(String.format(announcement, displayName, minutes[finalI]));
+                        plugin.getServer().spigot().broadcast(textComponent);
                     }
                 }.runTaskLater(plugin, 20*60*delay[i]);
             }

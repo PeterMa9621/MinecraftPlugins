@@ -18,6 +18,7 @@ public class WorldBossListener implements Listener
 		this.plugin=plugin;
 	}
 
+	/*
 	@EventHandler
 	public void onPlayerJoinBossGroup(DPlayerJoinDGroupEvent event) {
 		DGroup group = event.getDGroup();
@@ -32,4 +33,6 @@ public class WorldBossListener implements Listener
 			}
 		}
 	}
+
+	 */
 }

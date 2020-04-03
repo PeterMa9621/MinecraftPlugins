@@ -16,15 +16,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="module-library">
-      <library name="craftbukkit-1.14.4-R0.1-SNAPSHOT.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../craftbukkit-1.14.4-R0.1-SNAPSHOT.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/../PlaceholderAPI-2.10.4.jar!/" />
@@ -40,6 +31,17 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../spigot-1.15.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../spigot-1.15.2.jar!/" />
+        </SOURCES>
       </library>
     </orderEntry>
   </component>
