@@ -4,5 +4,6 @@
     <file url="file://$PROJECT_DIR$/src/antiXray/AntiXray.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/antiXray/AntiXrayListener.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/antiXray/expansion/AntiXrayExpansion.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/peterHelper/PeterHelper.java" charset="GBK" />
   </component>
 </project>
