@@ -61,7 +61,7 @@ class PlaceholderApiHooker : PluginHooker {
         }
 
         override fun getPlugin(): String {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            return "MoreFish"
         }
 
         /**
@@ -96,7 +96,7 @@ class PlaceholderApiHooker : PluginHooker {
                     if (competition.ranking.size >= number)
                         competition.recordOf(number).fisher.name
                     else
-                        "Ã»ÓÐÈË"
+                        "Ã»ï¿½ï¿½ï¿½ï¿½"
                 }
                 identifier.startsWith("top_fish_length_") -> {
                     val number = identifier.replace("top_fish_length_", "").toInt()
@@ -110,7 +110,7 @@ class PlaceholderApiHooker : PluginHooker {
                     if (competition.ranking.size >= number)
                         competition.recordOf(number).fish.type.name
                     else
-                        "ÎÞ"
+                        "ï¿½ï¿½"
                 }
                 identifier == "rank" -> {
                     require(player != null) { "'rank' placeholder requires a player" }
@@ -133,7 +133,7 @@ class PlaceholderApiHooker : PluginHooker {
                     if (competition.containsContestant(player))
                         competition.recordOf(player).fish.type.name
                     else
-                        "ÎÞ"
+                        "ï¿½ï¿½"
                 }
                 else -> null
             }
