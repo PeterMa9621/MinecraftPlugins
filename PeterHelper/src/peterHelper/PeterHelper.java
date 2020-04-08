@@ -15,6 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import peterHelper.expansion.PeterHelperExpansion;
+import peterHelper.util.AttributeModifierUtil;
 import peterHelper.util.Util;
 
 import java.math.BigDecimal;
@@ -84,47 +85,10 @@ public class PeterHelper extends JavaPlugin
 				}
 				ItemMeta itemMeta = itemStack.getItemMeta();
 				if(Util.isWeapon(itemStack)) {
-					Collection<AttributeModifier> attributeModifiers = itemMeta.getAttributeModifiers(Attribute.GENERIC_ATTACK_SPEED);
-					AtomicReference<Double> attackSpeed = new AtomicReference<>((double) 0);
-					attributeModifiers.forEach(attributeModifier -> {
-						attackSpeed.set(attributeModifier.getAmount());
-					});
-
-					attributeModifiers = itemMeta.getAttributeModifiers(Attribute.GENERIC_ATTACK_DAMAGE);
-					AtomicReference<Double> damage = new AtomicReference<>((double) 0);
-					attributeModifiers.forEach(attributeModifier -> {
-						damage.set(attributeModifier.getAmount());
-					});
-
-					double random = new Random(Calendar.getInstance().getTimeInMillis()).nextDouble() * 2;
-					BigDecimal bigDecimal = new BigDecimal(random);
-					random = bigDecimal.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
-					double modifiedDamage = damage.get() - random;
-					AttributeModifier newAttribute = new AttributeModifier(UUID.randomUUID(), "itemsadder", modifiedDamage, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.HAND);
-					itemMeta.removeAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE);
-					itemMeta.addAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, newAttribute);
-					List<String> lore = itemMeta.getLore();
-					int index = lore.size();
-					lore.add(index - 1, ChatColor.DARK_GREEN + String.valueOf(modifiedDamage + 1) + " ¹¥»÷ÉËº¦");
-					lore.add(index - 1, ChatColor.DARK_GREEN + String.valueOf(4 + attackSpeed.get()) + " ¹¥»÷ËÙ¶È");
-					itemMeta.setLore(lore);
-					itemMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+					AttributeModifierUtil.randomWeaponAttribute(itemMeta);
 					itemStack.setItemMeta(itemMeta);
 				} else if(Util.isArmor(itemStack)) {
-					Collection<AttributeModifier> attributeModifiers = itemMeta.getAttributeModifiers(Attribute.GENERIC_ARMOR);
-					AtomicReference<Double> armor = new AtomicReference<>((double) 0);
-					AtomicReference<EquipmentSlot> slot = new AtomicReference<>();
-					attributeModifiers.forEach(attributeModifier -> {
-						armor.set(attributeModifier.getAmount());
-						slot.set(attributeModifier.getSlot());
-					});
-					double random = new Random(Calendar.getInstance().getTimeInMillis()).nextDouble() * 1;
-					BigDecimal bigDecimal = new BigDecimal(random);
-					random = bigDecimal.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
-					double modifiedArmor = armor.get() - random;
-					AttributeModifier newAttribute = new AttributeModifier(UUID.randomUUID(), "itemsadder", modifiedArmor, AttributeModifier.Operation.ADD_NUMBER, slot.get());
-					itemMeta.removeAttributeModifier(Attribute.GENERIC_ARMOR);
-					itemMeta.addAttributeModifier(Attribute.GENERIC_ARMOR, newAttribute);
+					AttributeModifierUtil.randomArmorAttribute(itemMeta);
 					itemStack.setItemMeta(itemMeta);
 				}
 				player.getInventory().addItem(itemStack);
