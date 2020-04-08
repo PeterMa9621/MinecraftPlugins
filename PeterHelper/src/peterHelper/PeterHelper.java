@@ -10,6 +10,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -17,10 +18,7 @@ import peterHelper.expansion.PeterHelperExpansion;
 import peterHelper.util.Util;
 
 import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class PeterHelper extends JavaPlugin
@@ -67,6 +65,11 @@ public class PeterHelper extends JavaPlugin
 			}
 
 			if(args[0].equalsIgnoreCase("giveitem")){
+				if(args.length<3){
+					sender.sendMessage("§a/ph giveitem [playerName] [itemName] §3给予ItemAdders内的自定义物品");
+					return true;
+				}
+
 				String playerName = args[1];
 				String itemName = args[2];
 				Player player = Bukkit.getPlayer(playerName);
@@ -81,11 +84,18 @@ public class PeterHelper extends JavaPlugin
 				}
 				ItemMeta itemMeta = itemStack.getItemMeta();
 				if(Util.isWeapon(itemStack)) {
-					Collection<AttributeModifier> attributeModifiers = itemMeta.getAttributeModifiers(Attribute.GENERIC_ATTACK_DAMAGE);
+					Collection<AttributeModifier> attributeModifiers = itemMeta.getAttributeModifiers(Attribute.GENERIC_ATTACK_SPEED);
+					AtomicReference<Double> attackSpeed = new AtomicReference<>((double) 0);
+					attributeModifiers.forEach(attributeModifier -> {
+						attackSpeed.set(attributeModifier.getAmount());
+					});
+
+					attributeModifiers = itemMeta.getAttributeModifiers(Attribute.GENERIC_ATTACK_DAMAGE);
 					AtomicReference<Double> damage = new AtomicReference<>((double) 0);
 					attributeModifiers.forEach(attributeModifier -> {
 						damage.set(attributeModifier.getAmount());
 					});
+
 					double random = new Random(Calendar.getInstance().getTimeInMillis()).nextDouble() * 2;
 					BigDecimal bigDecimal = new BigDecimal(random);
 					random = bigDecimal.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
@@ -93,6 +103,12 @@ public class PeterHelper extends JavaPlugin
 					AttributeModifier newAttribute = new AttributeModifier(UUID.randomUUID(), "itemsadder", modifiedDamage, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.HAND);
 					itemMeta.removeAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE);
 					itemMeta.addAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, newAttribute);
+					List<String> lore = itemMeta.getLore();
+					int index = lore.size();
+					lore.add(index - 1, ChatColor.DARK_GREEN + String.valueOf(modifiedDamage + 1) + " 攻击伤害");
+					lore.add(index - 1, ChatColor.DARK_GREEN + String.valueOf(4 + attackSpeed.get()) + " 攻击速度");
+					itemMeta.setLore(lore);
+					itemMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 					itemStack.setItemMeta(itemMeta);
 				} else if(Util.isArmor(itemStack)) {
 					Collection<AttributeModifier> attributeModifiers = itemMeta.getAttributeModifiers(Attribute.GENERIC_ARMOR);
