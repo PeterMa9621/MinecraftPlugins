@@ -1,5 +1,6 @@
 package dps;
 
+import de.erethon.dungeonsxl.event.dplayer.DPlayerKickEvent;
 import de.erethon.dungeonsxl.event.dplayer.instance.game.DGamePlayerEscapeEvent;
 import de.erethon.dungeonsxl.event.dplayer.instance.game.DGamePlayerFinishEvent;
 import de.erethon.dungeonsxl.event.gameworld.GameWorldStartGameEvent;
@@ -165,4 +166,10 @@ public class DpsListener implements Listener
 	public void onPlayerEscape(DGamePlayerEscapeEvent event) {
 		Dps.scoreBoard.getAPI().restartScoreBoard(event.getDPlayer().getPlayer());
 	}
+
+	@EventHandler
+	public void onPlayerKicked(DPlayerKickEvent event) {
+		Dps.scoreBoard.getAPI().restartScoreBoard(event.getDPlayer().getPlayer());
+	}
+
 }
