@@ -56,7 +56,7 @@ public class MYSQLStorage implements StorageInterface{
                 .column(keys)
                 .where(new String[] {"id"});
         String query = insertQueryBuilder.getQuery();
-        Bukkit.getConsoleSender().sendMessage(query);
+        //Bukkit.getConsoleSender().sendMessage(query);
         try {
             PreparedStatement statement = connection.prepareStatement(query);
             for(int i=0; i<keys.length; i++){
@@ -68,7 +68,7 @@ public class MYSQLStorage implements StorageInterface{
             QueryBuilderInterface updateQueryBuilder = QueryBuilderFactory.getUpdateQueryBuilder();
             updateQueryBuilder = updateQueryBuilder.from(tableName).set(keys).where(new String[] {"id"});
             query = updateQueryBuilder.getQuery();
-            Bukkit.getConsoleSender().sendMessage(query);
+            //Bukkit.getConsoleSender().sendMessage(query);
             PreparedStatement statement;
             try {
                 statement = connection.prepareStatement(query);
@@ -89,7 +89,7 @@ public class MYSQLStorage implements StorageInterface{
         selectQueryBuilder = selectQueryBuilder.from(tableName).where(new String[] {"id"});
 
         String query = selectQueryBuilder.getQuery();
-        Bukkit.getConsoleSender().sendMessage(query);
+        //Bukkit.getConsoleSender().sendMessage(query);
         try {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setObject(1, uniqueId.toString());

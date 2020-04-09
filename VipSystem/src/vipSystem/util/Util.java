@@ -14,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import vipSystem.ConfigLoader;
 import vipSystem.VipPlayer;
+import vipSystem.VipSystem;
 
 import java.io.File;
 import java.io.IOException;
@@ -90,7 +91,7 @@ public class Util {
 
     public static void removeVip(VipPlayer vipPlayer, ConfigLoader configLoader, HashMap<UUID, VipPlayer> players) throws SQLException {
         LuckPerms lp = LuckPermsProvider.get();
-        User lpUser = lp.getUserManager().getUser(vipPlayer.getUniqueId());
+        User lpUser = lp.getUserManager().loadUser(vipPlayer.getUniqueId()).join();
 
         lpUser.data().toMap().values().forEach(nodeList -> {
             nodeList.forEach(node -> {
@@ -99,6 +100,7 @@ public class Util {
                 }
             });
         });
+        lpUser.data().add(Node.builder("group." + VipSystem.defaultGroup).build());
         lp.getUserManager().saveUser(lpUser);
         players.remove(vipPlayer.getUniqueId());
         configLoader.deletePlayerConfig(vipPlayer.getUniqueId());
@@ -106,10 +108,20 @@ public class Util {
 
     public static void addVip(VipPlayer vipPlayer, ConfigLoader configLoader, HashMap<UUID, VipPlayer> players) throws SQLException {
         LuckPerms lp = LuckPermsProvider.get();
-        User lpUser = lp.getUserManager().getUser(vipPlayer.getUniqueId());
-        if(lpUser == null){
-            lpUser = lp.getUserManager().loadUser(vipPlayer.getUniqueId()).join();
-        }
+        User lpUser = lp.getUserManager().loadUser(vipPlayer.getUniqueId()).join();
+
+        lpUser.data().toMap().values().forEach(nodeList -> {
+            nodeList.forEach(node -> {
+                for(String vipGroup:VipSystem.vipGroups.keySet()){
+                    if(node.getKey().equalsIgnoreCase("group." + vipGroup)){
+                        lpUser.data().remove(node);
+                    }
+                }
+                if(node.getKey().equalsIgnoreCase("group." + VipSystem.defaultGroup)){
+                    lpUser.data().remove(node);
+                }
+            });
+        });
         lpUser.data().add(Node.builder("group." + vipPlayer.getVipGroup()).build());
         lp.getUserManager().saveUser(lpUser);
 

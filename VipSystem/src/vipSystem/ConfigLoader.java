@@ -109,7 +109,7 @@ public class ConfigLoader {
             DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             String registerDate = vipPlayer.getRegDate().format(format);
             String deadlineDate = vipPlayer.getDeadline().format(format);
-            Bukkit.getConsoleSender().sendMessage(String.valueOf(resultSet.getRow()));
+
             if(resultSet.next()){
                 String updateQuery = "Update vip_system set player_name = ?, register_date = ?, deadline_date = ?, vip_group = ?, is_expired = ? where id = ?";
                 stmt = MySQL.getConnection().prepareStatement(updateQuery);

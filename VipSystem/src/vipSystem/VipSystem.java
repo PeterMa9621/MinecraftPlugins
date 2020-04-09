@@ -41,8 +41,8 @@ import static vipSystem.util.Util.getNewDate;
 
 public class VipSystem extends JavaPlugin
 {
-	HashMap<String, String> vipGroups = new HashMap<String, String>();
-	String defaultGroup = "";
+	public static HashMap<String, String> vipGroups = new HashMap<String, String>();
+	public static String defaultGroup = "";
 	
 	SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd-HH");
 	
