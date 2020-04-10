@@ -8,6 +8,8 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.ItemMeta;
 import peterHelper.model.ArmorInfo;
+import peterHelper.model.ArmorToughnessInfo;
+import peterHelper.model.MaxHealthInfo;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -17,6 +19,8 @@ public class AttributeModifierUtil {
     private static double attackUpperBound = 2.0;
     private static double attackSpeedUpperBound = 0.2;
     private static double armorUpperBound = 1.0;
+    private static double healthBonusUpperBound = 1.0;
+    private static double armorToughnessUpperBound = 0.5;
 
     public static void randomWeaponAttribute(ItemMeta itemMeta) {
         double attackSpeed = getOriginAttackSpeed(itemMeta);
@@ -24,6 +28,8 @@ public class AttributeModifierUtil {
 
         double damage = getOriginAttack(itemMeta);
         double modifiedDamage = getRandomAttack(damage);
+
+        MaxHealthInfo healthBonus = getOriginHealthBonus(itemMeta);
         AttributeModifier newAttribute = new AttributeModifier(UUID.randomUUID(), "itemsadder", modifiedDamage, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.HAND);
         itemMeta.removeAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE);
         itemMeta.addAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, newAttribute);
@@ -37,6 +43,13 @@ public class AttributeModifierUtil {
             lore = new ArrayList<>();
         int index = lore.size();
 
+        if(healthBonus.healthBonus > 0d) {
+            double modifiedHealthBonus = getRandomHealthBonus(healthBonus.healthBonus);
+            newAttribute = new AttributeModifier(UUID.randomUUID(), "itemsadder", modifiedHealthBonus, AttributeModifier.Operation.ADD_NUMBER, healthBonus.equipmentSlot);
+            itemMeta.removeAttributeModifier(Attribute.GENERIC_MAX_HEALTH);
+            itemMeta.addAttributeModifier(Attribute.GENERIC_MAX_HEALTH, newAttribute);
+            lore.add(index - 1, ChatColor.DARK_GREEN + String.format("%.1f 额外生命加成", modifiedHealthBonus));
+        }
         lore.add(index - 1, ChatColor.DARK_GREEN + String.format("%.1f 攻击伤害", modifiedDamage + 1));
         lore.add(index - 1, ChatColor.DARK_GREEN + String.format("%.1f 攻击速度", 4 + modifiedAttackSpeed));
 
@@ -53,6 +66,28 @@ public class AttributeModifierUtil {
         AttributeModifier newAttribute = new AttributeModifier(UUID.randomUUID(), "itemsadder", modifiedArmor, AttributeModifier.Operation.ADD_NUMBER, slot);
         itemMeta.removeAttributeModifier(Attribute.GENERIC_ARMOR);
         itemMeta.addAttributeModifier(Attribute.GENERIC_ARMOR, newAttribute);
+
+        MaxHealthInfo maxHealthInfo = getOriginHealthBonus(itemMeta);
+        double healthBonus = maxHealthInfo.healthBonus;
+        if(healthBonus > 0d) {
+            EquipmentSlot healthSlot = maxHealthInfo.equipmentSlot;
+            double modifiedHealthBonus = getRandomHealthBonus(healthBonus);
+
+            newAttribute = new AttributeModifier(UUID.randomUUID(), "itemsadder", modifiedHealthBonus, AttributeModifier.Operation.ADD_NUMBER, healthSlot);
+            itemMeta.removeAttributeModifier(Attribute.GENERIC_MAX_HEALTH);
+            itemMeta.addAttributeModifier(Attribute.GENERIC_MAX_HEALTH, newAttribute);
+        }
+
+        ArmorToughnessInfo armorToughnessInfo = getOriginArmorToughness(itemMeta);
+        double armorToughness = armorToughnessInfo.armorToughness;
+        if(armorToughness > 0d) {
+            EquipmentSlot armorToughnessSlot = armorToughnessInfo.equipmentSlot;
+            double modifiedArmorToughness = getRandomArmorToughness(armorToughness);
+
+            newAttribute = new AttributeModifier(UUID.randomUUID(), "itemsadder", modifiedArmorToughness, AttributeModifier.Operation.ADD_NUMBER, armorToughnessSlot);
+            itemMeta.removeAttributeModifier(Attribute.GENERIC_ARMOR_TOUGHNESS);
+            itemMeta.addAttributeModifier(Attribute.GENERIC_ARMOR_TOUGHNESS, newAttribute);
+        }
     }
 
     private static double getRandomAttack(double originDamage) {
@@ -80,6 +115,26 @@ public class AttributeModifierUtil {
         BigDecimal bigDecimal = new BigDecimal(random);
         random = bigDecimal.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
         return originArmor - random;
+    }
+
+    private static double getRandomHealthBonus(double originHealthBonus) {
+        Random random = new Random(Calendar.getInstance().getTimeInMillis());
+        double randomNumber = random.nextDouble() * healthBonusUpperBound;
+        if(random.nextDouble() < 0.5)
+            randomNumber = -randomNumber;
+        BigDecimal bigDecimal = new BigDecimal(randomNumber);
+        randomNumber = bigDecimal.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
+        return originHealthBonus - randomNumber;
+    }
+
+    private static double getRandomArmorToughness(double originArmorToughness) {
+        Random random = new Random(Calendar.getInstance().getTimeInMillis());
+        double randomNumber = random.nextDouble() * armorToughnessUpperBound;
+        if(random.nextDouble() < 0.5)
+            randomNumber = -randomNumber;
+        BigDecimal bigDecimal = new BigDecimal(randomNumber);
+        randomNumber = bigDecimal.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
+        return originArmorToughness - randomNumber;
     }
 
     private static double getOriginAttack(ItemMeta itemMeta) {
@@ -111,5 +166,29 @@ public class AttributeModifierUtil {
             slot.set(attributeModifier.getSlot());
         });
         return new ArmorInfo(armor.get(), slot.get());
+    }
+
+    private static MaxHealthInfo getOriginHealthBonus(ItemMeta itemMeta) {
+        Collection<AttributeModifier> attributeModifiers = itemMeta.getAttributeModifiers(Attribute.GENERIC_MAX_HEALTH);
+        AtomicReference<Double> healthBonus = new AtomicReference<>(0d);
+        AtomicReference<EquipmentSlot> slot = new AtomicReference<>();
+        if(attributeModifiers!=null)
+            attributeModifiers.forEach(attributeModifier -> {
+                healthBonus.set(attributeModifier.getAmount());
+                slot.set(attributeModifier.getSlot());
+            });
+        return new MaxHealthInfo(healthBonus.get(), slot.get());
+    }
+
+    private static ArmorToughnessInfo getOriginArmorToughness(ItemMeta itemMeta) {
+        Collection<AttributeModifier> attributeModifiers = itemMeta.getAttributeModifiers(Attribute.GENERIC_ARMOR_TOUGHNESS);
+        AtomicReference<Double> armorToughness = new AtomicReference<>(0d);
+        AtomicReference<EquipmentSlot> slot = new AtomicReference<>();
+        if(attributeModifiers!=null)
+            attributeModifiers.forEach(attributeModifier -> {
+                armorToughness.set(attributeModifier.getAmount());
+                slot.set(attributeModifier.getSlot());
+            });
+        return new ArmorToughnessInfo(armorToughness.get(), slot.get());
     }
 }

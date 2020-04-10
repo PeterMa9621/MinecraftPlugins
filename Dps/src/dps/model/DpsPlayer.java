@@ -20,6 +20,11 @@ public class DpsPlayer {
     private String dungeonName;
 
     /**
+     *  Used to check if the player is in a dungeon or not
+     */
+    private Boolean isInDungeon = true;
+
+    /**
      *  The number of bonus rewards for this player in this dungeon
      */
     private Integer numBonusReward = 0;
@@ -99,5 +104,17 @@ public class DpsPlayer {
 
     public String getDungeonName() {
         return dungeonName;
+    }
+
+    public Boolean isInDungeon() {
+        return isInDungeon;
+    }
+
+    public void exitDungeon() {
+        this.isInDungeon = false;
+    }
+
+    public void enterDungeon() {
+        this.isInDungeon = true;
     }
 }

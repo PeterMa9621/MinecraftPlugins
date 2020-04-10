@@ -15,7 +15,6 @@ import dps.util.ScoreBoardUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -143,6 +142,7 @@ public class DpsListener implements Listener
 			pendingDpsPlayers.get(world.getUID()).forEach(dpsPlayer -> {
 				Dps.scoreBoard.getAPI().restartScoreBoard(dpsPlayer.getPlayer());
 				RewardBoxManager.showRewardBox(dpsPlayer);
+				DpsPlayerManager.markPlayerExitDungeon(dpsPlayer.getPlayer());
 			});
 			pendingDpsPlayers.remove(world.getUID());
 		}
@@ -162,16 +162,19 @@ public class DpsListener implements Listener
 
 		players.add(dpsPlayer);
 		pendingDpsPlayers.put(wordId, players);
+		DpsPlayerManager.markPlayerExitDungeon(event.getDPlayer().getPlayer());
 	}
 
 	@EventHandler
 	public void onPlayerEscape(DGamePlayerEscapeEvent event) {
 		Dps.scoreBoard.getAPI().restartScoreBoard(event.getDPlayer().getPlayer());
+		DpsPlayerManager.markPlayerExitDungeon(event.getDPlayer().getPlayer());
 	}
 
 	@EventHandler
 	public void onPlayerKicked(DPlayerKickEvent event) {
 		Dps.scoreBoard.getAPI().restartScoreBoard(event.getDPlayer().getPlayer());
+		DpsPlayerManager.markPlayerExitDungeon(event.getDPlayer().getPlayer());
 	}
 
 	@EventHandler
@@ -179,19 +182,21 @@ public class DpsListener implements Listener
 		Player player = event.getEntity().getKiller();
 		if(player==null)
 			return;
-		UUID worldId = player.getWorld().getUID();
+
 		UUID playerId = player.getUniqueId();
-		if(DpsPlayerManager.dpsData.containsKey(worldId) &&
-				DpsPlayerManager.dpsData.get(worldId).containsKey(playerId)){
-			Random random = new Random(Calendar.getInstance().getTimeInMillis());
-			double randomNumber = random.nextDouble();
-			DpsPlayer dpsPlayer = DpsPlayerManager.dpsData.get(worldId).get(playerId);
-			RewardTable rewardTable = RewardBoxManager.getRewardTable(dpsPlayer.getDungeonName());
-			if(randomNumber < rewardTable.getBonusRewardProb() &&
-					dpsPlayer.getNumBonusReward() < RewardBoxManager.maxBonusRewards) {
-				dpsPlayer.addBonusReward();
-				player.sendMessage(ChatColor.GOLD + "你获得了额外的奖励，副本结束后你的奖励会+1");
+		if(DpsPlayerManager.dpsPlayers.containsKey(playerId)){
+			DpsPlayer dpsPlayer = DpsPlayerManager.dpsPlayers.get(playerId);
+			if(dpsPlayer.isInDungeon()) {
+				Random random = new Random(Calendar.getInstance().getTimeInMillis());
+				double randomNumber = random.nextDouble();
+				RewardTable rewardTable = RewardBoxManager.getRewardTable(dpsPlayer.getDungeonName());
+				if(randomNumber < rewardTable.getBonusRewardProb() &&
+						dpsPlayer.getNumBonusReward() < RewardBoxManager.maxBonusRewards) {
+					dpsPlayer.addBonusReward();
+					player.sendMessage(ChatColor.GOLD + "你获得了额外的奖励，副本结束后你的奖励会+1");
+				}
 			}
+
 		}
 	}
 }
