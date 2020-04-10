@@ -2,14 +2,10 @@ package dps;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
+import dps.model.DpsPlayer;
 import dps.rewardBox.RewardBoxListener;
 import dps.rewardBox.RewardTable;
 import dps.util.ConfigUtil;
@@ -51,7 +47,8 @@ public class Dps extends JavaPlugin
 	public ArrayList<String> dpsTask = new ArrayList<String>();
 	
 	HashMap<String, HashMap<String, Integer>> groupRank = new HashMap<String, HashMap<String, Integer>>();
-	
+
+
 	//DpsAPI api = new DpsAPI(this);
 	
 	private boolean hookScoreBoard()
@@ -113,6 +110,7 @@ public class Dps extends JavaPlugin
 			if(args.length > 0){
 				if(args[0].equalsIgnoreCase("reload")){
 					ConfigUtil.loadConfig(this);
+					sender.sendMessage("°Ïa[Dps] °Ïe≈‰÷√÷ÿ‘ÿ≥…π¶");
 				}
 			}
 			return true;

@@ -8,28 +8,28 @@ import de.erethon.dungeonsxl.event.gameworld.GameWorldUnloadEvent;
 import de.erethon.dungeonsxl.game.Game;
 import dps.listener.PlayerListener;
 import dps.model.DpsPlayer;
+import dps.model.DpsPlayerManager;
 import dps.rewardBox.RewardBoxManager;
+import dps.rewardBox.RewardTable;
 import dps.util.ScoreBoardUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 public class DpsListener implements Listener
 {
 	private Dps plugin;
-
-	private HashMap<UUID, HashMap<UUID, DpsPlayer>> dpsData = new HashMap<>();
 
 	private HashMap<UUID, ArrayList<DpsPlayer>> pendingDpsPlayers = new HashMap<>();
 
@@ -46,8 +46,8 @@ public class DpsListener implements Listener
 		UUID currentWorldId = event.getDamager().getWorld().getUID();
 		if(event.getDamager() instanceof Player)
 		{
-			if(dpsData.containsKey(currentWorldId)){
-				HashMap<UUID, DpsPlayer> players = dpsData.get(currentWorldId);
+			if(DpsPlayerManager.dpsData.containsKey(currentWorldId)){
+				HashMap<UUID, DpsPlayer> players = DpsPlayerManager.dpsData.get(currentWorldId);
 				if(players.containsKey(event.getDamager().getUniqueId()))
 				{
 					Player damager = (Player)event.getDamager();
@@ -66,7 +66,7 @@ public class DpsListener implements Listener
 				return;
 			if(Bukkit.getPlayer(event.getDamager().getCustomName())==null)
 				return;
-			HashMap<UUID, DpsPlayer> players = dpsData.get(currentWorldId);
+			HashMap<UUID, DpsPlayer> players = DpsPlayerManager.dpsData.get(currentWorldId);
 			Player damager = Bukkit.getPlayer(event.getDamager().getCustomName());
 			assert damager != null;
 			if(players.containsKey(damager.getUniqueId()))
@@ -84,8 +84,8 @@ public class DpsListener implements Listener
     {
     	Player player = event.getPlayer();
 		UUID currentWorldId = player.getWorld().getUID();
-		if(dpsData.containsKey(currentWorldId)){
-			HashMap<UUID, DpsPlayer> dpsPlayers = dpsData.get(currentWorldId);
+		if(DpsPlayerManager.dpsData.containsKey(currentWorldId)){
+			HashMap<UUID, DpsPlayer> dpsPlayers = DpsPlayerManager.dpsData.get(currentWorldId);
 			dpsPlayers.remove(player.getUniqueId());
 		}
     }
@@ -124,11 +124,13 @@ public class DpsListener implements Listener
 		players.forEach(player -> {
 			Dps.scoreBoard.getAPI().stopScoreBoard(player);
 			DpsPlayer dpsPlayer = new DpsPlayer(player, 0d, true, worldId, dungeonName, playerListener);
+
+			DpsPlayerManager.dpsPlayers.put(dpsPlayer.getPlayer().getUniqueId(), dpsPlayer);
 			dpsPlayer.setGroupSize(players.size());
 			dpsPlayers.put(player.getUniqueId(), dpsPlayer);
 		});
 
-		dpsData.put(worldId, dpsPlayers);
+		DpsPlayerManager.dpsData.put(worldId, dpsPlayers);
 		ScoreBoardUtil.displayDpsBoard(dpsPlayers);
 	}
 
@@ -136,7 +138,7 @@ public class DpsListener implements Listener
 	public void onDungeonEnd(GameWorldUnloadEvent event) {
 		World world = event.getGameWorld().getWorld();
 
-		dpsData.remove(world.getUID());
+		DpsPlayerManager.dpsData.remove(world.getUID());
 		if(pendingDpsPlayers.containsKey(world.getUID())){
 			pendingDpsPlayers.get(world.getUID()).forEach(dpsPlayer -> {
 				Dps.scoreBoard.getAPI().restartScoreBoard(dpsPlayer.getPlayer());
@@ -149,7 +151,7 @@ public class DpsListener implements Listener
 	@EventHandler
 	public void onFinishDungeon(DGamePlayerFinishEvent event) {
 		UUID wordId = event.getDPlayer().getWorld().getUID();
-		DpsPlayer dpsPlayer = dpsData.get(wordId).get(event.getDPlayer().getPlayer().getUniqueId());
+		DpsPlayer dpsPlayer = DpsPlayerManager.dpsData.get(wordId).get(event.getDPlayer().getPlayer().getUniqueId());
 
 		ArrayList<DpsPlayer> players;
 		if(!pendingDpsPlayers.containsKey(wordId)) {
@@ -172,4 +174,24 @@ public class DpsListener implements Listener
 		Dps.scoreBoard.getAPI().restartScoreBoard(event.getDPlayer().getPlayer());
 	}
 
+	@EventHandler
+	public void onPlayerKillEntity(EntityDeathEvent event) {
+		Player player = event.getEntity().getKiller();
+		if(player==null)
+			return;
+		UUID worldId = player.getWorld().getUID();
+		UUID playerId = player.getUniqueId();
+		if(DpsPlayerManager.dpsData.containsKey(worldId) &&
+				DpsPlayerManager.dpsData.get(worldId).containsKey(playerId)){
+			Random random = new Random(Calendar.getInstance().getTimeInMillis());
+			double randomNumber = random.nextDouble();
+			DpsPlayer dpsPlayer = DpsPlayerManager.dpsData.get(worldId).get(playerId);
+			RewardTable rewardTable = RewardBoxManager.getRewardTable(dpsPlayer.getDungeonName());
+			if(randomNumber < rewardTable.getBonusRewardProb() &&
+					dpsPlayer.getNumBonusReward() < RewardBoxManager.maxBonusRewards) {
+				dpsPlayer.addBonusReward();
+				player.sendMessage(ChatColor.GOLD + "你获得了额外的奖励，副本结束后你的奖励会+1");
+			}
+		}
+	}
 }

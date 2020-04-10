@@ -4,14 +4,13 @@ import com.mysql.fabric.xmlrpc.base.Array;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Set;
+import java.util.*;
 
 public class RewardTable {
     private String dungeonName;
     private ArrayList<Reward> rewards;
     private ArrayList<Double> probs;
+    private Double bonusRewardProb = 0.005;
 
     public RewardTable(String dungeonName, ArrayList<Reward> rewards) {
         this.dungeonName = dungeonName;
@@ -56,14 +55,22 @@ public class RewardTable {
         this.dungeonName = dungeonName;
     }
 
+    public Double getBonusRewardProb() {
+        return bonusRewardProb;
+    }
+
+    public void setBonusRewardProb(Double bonusRewardProb) {
+        this.bonusRewardProb = bonusRewardProb;
+    }
+
     public Reward getRandomReward() {
-        final double randomNum = Math.random();
+        Random random = new Random(Calendar.getInstance().getTimeInMillis());
+        final double randomNum = random.nextDouble();
         // Here I use the size of rewards because probs has 0 in the list as default, thus probs will have one more element
         // than rewards which is not what I want
         for(int i=0; i<rewards.size(); i++){
             if(randomNum >= probs.get(i) && randomNum < probs.get(i+1)){
-                Reward reward = rewards.get(i);
-                return reward;
+                return rewards.get(i);
             }
         }
         return rewards.get(0);

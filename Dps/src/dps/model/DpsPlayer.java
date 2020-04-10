@@ -11,17 +11,25 @@ public class DpsPlayer {
     private Boolean isInDpsMode;
     private DpsPlayerListener dpsListener;
     private Integer rank = 1;
+    /**
+     *  GroupSize is meaning the size of the group that the player is in
+     */
     private Integer groupSize = 1;
-    private UUID dungeonId;
+    private UUID dungeonWorldId;
     private int numRewards;
     private String dungeonName;
 
-    public DpsPlayer(Player player, Double dpsScore, Boolean isInDpsMode, UUID dungeonId, String dungeonName, DpsPlayerListener dpsListener) {
+    /**
+     *  The number of bonus rewards for this player in this dungeon
+     */
+    private Integer numBonusReward = 0;
+
+    public DpsPlayer(Player player, Double dpsScore, Boolean isInDpsMode, UUID dungeonWorldId, String dungeonName, DpsPlayerListener dpsListener) {
         this.player = player;
         this.dpsScore = dpsScore;
         this.isInDpsMode = isInDpsMode;
         this.dpsListener = dpsListener;
-        this.dungeonId = dungeonId;
+        this.dungeonWorldId = dungeonWorldId;
         this.dungeonName = dungeonName;
     }
 
@@ -48,6 +56,15 @@ public class DpsPlayer {
         this.dpsListener.call();
     }
 
+    public void addBonusReward() {
+        this.numBonusReward += 1;
+        //RewardBoxManager.updateDpsPlayer(player.getUniqueId(), this);
+    }
+
+    public Integer getNumBonusReward() {
+        return numBonusReward;
+    }
+
     public Player getPlayer() {
         return player;
     }
@@ -68,8 +85,8 @@ public class DpsPlayer {
         this.groupSize = groupSize;
     }
 
-    public UUID getDungeonId() {
-        return dungeonId;
+    public UUID getDungeonWorldId() {
+        return dungeonWorldId;
     }
 
     public void setNumRewards(int numRewards) {

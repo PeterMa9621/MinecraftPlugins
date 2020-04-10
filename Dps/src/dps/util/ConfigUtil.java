@@ -24,6 +24,7 @@ public class ConfigUtil {
         if(!file.exists()){
             config = load(file);
             for(int i=0; i<3; i++){
+                config.set("test"+(i+1)+".bonusRewardProb", 0.005);
                 for(int j=0; j<4; j++){
                     config.set("test"+(i+1)+"."+(j+1)+".cmd", "give %player% diamond " + j);
                     config.set("test"+(i+1)+"."+(j+1)+".chance", 0.25);
@@ -48,6 +49,7 @@ public class ConfigUtil {
         int numReward = 0;
         for(String dungeonName:config.getKeys(false)){
             numDungeon ++;
+            Double bonusRewardProb = config.getDouble(dungeonName+".bonusRewardProb", 0.005);
             ArrayList<Reward> rewards = new ArrayList<>();
             for(int i=0; config.contains(dungeonName+"."+(i+1)); i++){
                 numReward ++;
@@ -66,6 +68,7 @@ public class ConfigUtil {
                 rewards.add(reward);
             }
             RewardTable rewardTable = new RewardTable(dungeonName, rewards);
+            rewardTable.setBonusRewardProb(bonusRewardProb);
             RewardBoxManager.rewards.put(dungeonName, rewardTable);
         }
         Bukkit.getConsoleSender().sendMessage("§a[Dps] §e已加载" + numDungeon + "个副本,共" + numReward + "个奖励");

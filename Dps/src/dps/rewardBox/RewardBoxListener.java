@@ -33,10 +33,11 @@ public class RewardBoxListener implements Listener {
             String dungeonName = dpsPlayer.getDungeonName();
             int index = event.getSlot();
 
-            if(index < numRewards && index >= 0){
+            if(index < numRewards+dpsPlayer.getNumBonusReward() && index >= 0){
                 ItemStack clickedItem = event.getCurrentItem();
                 ItemMeta itemMeta = clickedItem.getItemMeta();
-                if(itemMeta.getDisplayName().equalsIgnoreCase(RewardBoxManager.rewardTitle)){
+                if(itemMeta.getDisplayName().equalsIgnoreCase(RewardBoxManager.rewardTitle) ||
+                        itemMeta.getDisplayName().equalsIgnoreCase(RewardBoxManager.bonusRewardTitle)){
                     RewardTable rewardTable = RewardBoxManager.getRewardTable(dungeonName);
                     Reward reward = rewardTable.getRandomReward();
                     String cmd = reward.getCmd();
@@ -68,8 +69,7 @@ public class RewardBoxListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent event)
-    {
+    public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         RewardBoxManager.removeRewardBoxPlayer(player);
     }
