@@ -40,7 +40,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../Project0/server/plugins/dungeonsxl-dist-0.18-SNAPSHOT-819.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../Project0/server/plugins/ScoreBoard.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -49,7 +49,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../Project0/server/plugins/ScoreBoard.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../Project0/server/plugins/dungeonsxl-dist-0.18-SNAPSHOT-906.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

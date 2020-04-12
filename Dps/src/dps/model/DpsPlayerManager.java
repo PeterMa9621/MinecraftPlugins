@@ -13,7 +13,9 @@ public class DpsPlayerManager {
 
     public static void markPlayerExitDungeon(Player player) {
         UUID uuid = player.getUniqueId();
+        Bukkit.getConsoleSender().sendMessage(uuid.toString());
         DpsPlayer dpsPlayer = dpsPlayers.get(uuid);
-        dpsPlayer.exitDungeon();
+        if(dpsPlayer!=null)
+            dpsPlayer.exitDungeon();
     }
 }

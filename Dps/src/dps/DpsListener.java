@@ -1,11 +1,12 @@
 package dps;
 
+import de.erethon.dungeonsxl.api.dungeon.Game;
 import de.erethon.dungeonsxl.event.dplayer.DPlayerKickEvent;
 import de.erethon.dungeonsxl.event.dplayer.instance.game.DGamePlayerEscapeEvent;
 import de.erethon.dungeonsxl.event.dplayer.instance.game.DGamePlayerFinishEvent;
+import de.erethon.dungeonsxl.event.gameworld.GameWorldLoadEvent;
 import de.erethon.dungeonsxl.event.gameworld.GameWorldStartGameEvent;
 import de.erethon.dungeonsxl.event.gameworld.GameWorldUnloadEvent;
-import de.erethon.dungeonsxl.game.Game;
 import dps.listener.PlayerListener;
 import dps.model.DpsPlayer;
 import dps.model.DpsPlayerManager;
@@ -114,6 +115,7 @@ public class DpsListener implements Listener
 
     @EventHandler
 	public void onDungeonStart(GameWorldStartGameEvent event) {
+		Bukkit.getConsoleSender().sendMessage("GameWorldStartGame");
 		Game game = event.getGame();
 		final String dungeonName = game.getDungeon().getName();
 		final UUID worldId = game.getWorld().getWorld().getUID();
@@ -141,7 +143,8 @@ public class DpsListener implements Listener
 		if(pendingDpsPlayers.containsKey(world.getUID())){
 			pendingDpsPlayers.get(world.getUID()).forEach(dpsPlayer -> {
 				Dps.scoreBoard.getAPI().restartScoreBoard(dpsPlayer.getPlayer());
-				RewardBoxManager.showRewardBox(dpsPlayer);
+				if(RewardBoxManager.getRewardTable(dpsPlayer.getDungeonName())!=null)
+					RewardBoxManager.showRewardBox(dpsPlayer);
 				DpsPlayerManager.markPlayerExitDungeon(dpsPlayer.getPlayer());
 			});
 			pendingDpsPlayers.remove(world.getUID());
