@@ -6,6 +6,7 @@ public class DungeonPlayer {
     private Player player;
     private DungeonGroup dungeonGroup;
     private Boolean isInDungeonGroup = false;
+    private Boolean waitForStart = false;
     private int currentJoinTeamViewPage = 0;
     private int currentCreateTeamViewPage = 0;
 
@@ -49,5 +50,13 @@ public class DungeonPlayer {
 
     public void setCurrentCreateTeamViewPage(int currentCreateTeamViewPage) {
         this.currentCreateTeamViewPage = currentCreateTeamViewPage;
+    }
+
+    public void setWaitForStart(Boolean isWaitingForStart) {
+        this.waitForStart = isWaitingForStart;
+    }
+
+    public Boolean isWaitingForStart() {
+        return this.waitForStart;
     }
 }

@@ -1,6 +1,6 @@
 name: AntiXray
 main: antiXray.AntiXray
-version: '1.8'
+version: '1.8.1'
 api-version: '1.14'
 author: Jingyuan Ma
 depend:

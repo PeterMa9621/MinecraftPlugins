@@ -4,6 +4,7 @@ import com.peter.dungeonManager.config.ConfigManager;
 import com.peter.dungeonManager.expansion.DungeonManagerExpansion;
 import com.peter.dungeonManager.gui.GuiListener;
 import com.peter.dungeonManager.gui.GuiManager;
+import com.peter.dungeonManager.listener.DungeonGroupListener;
 import com.peter.dungeonManager.model.DungeonGroup;
 import com.peter.dungeonManager.util.DataManager;
 import com.peter.dungeonManager.util.GuiType;
@@ -42,6 +43,7 @@ public class DungeonManager extends JavaPlugin
 		ConfigManager.loadConfig(this);
 		getServer().getPluginManager().registerEvents(new DungeonManagerListener(this), this);
 		getServer().getPluginManager().registerEvents(new GuiListener(this), this);
+		getServer().getPluginManager().registerEvents(new DungeonGroupListener(), this);
 
 		GuiManager.plugin = this;
 		Bukkit.getConsoleSender().sendMessage("¡ìa[DungeonManager] ¡ìeDungeonManager loaded");
@@ -58,11 +60,6 @@ public class DungeonManager extends JavaPlugin
 
 			if (args.length==0 && sender instanceof Player) {
 				Player player = (Player) sender;
-
-				if(DataManager.getDungeonGroups().size()==0)
-					for(int i=0; i<60; i++) {
-						DataManager.addDungeonGroup(new DungeonGroup("Group" + i, "anjinshushi", DataManager.dungeonGroupSetting.get("anjinshushi"), null));
-					}
 
 				GuiManager.openDungeonGui(player, GuiType.Team);
 				return true;

@@ -87,7 +87,7 @@ public class AntiXray extends JavaPlugin
 							currentPoint += recoverPointPerMinute;
 							playerData.put(uniqueId, Math.min(currentPoint, totalPoints));
 						}
-						Bukkit.getConsoleSender().sendMessage("Recover " + recoverPointPerMinute + " point for " + uniqueId.toString());
+						//Bukkit.getConsoleSender().sendMessage("Recover " + recoverPointPerMinute + " point for " + uniqueId.toString());
 					}
 				}
 			}

@@ -1,12 +1,12 @@
 package dps;
 
-import de.erethon.dungeonsxl.api.dungeon.Game;
 import de.erethon.dungeonsxl.event.dplayer.DPlayerKickEvent;
 import de.erethon.dungeonsxl.event.dplayer.instance.game.DGamePlayerEscapeEvent;
 import de.erethon.dungeonsxl.event.dplayer.instance.game.DGamePlayerFinishEvent;
-import de.erethon.dungeonsxl.event.gameworld.GameWorldLoadEvent;
+
 import de.erethon.dungeonsxl.event.gameworld.GameWorldStartGameEvent;
 import de.erethon.dungeonsxl.event.gameworld.GameWorldUnloadEvent;
+import de.erethon.dungeonsxl.game.Game;
 import dps.listener.PlayerListener;
 import dps.model.DpsPlayer;
 import dps.model.DpsPlayerManager;

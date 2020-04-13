@@ -19,23 +19,29 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class GuiManager {
-    public static String teamGuiTitle = "§2加入副本队伍";
-    public static String dungeonGuiTitle = "§2创建副本队伍";
-    public static String joinPrefix = "§6点击加入§5";
-    public static String leavePrefix = "§6点击退出§5";
-    public static String refreshTitle = "§3刷新";
-    public static String numPeopleLore = "§7已加入玩家:";
-    public static String nextPageTitle = "§f下一页";
-    public static String previousPageTitle = "§f上一页";
-    public static String createTeamTitle = "§f创建副本队伍";
-    public static String goBackTitle = "§f返回";
+    public static final String teamGuiTitle = "§2加入副本队伍";
+    public static final String dungeonGuiTitle = "§2创建副本队伍";
+    public static final String joinPrefix = "§6点击加入§5";
+    public static final String leavePrefix = "§6点击退出§5";
+    public static final String refreshTitle = "§3刷新";
+    public static final String numPeopleLore = "§7已加入玩家:";
+    public static final String nextPageTitle = "§f下一页";
+    public static final String previousPageTitle = "§f上一页";
+    public static final String createTeamTitle = "§f创建副本队伍";
+    public static final String goBackTitle = "§f返回";
+    public static final String missGroupNotification = ChatColor.RESET + "该队伍" + ChatColor.RED + "已解散" +
+            ChatColor.RESET + "或" + ChatColor.GREEN + "已进入副本";
+    public static final String duplicateGroupNotification = ChatColor.RED + "你已经加入一个队伍了";
+    public static final String notSatisfyRequirementNotification = "§c人数要求不满足,最少:§2%d§c人,最多:§2%d§c人";
+    public static final String groupFullNotification = ChatColor.RED + "人数已满";
     public static DungeonManager plugin;
-    public static int inventorySize = 54;
-    public static int maxDungeonGroupPerPage = 45;
-    public static int refreshIndex = 49;
-    public static int nextPageIndex = 53;
-    public static int previousPageIndex = 52;
-    public static int createTeamIndex = 45;
+    public static final int inventorySize = 54;
+    public static final int maxDungeonGroupPerPage = 45;
+    public static final int refreshIndex = 49;
+    public static final int startDungeonIndex = 50;
+    public static final int nextPageIndex = 53;
+    public static final int previousPageIndex = 52;
+    public static final int createTeamIndex = 45;
 
     public static Inventory createGui(Player player, GuiType guiType) {
         Inventory inventory;
@@ -88,6 +94,9 @@ public class GuiManager {
         ItemStack refresh = Util.createItem(Material.PAPER, refreshTitle, 19);
         inventory.setItem(refreshIndex, refresh);
 
+        ItemStack createDungeonIcon = createStartDungeonIcon(dungeonPlayer);
+        inventory.setItem(startDungeonIndex, createDungeonIcon);
+
         if(totalLength > firstIndex + restLength) {
             ItemStack next = createNextPageIcon();
             inventory.setItem(nextPageIndex, next);
@@ -108,9 +117,9 @@ public class GuiManager {
 
             ItemStack icon;
             if(dungeonGroup.containsPlayer(dungeonPlayer)){
-                icon = createLeaveIcon(dungeonGroup, dungeonSetting.getDisplayName());
+                icon = createLeaveIcon(dungeonGroup);
             } else {
-                icon = createJoinIcon(dungeonGroup, dungeonSetting.getDisplayName());
+                icon = createJoinIcon(dungeonGroup);
             }
             inventory.setItem(count, icon);
 
@@ -144,18 +153,29 @@ public class GuiManager {
         player.openInventory(createGui(player, guiType));
     }
 
-    public static ItemStack createJoinIcon(DungeonGroup dungeonGroup, String groupDisplayName) {
+    public static ItemStack createJoinIcon(DungeonGroup dungeonGroup) {
+        String groupDisplayName = dungeonGroup.getDungeonSetting().getDisplayName();
         ItemStack icon = Util.createItem(Material.DIAMOND_SWORD, joinPrefix + groupDisplayName);
 
         setDataForJoinLeaveIcon(dungeonGroup, icon);
         return icon;
     }
 
-    public static ItemStack createLeaveIcon(DungeonGroup dungeonGroup, String groupDisplayName) {
+    public static ItemStack createLeaveIcon(DungeonGroup dungeonGroup) {
+        String groupDisplayName = dungeonGroup.getDungeonSetting().getDisplayName();
         ItemStack icon = Util.createItem(Material.DIAMOND_SWORD, leavePrefix + groupDisplayName, 16);
 
         setDataForJoinLeaveIcon(dungeonGroup, icon);
         return icon;
+    }
+
+    public static ItemStack createStartDungeonIcon(DungeonPlayer dungeonPlayer) {
+        DungeonGroup dungeonGroup = dungeonPlayer.getDungeonGroup();
+        if(dungeonGroup!=null && dungeonGroup.isLeader(dungeonPlayer) && !dungeonPlayer.isWaitingForStart()){
+            String groupDisplayName = dungeonGroup.getDungeonSetting().getDisplayName();
+            return Util.createItem(Material.PAPER, ChatColor.RESET + "开始副本" + groupDisplayName, 33);
+        }
+        return null;
     }
 
     public static void setDataForJoinLeaveIcon(DungeonGroup dungeonGroup, ItemStack icon) {
@@ -165,6 +185,8 @@ public class GuiManager {
             for(DungeonPlayer dungeonPlayer:dungeonGroup.getPlayers()) {
                 add(ChatColor.RESET + "成员: " + dungeonPlayer.getPlayer().getDisplayName());
             }
+            if(dungeonGroup.isFull())
+                add(groupFullNotification);
         }};
         Util.setLoreForItem(icon, lore);
         Util.setPersistentData(icon,  new NamespacedKey(plugin, "groupName"), dungeonGroup.getGroupName());

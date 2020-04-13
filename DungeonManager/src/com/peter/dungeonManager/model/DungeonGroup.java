@@ -1,6 +1,7 @@
 package com.peter.dungeonManager.model;
 
 import com.peter.dungeonManager.DungeonManager;
+import com.peter.dungeonManager.config.ConfigManager;
 import com.peter.dungeonManager.util.DataManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -14,12 +15,17 @@ public class DungeonGroup {
     private DungeonSetting dungeonSetting;
     private String dungeonName;
     private DungeonPlayer leader;
+    private String startGameCmd;
+    private final String startGameTitle = ChatColor.GOLD + "副本将在" + ChatColor.GREEN + ConfigManager.startGameDelay +
+            ChatColor.GOLD + "秒后开始，请做好准备";
+    private final String disbandNotification = ChatColor.GOLD + "你的队伍已解散!";
 
     public DungeonGroup(String groupName, String dungeonName, DungeonSetting dungeonSetting, DungeonPlayer leader) {
         this.groupName = groupName;
         this.dungeonSetting = dungeonSetting;
         this.dungeonName = dungeonName;
         this.leader = leader;
+        startGameCmd = "dxl play " + dungeonName;
         players = new ArrayList<>();
     }
 
@@ -52,11 +58,26 @@ public class DungeonGroup {
         DataManager.getDungeonPlayer(player.getUniqueId()).leaveDungeonGroup();
     }
 
-    public void disband() {
+    public void disband(Boolean notifyPlayer) {
         for(DungeonPlayer dungeonPlayer:this.players) {
-            dungeonPlayer.getPlayer().sendMessage(ChatColor.GREEN + "[副本系统]" + ChatColor.GOLD + " 你的队伍已解散!");
+            if(notifyPlayer) {
+                dungeonPlayer.getPlayer().sendMessage(ChatColor.GREEN + "[副本系统] " + disbandNotification);
+                dungeonPlayer.getPlayer().sendTitle(disbandNotification, "", 5, 3*20, 5);
+            }
             dungeonPlayer.leaveDungeonGroup();
+            dungeonPlayer.setWaitForStart(false);
         }
+    }
+
+    public Boolean isSatisfyRequirement() {
+        int numPlayers = players.size();
+        int minPlayers = dungeonSetting.getMinPlayers();
+        int maxPlayers = dungeonSetting.getMaxPlayers();
+        return numPlayers >= minPlayers && numPlayers <= maxPlayers;
+    }
+
+    public Boolean isFull() {
+        return dungeonSetting.getMaxPlayers() == players.size();
     }
 
     public Boolean isLeader(Player player) {
@@ -91,20 +112,30 @@ public class DungeonGroup {
         return dungeonSetting;
     }
 
-    public void startGame(String startGameCmd, DungeonManager plugin) {
-
+    public void startGame(DungeonManager plugin) {
         int numPlayer = this.players.size();
         if(numPlayer<=0){
             return;
         }
-        Player leader = this.players.get(0).getPlayer();
 
-        dispatchDungeonCommand(leader, false, plugin);
-
-        for(int i=1; i<numPlayer; i++){
-            dispatchDungeonCommand(players.get(i).getPlayer(), true, plugin);
+        for(DungeonPlayer dungeonPlayer:this.players) {
+            dungeonPlayer.getPlayer().sendTitle(this.startGameTitle, "", 5,4*20,5);
+            dungeonPlayer.setWaitForStart(true);
         }
-        dispatchStartGameCommand(leader, startGameCmd, plugin);
+
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            Player leader = this.players.get(0).getPlayer();
+
+            dispatchDungeonCommand(leader, false, plugin);
+
+            for(int i=1; i<numPlayer; i++){
+                dispatchDungeonCommand(players.get(i).getPlayer(), true, plugin);
+            }
+
+            dispatchStartGameCommand(leader, this.startGameCmd, plugin);
+
+            disband(false);
+        }, ConfigManager.startGameDelay * 20);
     }
 
     private void dispatchDungeonCommand(Player player, Boolean isJoin, DungeonManager plugin) {
@@ -116,11 +147,11 @@ public class DungeonGroup {
         }
 
         if(isJoin){
-            Bukkit.dispatchCommand(player, "dxl leave " + this.groupName);
+            //Bukkit.dispatchCommand(player, "dxl leave " + this.groupName);
             Bukkit.dispatchCommand(player, "dxl group join " + this.groupName);
         }
         else{
-            Bukkit.dispatchCommand(player, "dxl leave " + this.groupName);
+            //Bukkit.dispatchCommand(player, "dxl leave " + this.groupName);
             Bukkit.dispatchCommand(player, "dxl group create " + this.groupName);
         }
 

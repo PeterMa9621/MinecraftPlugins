@@ -1,19 +1,20 @@
 package com.peter.dungeonManager.gui;
 
 import com.peter.dungeonManager.DungeonManager;
+import com.peter.dungeonManager.event.LeaveGroupEvent;
 import com.peter.dungeonManager.model.DungeonGroup;
 import com.peter.dungeonManager.model.DungeonPlayer;
 import com.peter.dungeonManager.model.DungeonSetting;
 import com.peter.dungeonManager.util.DataManager;
 import com.peter.dungeonManager.util.GuiType;
 import com.peter.dungeonManager.util.Util;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -56,34 +57,45 @@ public class GuiListener implements Listener
 			if(itemStack==null)
 				return;
 
-			if(index == GuiManager.refreshIndex) {
-				if(guiType.equals(GuiType.Team)) {
+			switch (index) {
+				case GuiManager.refreshIndex:
+					if(guiType.equals(GuiType.Team)) {
+						openJoinTeamGui(player);
+					} else if (guiType.equals(GuiType.Dungeon)) {
+						openCreateTeamGui(player);
+					}
+					return;
+				case GuiManager.createTeamIndex:
+					if(guiType.equals(GuiType.Team)) {
+						openCreateTeamGui(player);
+					} else if (guiType.equals(GuiType.Dungeon)) {
+						openJoinTeamGui(player);
+					}
+					return;
+				case GuiManager.nextPageIndex:
+					dungeonPlayer.setCurrentJoinTeamViewPage(dungeonPlayer.getCurrentJoinTeamViewPage() + 1);
 					openJoinTeamGui(player);
-				} else if (guiType.equals(GuiType.Dungeon)) {
-					openCreateTeamGui(player);
-				}
-				return;
-			}
-
-			if(index == GuiManager.createTeamIndex) {
-				if(guiType.equals(GuiType.Team)) {
-					openCreateTeamGui(player);
-				} else if (guiType.equals(GuiType.Dungeon)) {
+					return;
+				case GuiManager.previousPageIndex:
+					dungeonPlayer.setCurrentJoinTeamViewPage(dungeonPlayer.getCurrentJoinTeamViewPage() - 1);
 					openJoinTeamGui(player);
-				}
-				return;
-			}
-
-			if(index == GuiManager.nextPageIndex) {
-				dungeonPlayer.setCurrentJoinTeamViewPage(dungeonPlayer.getCurrentJoinTeamViewPage() + 1);
-				openJoinTeamGui(player);
-				return;
-			}
-
-			if(index == GuiManager.previousPageIndex) {
-				dungeonPlayer.setCurrentJoinTeamViewPage(dungeonPlayer.getCurrentJoinTeamViewPage() - 1);
-				openJoinTeamGui(player);
-				return;
+					return;
+				// Start dungeon
+				case GuiManager.startDungeonIndex:
+					DungeonGroup dungeonGroup = dungeonPlayer.getDungeonGroup();
+					if(dungeonGroup!=null && dungeonGroup.isLeader(dungeonPlayer)){
+						if(dungeonGroup.isSatisfyRequirement()) {
+							DataManager.removeDungeonGroup(dungeonGroup);
+							dungeonGroup.startGame(plugin);
+							player.closeInventory();
+						} else {
+							DungeonSetting dungeonSetting = dungeonGroup.getDungeonSetting();
+							int minPlayers = dungeonSetting.getMinPlayers();
+							int maxPlayers = dungeonSetting.getMaxPlayers();
+							showNotificationOnLore(itemStack, String.format(GuiManager.notSatisfyRequirementNotification, minPlayers, maxPlayers));
+						}
+					}
+					return;
 			}
 
 			if(guiType.equals(GuiType.Team))
@@ -99,32 +111,35 @@ public class GuiListener implements Listener
 		if((dungeonPlayer.isInDungeonGroup() &&
 				dungeonPlayer.getDungeonGroup().getGroupName().equalsIgnoreCase(groupName)) || !dungeonPlayer.isInDungeonGroup()) {
 			DungeonGroup dungeonGroup = DataManager.getDungeonGroup(groupName);
+			if(dungeonGroup==null){
+				showNotificationOnLore(itemStack, GuiManager.missGroupNotification);
+				return;
+			}
 			DungeonSetting dungeonSetting = dungeonGroup.getDungeonSetting();
 
-			ItemStack icon;
+			ItemStack joinDungeonIcon = null;
 			// Leave team
 			if(dungeonGroup.containsPlayer(dungeonPlayer)) {
-				if(dungeonGroup.isLeader(dungeonPlayer)) {
-					dungeonGroup.disband();
-					DataManager.removeDungeonGroup(dungeonGroup);
-					icon = null;
-				} else {
-					dungeonGroup.removePlayer(dungeonPlayer);
-					icon = GuiManager.createJoinIcon(dungeonGroup, dungeonSetting.getDisplayName());
-				}
+				LeaveGroupEvent event = new LeaveGroupEvent(dungeonPlayer);
+				Bukkit.getPluginManager().callEvent(event);
+
+				if(!dungeonGroup.isLeader(dungeonPlayer))
+					joinDungeonIcon = GuiManager.createJoinIcon(dungeonGroup);
+				else
+					inventory.setItem(GuiManager.startDungeonIndex, null);
 			}
 			// Join team
 			else {
-				dungeonGroup.addPlayer(dungeonPlayer);
-				icon = GuiManager.createLeaveIcon(dungeonGroup, dungeonSetting.getDisplayName());
+				if(!dungeonGroup.isFull()) {
+					dungeonGroup.addPlayer(dungeonPlayer);
+					joinDungeonIcon = GuiManager.createLeaveIcon(dungeonGroup);
+				} else {
+					showNotificationOnLore(itemStack, GuiManager.groupFullNotification);
+				}
 			}
-			inventory.setItem(index, icon);
+			inventory.setItem(index, joinDungeonIcon);
 		} else {
-			ItemMeta itemMeta = itemStack.getItemMeta();
-			itemMeta.setLore(new ArrayList<String>() {{
-				add(ChatColor.RED + "你已经加入一个队伍了");
-			}});
-			itemStack.setItemMeta(itemMeta);
+			showNotificationOnLore(itemStack, GuiManager.duplicateGroupNotification);
 		}
 	}
 
@@ -138,12 +153,16 @@ public class GuiListener implements Listener
 			DataManager.addDungeonGroup(dungeonGroup);
 			GuiManager.openDungeonGui(dungeonPlayer.getPlayer(), GuiType.Team);
 		} else {
-			ItemMeta itemMeta = itemStack.getItemMeta();
-			itemMeta.setLore(new ArrayList<String>() {{
-				add(ChatColor.RED + "你已经加入一个队伍了");
-			}});
-			itemStack.setItemMeta(itemMeta);
+			showNotificationOnLore(itemStack, GuiManager.duplicateGroupNotification);
 		}
+	}
+
+	private void showNotificationOnLore(ItemStack itemStack, String notification) {
+		ItemMeta itemMeta = itemStack.getItemMeta();
+		itemMeta.setLore(new ArrayList<String>() {{
+			add(notification);
+		}});
+		itemStack.setItemMeta(itemMeta);
 	}
 
 	private void openJoinTeamGui(Player player) {
@@ -162,13 +181,5 @@ public class GuiListener implements Listener
 				GuiManager.openDungeonGui(player, GuiType.Dungeon);
 			}
 		}.runTaskLater(plugin, 1);
-	}
-
-	@EventHandler
-	public void onPlayerQuit(PlayerQuitEvent event) {
-		Player player = event.getPlayer();
-		for(DungeonGroup dungeonGroup : DataManager.getDungeonGroups()){
-			dungeonGroup.removePlayer(player);
-		}
 	}
 }

@@ -4,6 +4,10 @@
     <file url="file://$PROJECT_DIR$/src/antiXray/AntiXray.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/antiXray/AntiXrayListener.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/antiXray/expansion/AntiXrayExpansion.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/peter/dungeonManager/DungeonManager.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/peter/dungeonManager/config/ConfigManager.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/peter/dungeonManager/gui/GuiListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/peter/dungeonManager/gui/GuiManager.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/com/peter/dungeonManager/model/DungeonGroup.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/com/peter/worldBoss/WorldBoss.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/com/peter/worldBoss/WorldBossListener.java" charset="GBK" />

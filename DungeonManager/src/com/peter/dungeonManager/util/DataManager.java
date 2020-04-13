@@ -52,4 +52,8 @@ public class DataManager {
     public static DungeonPlayer getDungeonPlayer(UUID uuid) {
         return dungeonPlayers.get(uuid);
     }
+
+    public static void removeDungeonPlayer(UUID uuid) {
+        dungeonPlayers.remove(uuid);
+    }
 }

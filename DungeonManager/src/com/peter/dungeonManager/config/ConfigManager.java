@@ -13,6 +13,8 @@ import java.io.IOException;
 
 public class ConfigManager {
     public static int maxInstancePerDungeon;
+    public static int startGameDelay = 30;
+
     public static void loadConfig(DungeonManager plugin) {
         File file = new File(plugin.getDataFolder(), "/config.yml");
         FileConfiguration config;
@@ -20,6 +22,7 @@ public class ConfigManager {
             config = load(file);
 
             config.set("maxInstancePerDungeon", 2);
+            config.set("startGameDelay", 30);
             config.set("dungeons.lieyanwang.displayName", "&c烈焰王");
             config.set("dungeons.lieyanwang.minPlayers", 2);
             config.set("dungeons.lieyanwang.maxPlayers", 4);
@@ -41,6 +44,7 @@ public class ConfigManager {
         DataManager.getDungeonGroups().clear();
         config = load(file);
         maxInstancePerDungeon = config.getInt("maxInstancePerDungeon", 2);
+        startGameDelay = config.getInt("startGameDelay", 30);
         int numDungeon = 0;
         ConfigurationSection dungeonConfig = config.getConfigurationSection("dungeons");
         if(dungeonConfig!=null){
@@ -56,7 +60,7 @@ public class ConfigManager {
             }
         }
 
-        Bukkit.getConsoleSender().sendMessage("§a[WorldBoss] §e已加载" + numDungeon + "个副本");
+        Bukkit.getConsoleSender().sendMessage("§a[DungeonManager] §e已加载" + numDungeon + "个副本");
     }
 
     public static FileConfiguration load(File file)

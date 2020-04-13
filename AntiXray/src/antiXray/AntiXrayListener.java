@@ -39,7 +39,6 @@ public class AntiXrayListener implements Listener
 	public void onPlayerJoin(PlayerJoinEvent event)
     {
 		plugin.loadPlayerConfig(event.getPlayer().getUniqueId());
-		return;
     }
 	
 	@EventHandler
@@ -101,7 +100,7 @@ public class AntiXrayListener implements Listener
 				if(msg.contains("{points}"))
 					msg = msg.replace("{points}", String.valueOf(currentPoint));
 				p.sendMessage(msg);
-				if(plugin.notify==true)
+				if(plugin.notify)
 				{
 					for(String name:plugin.op)
 					{
