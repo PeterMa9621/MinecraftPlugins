@@ -1,5 +1,5 @@
-name: WorldBoss
-main: com.peter.worldBoss.WorldBoss
+name: DungeonManager
+main: com.peter.dungeonManager.DungeonManager
 version: '1.0'
 api-version: '1.15'
 author: Jingyuan Ma
@@ -8,9 +8,9 @@ depend:
 softdepend:
   - PlaceholderAPI
 commands:
-  boss:
-    description: world boss helper
-    usage: /boss
+  dm:
+    description: Dungeon Manager
+    usage: /dm
     permission-message: §c无权执行！
 permissions: 
   worldBoss.op:

@@ -58,7 +58,7 @@ public class WorldBoss extends JavaPlugin
 			} else {
 				if(args[0].equalsIgnoreCase("reload")){
 					ConfigManager.loadConfig(this);
-					sender.addAttachment(this, "dxl.group", true);
+
 					sender.sendMessage("°Ï6[WorldBoss] °Ï3÷ÿ‘ÿ≈‰÷√≥…π¶!");
 					return true;
 				} else if(args[0].equalsIgnoreCase("help")){

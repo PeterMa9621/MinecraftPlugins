@@ -44,8 +44,8 @@ public class GuiManager {
                     icon = createJoinIcon(bossGroup, setting.getDisplayName());
                 }
                 inventory.setItem(count, icon);
+                count++;
             }
-            count++;
         }
 
         ItemStack refresh = Util.createItem(Material.PAPER, refreshTitle, 19);
