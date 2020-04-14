@@ -12,6 +12,6 @@ commands:
     description: Dungeon Manager
     usage: /dm
     permission-message: §c无权执行！
-permissions: 
-  worldBoss.op:
+permissions:
+  dungeonManager.op:
     default: op
