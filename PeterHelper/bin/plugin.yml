@@ -3,6 +3,10 @@ main: peterHelper.PeterHelper
 version: '1.1.4'
 api-version: '1.14'
 author: Jingyuan Ma
+depend:
+  - ItemsAdder
+softdepend:
+  - PlaceholderAPI
 commands:
   ph:
     description: helper plugin

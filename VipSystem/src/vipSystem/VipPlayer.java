@@ -84,11 +84,10 @@ public class VipPlayer
 	}
 	
 	public String getLeftTime()
-	{	
+	{
 		if(getLeftDays()<=0)
 			return String.format("%d天%d小时%d分钟", getLeftDays(), getLeftHours()%24, getLeftMinutes()%60);
 		else
 			return String.format("%d天%d小时", getLeftDays(), getLeftHours()%24);
 	}
-
 }

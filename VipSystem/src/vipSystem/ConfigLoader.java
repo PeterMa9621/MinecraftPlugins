@@ -205,13 +205,8 @@ public class ConfigLoader {
             config = Util.load(file);
 
             config.set("VIP1.Money", 3000);
-            config.set("VIP1.Items.1.ID", "diamond");
-            config.set("VIP1.Items.1.Amount", 32);
-            config.set("VIP1.Items.1.DisplayName", "钻石");
-            config.set("VIP1.Items.1.Lore", "神奇钻石");
-            config.set("VIP1.Items.1.Enchant.ID", "fortune");
-            config.set("VIP1.Items.1.Enchant.Level", 1);
-            config.set("VIP1.Items.1.HideEnchant", true);
+            config.set("VIP1.Items.MinInventory", 8);
+            config.set("VIP1.Items.1.Command", "give %player% diamond 32");
 
             try {
                 config.save(file);
@@ -227,48 +222,16 @@ public class ConfigLoader {
 
         for(String vipGroup:vipGroups.keySet())
         {
-            ArrayList<ItemStack> items = new ArrayList<ItemStack>();
-            int money = config.getInt(vipGroup + ".Money");
+            ArrayList<String> commands = new ArrayList<>();
+            int money = config.getInt(vipGroup + ".Money", 0);
+            int minInventory = config.getInt(vipGroup + ".Items.MinInventory", 1);
             for(int i=0; config.contains(vipGroup + ".Items."+(i+1)); i++)
             {
-                String id = "";
-                boolean hide = config.getBoolean(vipGroup + ".Items."+(i+1)+".HideEnchant");
-                if(config.getString(vipGroup + ".Items."+(i+1)+".ID").contains(":")) {
-                    id = config.getString(vipGroup + ".Items."+(i+1)+".ID").split(":")[0];
-                }
-                else {
-                    id = config.getString(vipGroup + ".Items."+(i+1)+".ID");
-                }
-                int amount = config.getInt(vipGroup + ".Items."+(i+1)+".Amount");
-                String name = config.getString(vipGroup + ".Items."+(i+1)+".DisplayName");
-                String lore = config.getString(vipGroup + ".Items."+(i+1)+".Lore");
-                String enchantID = config.getString(vipGroup + ".Items."+(i+1)+".Enchant.ID");
-                int level = config.getInt(vipGroup + ".Items."+(i+1)+".Enchant.Level");
+                String command = config.getString(vipGroup + ".Items."+(i+1) + ".Command");
 
-                ItemStack item = new ItemStack(Material.getMaterial(id.toUpperCase()), amount);
-                ItemMeta meta = item.getItemMeta();
-                if(name!=null)
-                    meta.setDisplayName(name);
-                if(lore!=null)
-                {
-                    ArrayList<String> itemLore = new ArrayList<String>();
-                    for(String l:lore.split("%"))
-                    {
-                        itemLore.add(l);
-                    }
-                    meta.setLore(itemLore);
-                }
-                if(hide==true)
-                    meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                item.setItemMeta(meta);
-
-                if(!enchantID.equalsIgnoreCase("") && level>0)
-                {
-                    item.addUnsafeEnchantment(EnchantmentWrapper.getByKey(NamespacedKey.minecraft(enchantID)), level);
-                }
-                items.add(item);
+                commands.add(command);
             }
-            VipReward vipReward = new VipReward(items, money);
+            VipReward vipReward = new VipReward(commands, money, minInventory);
             reward.put(vipGroup, vipReward);
         }
 

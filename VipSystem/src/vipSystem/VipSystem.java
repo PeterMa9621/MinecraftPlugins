@@ -328,7 +328,7 @@ public class VipSystem extends JavaPlugin
 					} catch (SQLException e) {
 						e.printStackTrace();
 					}
-					String msg = String.format("§6[会员系统] §e会员类型:§c%s§e,剩余会员时间:§a%d天,%d小时,%d分钟", vipGroups.get(vip.getVipGroup()), vip.getLeftDays()%365, vip.getLeftHours()%24, vip.getLeftMinutes()%60);
+					String msg = String.format("§6[会员系统] §e会员类型:§c%s§e,剩余会员时间:§a%d天,%d小时,%d分钟", vipGroups.get(vip.getVipGroup()), vip.getLeftDays(), vip.getLeftHours()%24, vip.getLeftMinutes()%60);
 					p.sendMessage(msg);
 				}
 				return true;
@@ -367,6 +367,7 @@ public class VipSystem extends JavaPlugin
 				String playerName = args[1];
 				String group = args[2];
 				Player p = Bukkit.getPlayer(playerName);
+
 				VipPlayer vipPlayer = null;
 				try {
 					vipPlayer = configLoader.loadPlayerConfig(p.getUniqueId());
@@ -400,20 +401,16 @@ public class VipSystem extends JavaPlugin
 					e.printStackTrace();
 				}
 
-				if(!reward.get(group).getItems().isEmpty() && reward.get(group).money!=0)
+				if(!reward.get(group).getCommands().isEmpty())
 				{
-					for(ItemStack item:reward.get(group).getItems())
-					{
-						if(p.getInventory().firstEmpty()!=-1)
-						{
-							p.getInventory().addItem(item);
-						}
-						else
-						{
-							Bukkit.getServer().getWorld(p.getWorld().getName()).dropItem(p.getLocation(), item);
-						}
+					VipReward vipReward = reward.get(group);
+					for(String command:vipReward.getCommands()) {
+						command = command.replace("%player%", playerName);
+						Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
 					}
-					economy.depositPlayer(p.getName(), reward.get(group).money);
+
+					if(vipReward.getMoney()>0)
+						economy.depositPlayer(p.getName(), reward.get(group).getMoney());
 					p.sendMessage("§6[会员系统] §a物品奖励已放入背包内，如果背包满了，则会掉落到地面上，请注意拾取。");
 				}
 				

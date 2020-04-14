@@ -46,7 +46,7 @@ public class PeterHelper extends JavaPlugin
 			if (args.length==0) {
 				sender.sendMessage("§a=========[PeterHelper]=========");
 				sender.sendMessage("§a/ph item §3查看手上的物品信息");
-				sender.sendMessage("§a/ph getitem [itemName] §3获得自定义物品");
+				sender.sendMessage("§a/ph give [playerName] [itemName] [amount] §3给予原版物品");
 				sender.sendMessage("§a/ph giveitem [playerName] [itemName] §3给予ItemAdders内的自定义物品");
 				return true;
 			}
@@ -58,10 +58,32 @@ public class PeterHelper extends JavaPlugin
 				return true;
 			}
 
-			if(args[0].equalsIgnoreCase("getitem") && sender instanceof Player){
-				Player player = (Player) sender;
-				ItemStack itemStack = ItemsAdder.getCustomItem(args[1]);
-				player.getInventory().addItem(itemStack);
+			if(args[0].equalsIgnoreCase("give")){
+				if(args.length<3){
+					sender.sendMessage("§a/ph give [playerName] [itemName] [amount] §3给予原版物品");
+					return true;
+				}
+				String playerName = args[1];
+				String itemName = args[2];
+				int amount = Integer.parseInt(args[3]);
+				Player player = Bukkit.getPlayer(playerName);
+				if(player==null){
+					sender.sendMessage("§a[PeterHelper] §c玩家不存在");
+					return true;
+				}
+				Material material = Material.getMaterial(itemName.toUpperCase());
+				if (material == null) {
+					sender.sendMessage("§a[PeterHelper] §c物品不存在");
+					return true;
+				}
+				ItemStack itemStack = new ItemStack(material, amount);
+
+				if(player.getInventory().firstEmpty()!=-1) {
+					player.getInventory().addItem(itemStack);
+				}
+				else {
+					Bukkit.getServer().getWorld(player.getWorld().getName()).dropItem(player.getLocation(), itemStack);
+				}
 				return true;
 			}
 
@@ -91,13 +113,16 @@ public class PeterHelper extends JavaPlugin
 					AttributeModifierUtil.randomArmorAttribute(itemMeta);
 					itemStack.setItemMeta(itemMeta);
 				}
-				player.getInventory().addItem(itemStack);
+
+				if(player.getInventory().firstEmpty()!=-1) {
+					player.getInventory().addItem(itemStack);
+				}
+				else {
+					Bukkit.getServer().getWorld(player.getWorld().getName()).dropItem(player.getLocation(), itemStack);
+				}
 				player.sendMessage(ChatColor.GOLD + "已获得" + ChatColor.WHITE + itemStack.getItemMeta().getDisplayName());
 				return true;
 			}
-
-		} else {
-			sender.sendMessage("只能应用在玩家身上");
 		}
 		return false;
 	}

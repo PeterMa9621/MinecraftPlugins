@@ -1,8 +1,12 @@
 name: VipSystem
 main: vipSystem.VipSystem
-version: '1.1.2'
+version: '1.2'
 api-version: '1.14'
-softdepend: [PlaceholderAPI]
+depend:
+  - LuckPerms
+softdepend:
+  - PlaceholderAPI
+  - Vault
 author: Jingyuan Ma
 commands:
   vip:
