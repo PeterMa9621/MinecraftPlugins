@@ -2,7 +2,9 @@ package levelSystem.listener;
 
 import levelSystem.LevelSystem;
 import levelSystem.event.LevelUpEvent;
+import levelSystem.manager.RewardManager;
 import levelSystem.model.LevelPlayer;
+import levelSystem.model.LevelReward;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -14,6 +16,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.io.IOException;
+import java.util.List;
 
 public class LevelSystemListener implements Listener
 {
@@ -30,20 +33,18 @@ public class LevelSystemListener implements Listener
     }
 
 	@EventHandler
-	public void onPlayerChat(AsyncPlayerChatEvent event)
-    {
+	public void onPlayerChat(AsyncPlayerChatEvent event) {
 		/*
 		int index = event.getMessage().indexOf(":");
 		String prefix = event.getMessage().substring(index)+"§2[1级]";
 		//String prefix = event.getFormat().re.replace(message, "")+"§2[1级]";
 		String message = event.getMessage();
 		*/
-		// event.setFormat("§2["+plugin.players.get(event.getPlayer().getUniqueId()).getLevel()+"级]§f"+event.getFormat());
+		event.setFormat("§f[§2"+plugin.players.get(event.getPlayer().getUniqueId()).getLevel()+"级]§f"+event.getFormat());
     }
 	
 	@EventHandler
-	public void onPlayerChangeExp(PlayerExpChangeEvent event)
-    {
+	public void onPlayerChangeExp(PlayerExpChangeEvent event) {
 		int expAmount = event.getAmount();
 		Player p = event.getPlayer();
 		LevelPlayer levelPlayer = plugin.players.get(p.getUniqueId());
@@ -57,6 +58,21 @@ public class LevelSystemListener implements Listener
 		Player player = levelPlayer.getPlayer();
 		player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5F, 0.0F);
 		player.sendTitle("§6你的历练等级已升级", "§2当前历练等级为:§5§l" + level + "§2级", 10, 60, 10);
+
+		LevelReward levelReward = plugin.rewardManager.getReward(level);
+		if(levelReward==null)
+			return;
+
+		String msg = levelReward.getMsg();
+		List<String> commands = levelReward.getCommands();
+		if(commands.size()>0){
+			for(String command:commands) {
+				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", player.getName()));
+			}
+		}
+
+		if(!msg.equalsIgnoreCase(""))
+			player.sendMessage("§6[等级系统] §f" + msg);
 	}
 
 	@EventHandler

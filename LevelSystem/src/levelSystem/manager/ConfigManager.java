@@ -13,6 +13,7 @@ import peterUtil.database.StorageInterface;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -47,9 +48,13 @@ public class ConfigManager
 			Double[] powers = new Double[] {2d,1.5d,1d};
 			config.set("formula.power", powers);
 
-			String[] commands = new String[] {"eco give %player% 100", "give %player% diamond 16"};
+			ArrayList<String> commands = new ArrayList<String>() {{
+				add("eco give %player% 100");
+				add("give %player% diamond 16");
+			}};
 			for(int i=0; i<10; i++) {
-				config.set("reward." + i, commands);
+				config.set("reward." + (i+2) + ".msg", "");
+				config.set("reward." + (i+2) + ".command", commands.toArray());
 			}
 			
 			try {
@@ -75,8 +80,9 @@ public class ConfigManager
 		if(section!=null) {
 			for(String levelString:section.getKeys(false)) {
 				int level = Integer.parseInt(levelString);
-				List<String> commands = section.getStringList(levelString);
-				LevelReward levelReward = new LevelReward(level, commands);
+				String msg = section.getString(levelString+".msg", "").replace("&", "¡ì");
+				List<String> commands = section.getStringList(levelString+".command");
+				LevelReward levelReward = new LevelReward(level, commands, msg);
 				plugin.rewardManager.addReward(level, levelReward);
 			}
 		}

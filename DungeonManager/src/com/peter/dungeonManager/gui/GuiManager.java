@@ -14,6 +14,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 
@@ -117,9 +118,9 @@ public class GuiManager {
 
             ItemStack icon;
             if(dungeonGroup.containsPlayer(dungeonPlayer)){
-                icon = createLeaveIcon(dungeonGroup, dungeonPlayer);
+                icon = createGroupIcon(dungeonGroup, dungeonPlayer, false);
             } else {
-                icon = createJoinIcon(dungeonGroup, dungeonPlayer);
+                icon = createGroupIcon(dungeonGroup, dungeonPlayer, true);
             }
             inventory.setItem(count, icon);
 
@@ -160,17 +161,17 @@ public class GuiManager {
         player.openInventory(createGui(player, guiType));
     }
 
-    public static ItemStack createJoinIcon(DungeonGroup dungeonGroup, DungeonPlayer dungeonPlayer) {
-        String groupDisplayName = dungeonGroup.getDungeonSetting().getDisplayName();
-        ItemStack icon = Util.createItem(Material.DIAMOND_SWORD, joinPrefix + groupDisplayName);
-
-        setDataForJoinLeaveIcon(dungeonGroup, icon, dungeonPlayer);
-        return icon;
-    }
-
-    public static ItemStack createLeaveIcon(DungeonGroup dungeonGroup, DungeonPlayer dungeonPlayer) {
-        String groupDisplayName = dungeonGroup.getDungeonSetting().getDisplayName();
-        ItemStack icon = Util.createItem(Material.DIAMOND_SWORD, leavePrefix + groupDisplayName, 16);
+    public static ItemStack createGroupIcon(DungeonGroup dungeonGroup, DungeonPlayer dungeonPlayer, Boolean isJoinIcon) {
+        DungeonSetting dungeonSetting = dungeonGroup.getDungeonSetting();
+        String groupDisplayName = dungeonSetting.getDisplayName();
+        ItemStack icon = dungeonSetting.getIcon();
+        ItemMeta itemMeta = icon.getItemMeta();
+        if(isJoinIcon) {
+            itemMeta.setDisplayName(joinPrefix + groupDisplayName);
+            icon.setItemMeta(itemMeta);
+        } else {
+            icon = Util.createItem(Material.PAPER, leavePrefix + groupDisplayName, 40);
+        }
 
         setDataForJoinLeaveIcon(dungeonGroup, icon, dungeonPlayer);
         return icon;

@@ -60,6 +60,13 @@ public class LevelSystem extends JavaPlugin
 	}
 
 	public void onDisable() {
+		for(LevelPlayer levelPlayer:players.values()) {
+			try {
+				configManager.savePlayerConfig(levelPlayer.getPlayer());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		Bukkit.getConsoleSender().sendMessage("§a[LevelSystem] §e等级系统卸载完毕");
 	}
 

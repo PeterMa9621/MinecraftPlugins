@@ -5,10 +5,12 @@ import java.util.List;
 public class LevelReward {
     private int level;
     private List<String> commands;
+    private String msg;
 
-    public LevelReward(int level, List<String> commands) {
+    public LevelReward(int level, List<String> commands, String msg) {
         this.level = level;
         this.commands = commands;
+        this.msg = msg;
     }
 
     public int getLevel() {
@@ -17,5 +19,9 @@ public class LevelReward {
 
     public List<String> getCommands() {
         return commands;
+    }
+
+    public String getMsg() {
+        return msg;
     }
 }

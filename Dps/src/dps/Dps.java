@@ -98,21 +98,16 @@ public class Dps extends JavaPlugin
 				if(sender.isOp())
 				{
 					sender.sendMessage("§a=========[DPS系统]=========");
-					sender.sendMessage("§a/dps start §3启动该玩家的队伍DPS模式");
-					sender.sendMessage("§a/dps end §3关闭该玩家的队伍DPS模式");
-					sender.sendMessage("§a/dps start [玩家名] §3启动该玩家DPS模式");
-					sender.sendMessage("§a/dps close [玩家名] §3关闭该玩家DPS模式");
-					sender.sendMessage("§a/dps put [玩家名] [队伍名] §3将该玩家放入另一个队伍中");
+					sender.sendMessage("§a/dps reload §3重载配置");
 				}
 				return true;
 			}
 
-			if(args.length > 0){
-				if(args[0].equalsIgnoreCase("reload")){
-					ConfigUtil.loadConfig(this);
-					sender.sendMessage("§a[Dps] §e配置重载成功");
-				}
+			if(args[0].equalsIgnoreCase("reload")){
+				ConfigUtil.loadConfig(this);
+				sender.sendMessage("§a[Dps] §e配置重载成功");
 			}
+
 			return true;
 		}
 		return false;

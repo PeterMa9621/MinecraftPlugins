@@ -120,7 +120,7 @@ public class GuiListener implements Listener
 				Bukkit.getPluginManager().callEvent(event);
 
 				if(!dungeonGroup.isLeader(dungeonPlayer))
-					itemStack = GuiManager.createJoinIcon(dungeonGroup, dungeonPlayer);
+					itemStack = GuiManager.createGroupIcon(dungeonGroup, dungeonPlayer, true);
 				else {
 					itemStack = null;
 					inventory.setItem(GuiManager.startDungeonIndex, null);
@@ -130,7 +130,7 @@ public class GuiListener implements Listener
 			else {
 				if(!dungeonGroup.isFull()) {
 					if(dungeonGroup.addPlayer(dungeonPlayer)) {
-						itemStack = GuiManager.createLeaveIcon(dungeonGroup, dungeonPlayer);
+						itemStack = GuiManager.createGroupIcon(dungeonGroup, dungeonPlayer, false);
 					} else {
 						showNotificationOnLore(itemStack, GuiManager.minLevelNotSatisfy);
 					}

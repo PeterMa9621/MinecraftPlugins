@@ -104,6 +104,13 @@ public class VipSystem extends JavaPlugin
 
 	public void onDisable() 
 	{
+		for (VipPlayer vipPlayer:players.values()) {
+			try {
+				configLoader.savePlayerConfig(vipPlayer);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 		Bukkit.getConsoleSender().sendMessage("§a[vipSystem] §e会员系统卸载完毕");
 	}
 	
