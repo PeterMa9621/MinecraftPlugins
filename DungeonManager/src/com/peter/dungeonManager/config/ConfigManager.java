@@ -26,16 +26,6 @@ public class ConfigManager {
 
             config.set("maxInstancePerDungeon", 2);
             config.set("startGameDelay", 30);
-            config.set("dungeons.lieyanwang.displayName", "&c烈焰王");
-            config.set("dungeons.lieyanwang.minPlayers", 2);
-            config.set("dungeons.lieyanwang.maxPlayers", 4);
-            config.set("dungeons.lieyanwang.minLevel", 10);
-            config.set("dungeons.lieyanwang.icon.id", "PAPER");
-            config.set("dungeons.lieyanwang.icon.model", 32);
-
-            config.set("dungeons.anjinshushi.displayName", "&c暗金术士");
-            config.set("dungeons.anjinshushi.minPlayers", 2);
-            config.set("dungeons.anjinshushi.maxPlayers", 4);
 
             try {
                 config.save(file);
@@ -51,30 +41,45 @@ public class ConfigManager {
         config = load(file);
         maxInstancePerDungeon = config.getInt("maxInstancePerDungeon", 2);
         startGameDelay = config.getInt("startGameDelay", 30);
+
+        File dungeonsXLMapDir = new File(plugin.getDataFolder().getParentFile().getAbsolutePath() + "/DungeonsXL/maps");
         int numDungeon = 0;
-        ConfigurationSection dungeonConfig = config.getConfigurationSection("dungeons");
-        if(dungeonConfig!=null){
-            for(String dungeonName:dungeonConfig.getKeys(false)){
-                String displayName = dungeonConfig.getString(dungeonName + ".displayName").replace("&", "§");
-                int minPlayers = dungeonConfig.getInt(dungeonName + ".minPlayers", 1);
-                int maxPlayers = dungeonConfig.getInt(dungeonName + ".maxPlayers", 4);
-                int minLevel = dungeonConfig.getInt(dungeonName + ".minLevel", 1);
-
-                DungeonSetting dungeonSetting = new DungeonSetting(dungeonName, displayName, minPlayers, maxPlayers, minLevel);
-
-                if(dungeonConfig.contains(dungeonName + ".icon")) {
-                    String itemId = dungeonConfig.getString(dungeonName + ".icon.id");
-                    int customModelId = dungeonConfig.getInt(dungeonName + ".icon.model", 0);
-                    ItemStack icon = Util.createItem(Material.getMaterial(itemId.toUpperCase()), "§f创建" + displayName + "§f的队伍", customModelId);
-                    dungeonSetting.setIcon(icon);
-                }
-
-                DataManager.dungeonGroupSetting.put(dungeonName, dungeonSetting);
-                numDungeon ++;
-            }
+        for(File mapDir:dungeonsXLMapDir.listFiles()){
+            if(mapDir.getName().equalsIgnoreCase(".raw"))
+                continue;
+            if(loadMapConfig(mapDir))
+                numDungeon++;
         }
-
         Bukkit.getConsoleSender().sendMessage("§a[DungeonManager] §e已加载" + numDungeon + "个副本");
+    }
+
+    private static Boolean loadMapConfig(File file) {
+        File configFile = new File(file, "/config.yml");
+
+        if(!configFile.exists())
+            return false;
+        FileConfiguration config = load(configFile);
+        String dungeonName = file.getName();
+        String displayName = config.getString("title.title", "§6副本").replace("&", "§");
+        ConfigurationSection dungeonConfig = config.getConfigurationSection("dungeonManager");
+        if(dungeonConfig!=null){
+            int minPlayers = dungeonConfig.getInt("minPlayers", 1);
+            int maxPlayers = dungeonConfig.getInt("maxPlayers", 4);
+            int minLevel = dungeonConfig.getInt("minLevel", 1);
+
+            DungeonSetting dungeonSetting = new DungeonSetting(dungeonName, displayName, minPlayers, maxPlayers, minLevel);
+
+            if(dungeonConfig.contains("icon")) {
+                String itemId = dungeonConfig.getString("icon.id");
+                int customModelId = dungeonConfig.getInt("icon.model", 0);
+                ItemStack icon = Util.createItem(Material.getMaterial(itemId.toUpperCase()), "§f创建" + displayName + "§f的队伍", customModelId);
+                dungeonSetting.setIcon(icon);
+            }
+
+            DataManager.dungeonGroupSetting.put(dungeonName, dungeonSetting);
+            return true;
+        }
+        return false;
     }
 
     public static FileConfiguration load(File file)
