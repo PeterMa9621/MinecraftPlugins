@@ -1,8 +1,12 @@
 package clockGUI;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -13,6 +17,8 @@ import clockGUI.ClockGUI;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 
 public class EventListen implements Listener 
@@ -46,21 +52,26 @@ public class EventListen implements Listener
 		if((event.getAction()==Action.RIGHT_CLICK_BLOCK)||
 				(event.getAction()==Action.RIGHT_CLICK_AIR))
 		{
-			if(event.getPlayer().getItemInHand().getType()==null || 
-					event.getPlayer().getItemInHand().getType()==Material.AIR)
+			Player player = event.getPlayer();
+			World world = player.getWorld();
+			if(!plugin.enableWorlds.contains(world.getName()))
 				return;
-			if(!event.getPlayer().getItemInHand().getItemMeta().hasLore())
+
+			ItemStack itemStack = event.getPlayer().getInventory().getItemInMainHand();
+			ItemMeta itemMeta = itemStack.getItemMeta();
+			if(itemStack.getType()==Material.AIR)
 				return;
-			if(!event.getPlayer().getItemInHand().getItemMeta().hasDisplayName())
+			if(!itemMeta.hasLore())
 				return;
-			if(event.getPlayer().getItemInHand().getItemMeta().getDisplayName().
+			if(!itemMeta.hasDisplayName())
+				return;
+			if(itemMeta.getDisplayName().
 					equals(plugin.clock.getItemMeta().getDisplayName()))
 			{
-				if(event.getPlayer().getItemInHand().getItemMeta().getLore().
-						equals(plugin.clock.getItemMeta().getLore()))
+				if(itemMeta.getLore().equals(plugin.clock.getItemMeta().getLore()))
 				{
-					Player player = event.getPlayer();
-					Inventory inv = plugin.initInventory(player, plugin.guiNameList.get(0), plugin.list.get(0), 0);
+					int guiNumber = 0;
+					Inventory inv = plugin.initInventory(player, plugin.guiNameList.get(guiNumber), plugin.list.get(guiNumber), guiNumber);
 					player.openInventory(inv);
 				}
 			}
@@ -103,12 +114,14 @@ public class EventListen implements Listener
 			if(event.getInventory().getItem(event.getRawSlot())==null)
 				return;
 
+
+			ClockGuiItem clockGuiItem = plugin.list.get(index).get(event.getRawSlot());
 			// ====================================
 			// Check if the player has enough money
 			// ====================================
-			int money = plugin.list.get(index).get(event.getRawSlot()).getMoney().getPrice();
+			int money = clockGuiItem.getMoney().getPrice();
 
-			if(plugin.list.get(index).get(event.getRawSlot()).getMoney().getCostType().equalsIgnoreCase("Money") 
+			if(clockGuiItem.getMoney().getCostType().equalsIgnoreCase("Money")
 					&& plugin.isEco)
 			{
 				if(money!=0)
@@ -125,7 +138,7 @@ public class EventListen implements Listener
 					}
 				}
 			}
-			else if(plugin.list.get(index).get(event.getRawSlot()).getMoney().getCostType().equalsIgnoreCase("PlayerPoints")
+			else if(clockGuiItem.getMoney().getCostType().equalsIgnoreCase("PlayerPoints")
 					&& plugin.isPP)
 			{
 				if(money!=0)
@@ -146,20 +159,19 @@ public class EventListen implements Listener
 			// ==================================================
 			// Send Messages first if the player has enough money
 			// ==================================================
-			if(!plugin.list.get(index).get(event.getRawSlot()).getMessage().isEmpty())
+			if(!clockGuiItem.getMessage().isEmpty())
 			{
-				ArrayList<String> messageList = plugin.list.get(index).get(event.getRawSlot()).getMessage();
+				ArrayList<String> messageList = clockGuiItem.getMessage();
 				for(String i:messageList)
 				{
 					p.sendMessage(i);
 				}
 			}
 			
-			
 			// ============================================================
 			// Check if this player has already run out the number of times
 			// ============================================================
-			if(plugin.list.get(index).get(event.getRawSlot()).getFrequency()>=1)
+			if(clockGuiItem.getFrequency()>=1)
 			{
 				int usedNumber = 0;
 				PlayerData playerData = null;
@@ -176,7 +188,7 @@ public class EventListen implements Listener
 				usedNumber = playerData.getNumber(index, event.getRawSlot());
 				playerData.setNumber(index, event.getRawSlot(), usedNumber+1);
 				plugin.playerData.put(p.getName(), playerData);
-				if(plugin.list.get(index).get(event.getRawSlot()).getFrequency()<=usedNumber+1)
+				if(clockGuiItem.getFrequency()<=usedNumber+1)
 				{
 					event.getInventory().setItem(event.getRawSlot(), null);
 				}
@@ -185,16 +197,52 @@ public class EventListen implements Listener
 			// =====================================
 			// Check if the functions are both false
 			// =====================================
-			if(plugin.list.get(index).get(event.getRawSlot()).getFunction().getType().equalsIgnoreCase("none"))
+			if(clockGuiItem.getFunction().getType().equalsIgnoreCase("none"))
 				return;
 			
 			// ========================================
 			// Run functions depends on function's type
 			// ========================================
-			if(plugin.list.get(index).get(event.getRawSlot()).getFunction().getType().equalsIgnoreCase("command"))
+			if(clockGuiItem.getFunction().getType().equalsIgnoreCase("command"))
 			{
 				
-				for(String i:plugin.list.get(index).get(event.getRawSlot()).getFunction().getCommand())
+				for(String i:clockGuiItem.getFunction().getCommand())
+				{
+					if(i.contains("{ignoreOP}"))
+					{
+						if(p.hasPermission("clock.bypass"))
+						{
+							p.performCommand(i.replace("{ignoreOP}", "").replace("/", "").replace("{player}", event.getWhoClicked().getName()));
+						}
+						else
+						{
+							p.setOp(true);
+							p.performCommand(i.replace("{ignoreOP}", "").replace("/", "").replace("{player}", event.getWhoClicked().getName()));
+							p.setOp(false);
+						}
+					}
+					else
+					{
+						Bukkit.dispatchCommand(p, i.replace("/", ""));
+						//p.performCommand(i.replace("/", ""));
+					}
+				}
+			}
+
+			else if(clockGuiItem.getFunction().getType().equalsIgnoreCase("gui"))
+			{
+
+				int OpenGUINumber = clockGuiItem.getFunction().getGuiNumber();
+
+				Inventory inv = plugin.initInventory(p, plugin.guiNameList.get(OpenGUINumber),
+						plugin.list.get(OpenGUINumber), OpenGUINumber);
+
+				p.openInventory(inv);
+			}
+
+			else if(clockGuiItem.getFunction().getType().equalsIgnoreCase("guiAndCommand"))
+			{
+				for(String i:clockGuiItem.getFunction().getCommand())
 				{
 					if(i.contains("{ignoreOP}"))
 					{
@@ -215,56 +263,14 @@ public class EventListen implements Listener
 					}
 				}
 				
-				return;
-			}
-
-			else if(plugin.list.get(index).get(event.getRawSlot()).getFunction().getType().equalsIgnoreCase("gui"))
-			{
-
-				int OpenGUINumber = plugin.list.get(index).get(event.getRawSlot()).getFunction().getGuiNumber();
+				int OpenGUINumber = clockGuiItem.getFunction().getGuiNumber();
 
 				Inventory inv = plugin.initInventory(p, plugin.guiNameList.get(OpenGUINumber),
 						plugin.list.get(OpenGUINumber), OpenGUINumber);
 
 				p.openInventory(inv);
-				return;
 			}
-			
-			else if(plugin.list.get(index).get(event.getRawSlot()).getFunction().getType().equalsIgnoreCase("guiAndCommand"))
-			{
-				for(String i:plugin.list.get(index).get(event.getRawSlot()).getFunction().getCommand())
-				{
-					if(i.contains("{ignoreOP}"))
-					{
-						if(p.hasPermission("clock.bypass"))
-						{
-							p.performCommand(i.replace("{ignoreOP}", "").replace("/", "").replace("{player}", event.getWhoClicked().getName()));
-						}
-						else
-						{
-							p.setOp(true);
-							p.performCommand(i.replace("{ignoreOP}", "").replace("/", "").replace("{player}", event.getWhoClicked().getName()));
-							p.setOp(false);
-						}
-					}
-					else
-					{
-						p.performCommand(i.replace("/", ""));
-					}
-				}
-				
-				int OpenGUINumber = plugin.list.get(index).get(event.getRawSlot()).getFunction().getGuiNumber();
-
-				Inventory inv = plugin.initInventory(p, plugin.guiNameList.get(OpenGUINumber),
-						plugin.list.get(OpenGUINumber), OpenGUINumber);
-
-				p.openInventory(inv);
-				return;
-			}
-
 		}
-		
 	}
-
 }
 

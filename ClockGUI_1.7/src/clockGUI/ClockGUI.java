@@ -1,22 +1,10 @@
 package clockGUI;
 
-import org.bukkit.NamespacedKey;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import clockGUI.EventListen;
 import net.milkbowl.vault.economy.Economy;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import org.black_ixx.playerpoints.PlayerPoints;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-//import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -26,6 +14,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+//import org.bukkit.Location;
 
 public class ClockGUI extends JavaPlugin
 {
@@ -36,12 +35,15 @@ public class ClockGUI extends JavaPlugin
 	HashMap<Integer, HashMap<Integer, ClockGuiItem>> list = new HashMap<Integer, HashMap<Integer, ClockGuiItem>>();
 	
 	HashMap<String, PlayerData> playerData = new HashMap<String, PlayerData>();
+	public List<String> enableWorlds;
 	
 	boolean autoGetClock = false;
+	public int dungeonOpenGui = -1;
 	
 	public Economy economy;
 	boolean isEco;
 	boolean isPP = true;
+	boolean useDps = true;
 	
 	public PlayerPoints playerPoints;
 	
@@ -68,15 +70,16 @@ public class ClockGUI extends JavaPlugin
 		{
 			isEco=setupEconomy();
 		}
-		if(isEco==false)
+		if(!isEco)
 		{
 			Bukkit.getConsoleSender().sendMessage("§a[ClockGUI] §4Valut未加载!");
 		}
-		if(hookPlayerPoints()==false)
+		if(!hookPlayerPoints())
 		{
 			Bukkit.getConsoleSender().sendMessage("§a[ClockGUI] §4PlayerPoints未加载!");
 			isPP = false;
 		}
+
 		if(!getDataFolder().exists())
 		{
 			getDataFolder().mkdir();
@@ -177,6 +180,10 @@ public class ClockGUI extends JavaPlugin
 			config.set("Clock.AutoGetClock", true);
 			config.set("Clock.Name", "§a钟表菜单");
 			config.set("Clock.Lore", "§1我的世界钟表菜单%§2右键我打开菜单");
+			config.set("Clock.World", new ArrayList<String>() {{
+				add("world");
+			}}.toArray());
+			config.set("Clock.DungeonOpen", 4);
 			
 			config.set("GUI.0.Name", "§1我的世界钟表菜单");
 			config.set("GUI.0.Item.1.Position", 1);
@@ -188,6 +195,7 @@ public class ClockGUI extends JavaPlugin
 			//config.set("GUI.0.Item.1.HideEnchant", true);
 			config.set("GUI.0.Item.1.Cost.Type", "Money");
 			config.set("GUI.0.Item.1.Cost.Price", 1000);
+			config.set("GUI.0.Item.1.BanInDungeon", true);
 			config.set("GUI.0.Item.1.Message", "§a你已按下这个按钮%§c测试");
 			config.set("GUI.0.Item.1.Frequency", 1);
 			config.set("GUI.0.Item.1.Function.OpenAnotherGUI.Use", true);
@@ -245,6 +253,8 @@ public class ClockGUI extends JavaPlugin
 			clockLore.add(i);
 		}
 		clock = setItem(clock, clockName, clockLore, "CLOCK");
+		dungeonOpenGui = config.getInt("Clock.DungeonOpen", -1);
+		enableWorlds = config.getStringList("Clock.World");
 
 		for(int i=0; config.contains("GUI."+i); i++)
 		{
@@ -270,6 +280,7 @@ public class ClockGUI extends JavaPlugin
 				int price = config.getInt("GUI."+i+".Item."+(x+1)+".Cost.Price");
 				String message = config.getString("GUI."+i+".Item."+(x+1)+".Message");
 				int frequency = config.getInt("GUI."+i+".Item."+(x+1)+".Frequency");
+				Boolean banInDungeon = config.getBoolean("GUI."+i+".Item."+(x+1)+".BanInDungeon", false);
 				
 				ArrayList<String> commandList = new ArrayList<String>();
 				ItemStack item = null;
@@ -316,7 +327,7 @@ public class ClockGUI extends JavaPlugin
 					function = new Function("none", null);
 				}
 				
-				ClockGuiItem guiItem = new ClockGuiItem(item, function, money, message, frequency);
+				ClockGuiItem guiItem = new ClockGuiItem(item, function, money, message, frequency, banInDungeon);
 				
 				guiList.put(position, guiItem);
 
@@ -442,10 +453,19 @@ public class ClockGUI extends JavaPlugin
 	{
 		if (cmd.getName().equalsIgnoreCase("clock")) 
 		{
-			if (args.length==0)
+			if(args.length==0) {
+				if (sender instanceof Player) {
+					Player p = (Player)sender;
+					Inventory inv = initInventory(p, guiNameList.get(0), list.get(0), 0);
+					p.openInventory(inv);
+				}
+				return true;
+			}
+			if (args[0].equalsIgnoreCase("help"))
 			{
 				sender.sendMessage("§a=======[钟表菜单]=======");
-				sender.sendMessage("§a/clock gui   §6打开界面");
+				sender.sendMessage("§a/clock   §6打开界面");
+				sender.sendMessage("§a/clock help  §6打开帮助");
 				if(sender.isOp())
 				{
 					sender.sendMessage("§a/clock give   §6给予钟表菜单");
@@ -455,7 +475,7 @@ public class ClockGUI extends JavaPlugin
 				}
 				return true;
 			}
-			
+
 			if (args[0].equalsIgnoreCase("delete"))
 			{
 				if (sender.isOp())
@@ -521,17 +541,6 @@ public class ClockGUI extends JavaPlugin
 				{
 					sender.sendMessage("§a[钟表菜单] §c没有权限！");
 				}
-			}
-			
-			if (args[0].equalsIgnoreCase("gui"))
-			{
-				if (sender instanceof Player)
-				{
-					Player p = (Player)sender;
-					Inventory inv = initInventory(p, guiNameList.get(0), list.get(0), 0);
-					p.openInventory(inv);
-				}
-				
 			}
 			
 			if (args[0].equalsIgnoreCase("give"))

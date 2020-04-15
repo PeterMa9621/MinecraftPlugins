@@ -11,7 +11,8 @@ public class ClockGuiItem
 	Money money = null;
 	ArrayList<String> message = new ArrayList<String>();
 	int frequency = 0;
-	public ClockGuiItem(ItemStack item, Function function, Money money, String message, int frequency)
+	Boolean isBannedInDungeon;
+	public ClockGuiItem(ItemStack item, Function function, Money money, String message, int frequency, Boolean isBannedInDungeon)
 	{
 		this.item = item;
 		this.function = function;
@@ -24,6 +25,7 @@ public class ClockGuiItem
 			}
 		}
 		this.frequency = frequency;
+		this.isBannedInDungeon = isBannedInDungeon;
 	}
 	
 	public int getFrequency()

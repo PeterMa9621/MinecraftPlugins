@@ -3,6 +3,10 @@ main: clockGUI.ClockGUI
 version: '1.3'
 api-version: '1.14'
 author: Jingyuan Ma
+softdepend:
+  - Dps
+  - PlayerPoints
+  - Vault
 commands:
   clock:
     description: Clock Command
