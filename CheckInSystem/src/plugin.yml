@@ -14,4 +14,6 @@ permissions:
   checkin.player: 
     default: true
 softdepend:
-  - sqlbuilder-3.0.0.jar
+  - PeterUtil
+  - Vault
+  - PlaceholderAPI

@@ -16,7 +16,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class GuiManager {
     public static final String teamGuiTitle = "§2加入副本队伍";
@@ -34,6 +33,8 @@ public class GuiManager {
     public static final String duplicateGroupNotification = ChatColor.RED + "你已经加入一个队伍了";
     public static final String notSatisfyRequirementNotification = "§c人数要求不满足,最少:§2%d§c人,最多:§2%d§c人";
     public static final String groupFullNotification = ChatColor.RED + "人数已满";
+    public static final String minLevelNotification = "§7最小等级要求:§6%d";
+    public static final String minLevelNotSatisfy = "§c你的等级不满足副本要求";
     public static DungeonManager plugin;
     public static final int inventorySize = 54;
     public static final int maxDungeonGroupPerPage = 45;
@@ -88,7 +89,7 @@ public class GuiManager {
         if(guiType.equals(GuiType.Team)) {
             putTeamInfoIntoInventory(restLength, firstIndex, dungeonPlayer, inventory);
         } else if(guiType.equals(GuiType.Dungeon)) {
-            putDungeonInfoIntoInventory(firstIndex, inventory);
+            putDungeonInfoIntoInventory(firstIndex, inventory, dungeonPlayer);
         }
 
         ItemStack refresh = Util.createItem(Material.PAPER, refreshTitle, 19);
@@ -113,13 +114,12 @@ public class GuiManager {
         ArrayList<DungeonGroup> dungeonGroups = DataManager.getDungeonGroups();
         for(int i=0; i<restNumGroups; i++){
             DungeonGroup dungeonGroup = dungeonGroups.get(firstIndex + i);
-            DungeonSetting dungeonSetting = dungeonGroup.getDungeonSetting();
 
             ItemStack icon;
             if(dungeonGroup.containsPlayer(dungeonPlayer)){
-                icon = createLeaveIcon(dungeonGroup);
+                icon = createLeaveIcon(dungeonGroup, dungeonPlayer);
             } else {
-                icon = createJoinIcon(dungeonGroup);
+                icon = createJoinIcon(dungeonGroup, dungeonPlayer);
             }
             inventory.setItem(count, icon);
 
@@ -130,7 +130,7 @@ public class GuiManager {
         inventory.setItem(createTeamIndex, createTeam);
     }
 
-    public static void putDungeonInfoIntoInventory(int firstIndex, Inventory inventory) {
+    public static void putDungeonInfoIntoInventory(int firstIndex, Inventory inventory, DungeonPlayer dungeonPlayer) {
         int count = 0;
         int i = 0;
         for(DungeonSetting dungeonSetting:DataManager.dungeonGroupSetting.values()){
@@ -138,8 +138,15 @@ public class GuiManager {
             if(i < firstIndex) {
                 continue;
             }
-            String displayName = ChatColor.RESET + "创建副本" + dungeonSetting.getDisplayName() + ChatColor.RESET + "队伍";
-            ItemStack icon = Util.createItem(Material.FEATHER, displayName, 29);
+            ItemStack icon = dungeonSetting.getIcon();
+            Util.setLoreForItem(icon, new ArrayList<String>() {{
+                int minLevel = dungeonSetting.getMinLevel();
+                add(String.format(minLevelNotification, minLevel));
+                Player player = dungeonPlayer.getPlayer();
+                if(!dungeonSetting.isSatisfyLevelRequirement(player)) {
+                    add(minLevelNotSatisfy);
+                }
+            }});
             Util.setPersistentData(icon,  new NamespacedKey(plugin, "dungeonName"), dungeonSetting.getDungeonName());
             inventory.setItem(count, icon);
             count++;
@@ -153,19 +160,19 @@ public class GuiManager {
         player.openInventory(createGui(player, guiType));
     }
 
-    public static ItemStack createJoinIcon(DungeonGroup dungeonGroup) {
+    public static ItemStack createJoinIcon(DungeonGroup dungeonGroup, DungeonPlayer dungeonPlayer) {
         String groupDisplayName = dungeonGroup.getDungeonSetting().getDisplayName();
         ItemStack icon = Util.createItem(Material.DIAMOND_SWORD, joinPrefix + groupDisplayName);
 
-        setDataForJoinLeaveIcon(dungeonGroup, icon);
+        setDataForJoinLeaveIcon(dungeonGroup, icon, dungeonPlayer);
         return icon;
     }
 
-    public static ItemStack createLeaveIcon(DungeonGroup dungeonGroup) {
+    public static ItemStack createLeaveIcon(DungeonGroup dungeonGroup, DungeonPlayer dungeonPlayer) {
         String groupDisplayName = dungeonGroup.getDungeonSetting().getDisplayName();
         ItemStack icon = Util.createItem(Material.DIAMOND_SWORD, leavePrefix + groupDisplayName, 16);
 
-        setDataForJoinLeaveIcon(dungeonGroup, icon);
+        setDataForJoinLeaveIcon(dungeonGroup, icon, dungeonPlayer);
         return icon;
     }
 
@@ -178,15 +185,19 @@ public class GuiManager {
         return null;
     }
 
-    public static void setDataForJoinLeaveIcon(DungeonGroup dungeonGroup, ItemStack icon) {
+    public static void setDataForJoinLeaveIcon(DungeonGroup dungeonGroup, ItemStack icon, DungeonPlayer dungeonPlayer) {
         ArrayList<String> lore = new ArrayList<String>() {{
+            DungeonSetting dungeonSetting = dungeonGroup.getDungeonSetting();
             add(ChatColor.RESET + "队伍: " + dungeonGroup.getGroupName());
-            add(numPeopleLore + dungeonGroup.getPlayers().size());
+            add(numPeopleLore + dungeonGroup.getPlayers().size() + "/" + dungeonSetting.getMaxPlayers());
             for(DungeonPlayer dungeonPlayer:dungeonGroup.getPlayers()) {
                 add(ChatColor.RESET + "成员: " + dungeonPlayer.getPlayer().getDisplayName());
             }
             if(dungeonGroup.isFull())
                 add(groupFullNotification);
+            if(!dungeonSetting.isSatisfyLevelRequirement(dungeonPlayer.getPlayer())){
+                add(minLevelNotSatisfy);
+            }
         }};
         Util.setLoreForItem(icon, lore);
         Util.setPersistentData(icon,  new NamespacedKey(plugin, "groupName"), dungeonGroup.getGroupName());

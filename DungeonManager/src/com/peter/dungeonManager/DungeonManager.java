@@ -9,6 +9,8 @@ import com.peter.dungeonManager.model.DungeonGroup;
 import com.peter.dungeonManager.util.DataManager;
 import com.peter.dungeonManager.util.GuiType;
 import com.peter.dungeonManager.util.Util;
+import levelSystem.API;
+import levelSystem.LevelSystem;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -19,6 +21,7 @@ import java.io.File;
 
 public class DungeonManager extends JavaPlugin
 {
+	public static API levelSystemAPI;
 	@Override
 	public void onEnable()
 	{
@@ -30,6 +33,9 @@ public class DungeonManager extends JavaPlugin
 			new DungeonManagerExpansion(this).register();
 		}
 
+		if(Bukkit.getPluginManager().getPlugin("LevelSystem") != null){
+			levelSystemAPI = ((LevelSystem) Bukkit.getPluginManager().getPlugin("LevelSystem")).getAPI();
+		}
 		// To do: add support for citizens
 		/*
 		if(Bukkit.getPluginManager().getPlugin("Citizens") == null) {

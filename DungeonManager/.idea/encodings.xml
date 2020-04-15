@@ -9,6 +9,7 @@
     <file url="file://$PROJECT_DIR$/src/com/peter/dungeonManager/gui/GuiListener.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/com/peter/dungeonManager/gui/GuiManager.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/com/peter/dungeonManager/model/DungeonGroup.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/peter/dungeonManager/model/DungeonSetting.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/com/peter/worldBoss/WorldBoss.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/com/peter/worldBoss/WorldBossListener.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/com/peter/worldBoss/config/ConfigManager.java" charset="GBK" />

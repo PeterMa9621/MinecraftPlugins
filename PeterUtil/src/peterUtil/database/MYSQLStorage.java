@@ -43,7 +43,7 @@ public class MYSQLStorage implements StorageInterface{
 
     @Override
     public void store(UUID uniqueId, HashMap<String, Object> data) throws IOException {
-        //data.put("id", uniqueId.toString());
+        data.put("id", uniqueId.toString());
 
         String[] keys = data.keySet().toArray(new String[0]);
         Object[] values = new Object[keys.length];
@@ -62,9 +62,16 @@ public class MYSQLStorage implements StorageInterface{
             for(int i=0; i<keys.length; i++){
                 statement.setObject(i+1, values[i]);
             }
-            statement.setObject(keys.length + 1, uniqueId.toString());
+            // statement.setObject(keys.length + 1, uniqueId.toString());
             statement.execute();
         } catch (SQLException e) {
+            data.remove("id");
+            keys = data.keySet().toArray(new String[0]);
+            values = new Object[keys.length];
+            for(int i=0; i<keys.length; i++){
+                values[i] = data.get(keys[i]);
+            }
+
             QueryBuilderInterface updateQueryBuilder = QueryBuilderFactory.getUpdateQueryBuilder();
             updateQueryBuilder = updateQueryBuilder.from(tableName).set(keys).where(new String[] {"id"});
             query = updateQueryBuilder.getQuery();

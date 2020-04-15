@@ -24,6 +24,7 @@ public class ConfigUtil {
         if(!file.exists()){
             config = load(file);
             for(int i=0; i<3; i++){
+                config.set("test"+(i+1)+".exp", "300-500");
                 config.set("test"+(i+1)+".bonusRewardProb", 0.005);
                 for(int j=0; j<4; j++){
                     config.set("test"+(i+1)+"."+(j+1)+".cmd", "give %player% diamond " + j);
@@ -49,6 +50,10 @@ public class ConfigUtil {
         int numReward = 0;
         for(String dungeonName:config.getKeys(false)){
             numDungeon ++;
+            String expString = config.getString(dungeonName+".exp", "10-100");
+            String[] expSplit = expString.split("-");
+            int minExp = Integer.parseInt(expSplit[0]);
+            int maxExp = Integer.parseInt(expSplit[1]);
             Double bonusRewardProb = config.getDouble(dungeonName+".bonusRewardProb", 0.005);
             ArrayList<Reward> rewards = new ArrayList<>();
             for(int i=0; config.contains(dungeonName+"."+(i+1)); i++){
@@ -67,7 +72,7 @@ public class ConfigUtil {
                 Reward reward = new Reward(chance, itemStack, cmd);
                 rewards.add(reward);
             }
-            RewardTable rewardTable = new RewardTable(dungeonName, rewards);
+            RewardTable rewardTable = new RewardTable(dungeonName, rewards, minExp, maxExp);
             rewardTable.setBonusRewardProb(bonusRewardProb);
             RewardBoxManager.rewards.put(dungeonName, rewardTable);
         }

@@ -45,7 +45,7 @@ public class ConfigManager
 			config.set("formula.coefficient", coefficients);
 
 			Double[] powers = new Double[] {2d,1.5d,1d};
-			config.set("formula.power.1", powers);
+			config.set("formula.power", powers);
 
 			String[] commands = new String[] {"eco give %player% 100", "give %player% diamond 16"};
 			for(int i=0; i<10; i++) {
@@ -108,6 +108,7 @@ public class ConfigManager
 		UUID uniqueId = player.getUniqueId();
 		LevelPlayer levelPlayer = plugin.players.get(uniqueId);
 		HashMap<String, Object> data = new HashMap<String, Object>() {{
+			put("name", player.getName());
 			put("current_exp", levelPlayer.getCurrentExp());
 			put("level", levelPlayer.getLevel());
 		}};

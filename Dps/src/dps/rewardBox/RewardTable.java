@@ -1,20 +1,22 @@
 package dps.rewardBox;
 
-import com.mysql.fabric.xmlrpc.base.Array;
-import org.bukkit.Bukkit;
-import org.bukkit.inventory.ItemStack;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Random;
 
 public class RewardTable {
     private String dungeonName;
     private ArrayList<Reward> rewards;
     private ArrayList<Double> probs;
     private Double bonusRewardProb = 0.005;
+    private int minExp;
+    private int maxExp;
 
-    public RewardTable(String dungeonName, ArrayList<Reward> rewards) {
+    public RewardTable(String dungeonName, ArrayList<Reward> rewards, int minExp, int maxExp) {
         this.dungeonName = dungeonName;
         this.rewards = rewards;
+        this.minExp = minExp;
+        this.maxExp = maxExp;
         convertToProbList();
     }
 
@@ -74,5 +76,10 @@ public class RewardTable {
             }
         }
         return rewards.get(0);
+    }
+
+    public int getRandomExp() {
+        Random random = new Random(Calendar.getInstance().getTimeInMillis());
+        return random.nextInt(maxExp - minExp) + minExp;
     }
 }

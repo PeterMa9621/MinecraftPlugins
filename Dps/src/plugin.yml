@@ -1,6 +1,6 @@
 name: Dps
 main: dps.Dps
-version: '1.3.2'
+version: '1.4.0'
 api-version: '1.14'
 author: Jingyuan Ma
 depend:

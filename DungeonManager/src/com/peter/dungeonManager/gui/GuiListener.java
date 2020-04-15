@@ -9,7 +9,6 @@ import com.peter.dungeonManager.util.DataManager;
 import com.peter.dungeonManager.util.GuiType;
 import com.peter.dungeonManager.util.Util;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -84,7 +83,7 @@ public class GuiListener implements Listener
 				case GuiManager.startDungeonIndex:
 					DungeonGroup dungeonGroup = dungeonPlayer.getDungeonGroup();
 					if(dungeonGroup!=null && dungeonGroup.isLeader(dungeonPlayer)){
-						if(dungeonGroup.isSatisfyRequirement()) {
+						if(dungeonGroup.isSatisfyNumRequirement()) {
 							DataManager.removeDungeonGroup(dungeonGroup);
 							dungeonGroup.startGame(plugin);
 							player.closeInventory();
@@ -115,29 +114,31 @@ public class GuiListener implements Listener
 				showNotificationOnLore(itemStack, GuiManager.missGroupNotification);
 				return;
 			}
-			DungeonSetting dungeonSetting = dungeonGroup.getDungeonSetting();
-
-			ItemStack joinDungeonIcon = null;
 			// Leave team
 			if(dungeonGroup.containsPlayer(dungeonPlayer)) {
 				LeaveGroupEvent event = new LeaveGroupEvent(dungeonPlayer);
 				Bukkit.getPluginManager().callEvent(event);
 
 				if(!dungeonGroup.isLeader(dungeonPlayer))
-					joinDungeonIcon = GuiManager.createJoinIcon(dungeonGroup);
-				else
+					itemStack = GuiManager.createJoinIcon(dungeonGroup, dungeonPlayer);
+				else {
+					itemStack = null;
 					inventory.setItem(GuiManager.startDungeonIndex, null);
+				}
 			}
 			// Join team
 			else {
 				if(!dungeonGroup.isFull()) {
-					dungeonGroup.addPlayer(dungeonPlayer);
-					joinDungeonIcon = GuiManager.createLeaveIcon(dungeonGroup);
+					if(dungeonGroup.addPlayer(dungeonPlayer)) {
+						itemStack = GuiManager.createLeaveIcon(dungeonGroup, dungeonPlayer);
+					} else {
+						showNotificationOnLore(itemStack, GuiManager.minLevelNotSatisfy);
+					}
 				} else {
 					showNotificationOnLore(itemStack, GuiManager.groupFullNotification);
 				}
 			}
-			inventory.setItem(index, joinDungeonIcon);
+			inventory.setItem(index, itemStack);
 		} else {
 			showNotificationOnLore(itemStack, GuiManager.duplicateGroupNotification);
 		}
@@ -149,9 +150,12 @@ public class GuiListener implements Listener
 		if(!dungeonPlayer.isInDungeonGroup()) {
 			DungeonSetting dungeonSetting = DataManager.dungeonGroupSetting.get(dungeonName);
 			DungeonGroup dungeonGroup = new DungeonGroup(dungeonPlayer.getPlayer().getName(), dungeonName, dungeonSetting, dungeonPlayer);
-			dungeonGroup.addPlayer(dungeonPlayer);
-			DataManager.addDungeonGroup(dungeonGroup);
-			GuiManager.openDungeonGui(dungeonPlayer.getPlayer(), GuiType.Team);
+			if(dungeonGroup.addPlayer(dungeonPlayer)) {
+				DataManager.addDungeonGroup(dungeonGroup);
+				GuiManager.openDungeonGui(dungeonPlayer.getPlayer(), GuiType.Team);
+			} else {
+				showNotificationOnLore(itemStack, GuiManager.minLevelNotSatisfy);
+			}
 		} else {
 			showNotificationOnLore(itemStack, GuiManager.duplicateGroupNotification);
 		}

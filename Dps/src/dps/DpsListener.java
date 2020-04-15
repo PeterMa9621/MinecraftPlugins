@@ -143,8 +143,16 @@ public class DpsListener implements Listener
 		if(pendingDpsPlayers.containsKey(world.getUID())){
 			pendingDpsPlayers.get(world.getUID()).forEach(dpsPlayer -> {
 				Dps.scoreBoard.getAPI().restartScoreBoard(dpsPlayer.getPlayer());
-				if(RewardBoxManager.getRewardTable(dpsPlayer.getDungeonName())!=null)
+				RewardTable rewardTable = RewardBoxManager.getRewardTable(dpsPlayer.getDungeonName());
+				if(rewardTable!=null) {
 					RewardBoxManager.showRewardBox(dpsPlayer);
+
+					String playerName = dpsPlayer.getPlayer().getName();
+					int exp = rewardTable.getRandomExp();
+					String command = String.format("level add %s %d", playerName, exp);
+					Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+				}
+
 				DpsPlayerManager.markPlayerExitDungeon(dpsPlayer.getPlayer());
 			});
 			pendingDpsPlayers.remove(world.getUID());

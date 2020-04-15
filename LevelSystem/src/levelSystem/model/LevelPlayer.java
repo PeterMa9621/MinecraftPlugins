@@ -59,7 +59,7 @@ public class LevelPlayer
 	}
 
 	public void levelUp(int overflowExp) {
-		this.currentExp += overflowExp;
+		this.currentExp = overflowExp;
 		this.level += 1;
 	}
 

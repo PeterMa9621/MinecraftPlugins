@@ -3,10 +3,13 @@ package com.peter.dungeonManager.config;
 import com.peter.dungeonManager.DungeonManager;
 import com.peter.dungeonManager.model.DungeonSetting;
 import com.peter.dungeonManager.util.DataManager;
+import com.peter.dungeonManager.util.Util;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +29,9 @@ public class ConfigManager {
             config.set("dungeons.lieyanwang.displayName", "&c烈焰王");
             config.set("dungeons.lieyanwang.minPlayers", 2);
             config.set("dungeons.lieyanwang.maxPlayers", 4);
+            config.set("dungeons.lieyanwang.minLevel", 10);
+            config.set("dungeons.lieyanwang.icon.id", "PAPER");
+            config.set("dungeons.lieyanwang.icon.model", 32);
 
             config.set("dungeons.anjinshushi.displayName", "&c暗金术士");
             config.set("dungeons.anjinshushi.minPlayers", 2);
@@ -52,8 +58,16 @@ public class ConfigManager {
                 String displayName = dungeonConfig.getString(dungeonName + ".displayName").replace("&", "§");
                 int minPlayers = dungeonConfig.getInt(dungeonName + ".minPlayers", 1);
                 int maxPlayers = dungeonConfig.getInt(dungeonName + ".maxPlayers", 4);
+                int minLevel = dungeonConfig.getInt(dungeonName + ".minLevel", 1);
 
-                DungeonSetting dungeonSetting = new DungeonSetting(dungeonName, displayName, minPlayers, maxPlayers);
+                DungeonSetting dungeonSetting = new DungeonSetting(dungeonName, displayName, minPlayers, maxPlayers, minLevel);
+
+                if(dungeonConfig.contains(dungeonName + ".icon")) {
+                    String itemId = dungeonConfig.getString(dungeonName + ".icon.id");
+                    int customModelId = dungeonConfig.getInt(dungeonName + ".icon.model", 0);
+                    ItemStack icon = Util.createItem(Material.getMaterial(itemId.toUpperCase()), "§f创建" + displayName + "§f的队伍", customModelId);
+                    dungeonSetting.setIcon(icon);
+                }
 
                 DataManager.dungeonGroupSetting.put(dungeonName, dungeonSetting);
                 numDungeon ++;

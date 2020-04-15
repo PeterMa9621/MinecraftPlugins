@@ -121,16 +121,38 @@ public class LevelSystem extends JavaPlugin
 				sender.sendMessage("§a/level §3查看当前等级");
 				sender.sendMessage("§a/level help §3查看帮助");
 				if(sender.isOp()) {
-					sender.sendMessage("§a/level clear [玩家名] §3清空该玩家总经验");
+					sender.sendMessage("§a/level add [玩家名] [数量] §3增加该玩家的经验");
+					sender.sendMessage("§a/level clear [玩家名] §3清空该玩家等级和经验");
 					sender.sendMessage("§a/level set [玩家名] [数量] §3设置玩家等级");
 					sender.sendMessage("§a/level reload §3重读配置");
 				}
 				return true;
 			}
-			
-			if(args[0].equalsIgnoreCase("clear")) {
-				if(!sender.isOp())
-					return true;
+
+			if(args[0].equalsIgnoreCase("add") && sender.isOp()) {
+				if(args.length==3) {
+					Player player = Bukkit.getPlayer(args[1]);
+					if(!args[2].matches("[0-9]*")) {
+						sender.sendMessage("§6[等级系统] §c等级必须是数字");
+						return true;
+					}
+					if(player==null) {
+						sender.sendMessage("§6[等级系统] §c玩家不存在或不在线");
+						return true;
+					}
+
+					LevelPlayer levelPlayer = players.get(player.getUniqueId());
+					levelPlayer.addExp(Integer.parseInt(args[2]));
+					sender.sendMessage("§6[等级系统] §a已为玩家§5"+args[1]+"§a增加§e" + args[2] + "§a点经验");
+					levelPlayer.getPlayer().sendMessage("§6获得§e" + args[2] + "§6点经验");
+				}
+				else {
+					sender.sendMessage("§4用法：§a/level add [玩家名] [数量] §3增加该玩家的经验");
+				}
+				return true;
+			}
+
+			if(args[0].equalsIgnoreCase("clear") && sender.isOp()) {
 				if(args.length==2) {
 					Player player = Bukkit.getPlayer(args[1]);
 					if(player!=null) {
@@ -147,18 +169,13 @@ public class LevelSystem extends JavaPlugin
 				return true;
 			}
 			
-			if(args[0].equalsIgnoreCase("reload")) {
-				if(!sender.isOp())
-					return true;
+			if(args[0].equalsIgnoreCase("reload") && sender.isOp()) {
 				configManager.loadConfig();
 				sender.sendMessage("§6[等级系统] §a重读配置成功");
 				return true;
 			}
 			
-			if(args[0].equalsIgnoreCase("set"))
-			{
-				if(!sender.isOp())
-					return true;
+			if(args[0].equalsIgnoreCase("set") && sender.isOp()) {
 				if(args.length==3)
 				{
 					Player player = Bukkit.getPlayer(args[1]);
