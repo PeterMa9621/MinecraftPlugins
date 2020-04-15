@@ -1,23 +1,23 @@
-package levelSystem;
+package levelSystem.event;
 
-import org.bukkit.entity.Player;
+import levelSystem.model.LevelPlayer;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 public class LevelUpEvent extends Event implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
-    private Player p;
+    private LevelPlayer levelPlayer;
     private boolean cancelled;
     
-    public LevelUpEvent(Player p) 
+    public LevelUpEvent(LevelPlayer levelPlayer)
     {
-        this.p = p;
+        this.levelPlayer = levelPlayer;
     }
 
-    public Player getPlayer() 
+    public LevelPlayer getPlayer()
     {
-        return p;
+        return levelPlayer;
     }
 
     @Override

@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="LevelSystem:jar">
+    <output-path>$PROJECT_DIR$/../../Project0/server/plugins</output-path>
+    <root id="archive" name="LevelSystem.jar">
+      <element id="module-output" name="LevelSystem" />
+    </root>
+  </artifact>
+</component>

@@ -12,12 +12,12 @@ public class PeterUtil extends JavaPlugin
 {
 	public void onEnable() 
 	{
-		Bukkit.getConsoleSender().sendMessage("§a[CheckInSystem] §ePeterUtil加载完毕");
+		Bukkit.getConsoleSender().sendMessage("§a[PeterUtil] §ePeterUtil加载完毕");
 	}
 
 	public void onDisable() 
 	{
-		Bukkit.getConsoleSender().sendMessage("§a[CheckInSystem] §ePeterUtil卸载完毕");
+		Bukkit.getConsoleSender().sendMessage("§a[PeterUtil] §ePeterUtil卸载完毕");
 	}
 	
 	public ItemStack createItem(String ID, int quantity, String displayName, String lore)

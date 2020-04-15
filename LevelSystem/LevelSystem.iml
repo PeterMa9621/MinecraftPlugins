@@ -14,20 +14,40 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="jdk" jdkName="JavaSE-1.8" jdkType="JavaSDK" />
+    <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="module-library">
-      <library name="craftbukkit-1.10.2-R0.1-SNAPSHOT-latest.jar">
+      <library>
         <CLASSES>
-          <root url="file://C:/用户目录/Desktop/马竞元文件夹/MinecraftServer/Server-1.10.2 Bukkit/craftbukkit-1.10.2-R0.1-SNAPSHOT-latest.jar" />
+          <root url="jar://$MODULE_DIR$/../spigot-1.15.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../spigot-1.15.2.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../Vault.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library">
-      <library name="Vault.jar">
+      <library>
         <CLASSES>
-          <root url="file://C:/用户目录/Desktop/马竞元文件夹/MinecraftServer/PaperSpigot-1.10.2/plugins/Vault.jar" />
+          <root url="jar://$MODULE_DIR$/../../Project0/server/plugins/PeterUtil.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../PlaceholderAPI-2.10.4.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

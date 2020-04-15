@@ -1,11 +1,18 @@
 name: LevelSystem
 main: levelSystem.LevelSystem
-version: 1.0
+version: '1.0'
+api-version: '1.15'
 author: Jingyuan Ma
+depend:
+  - PeterUtil
+softdepend:
+  - PlaceholderAPI
 commands:
   level:
     description: LevelSystem Commands
     usage: /level
+    aliases:
+      - ls
     permission-message: §c无权执行！
 permissions: 
   levelSystem.op: 

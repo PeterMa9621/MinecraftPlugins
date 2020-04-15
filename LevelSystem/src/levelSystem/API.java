@@ -1,8 +1,9 @@
 package levelSystem;
 
+import levelSystem.model.LevelPlayer;
 import org.bukkit.entity.Player;
 
-public class API 
+public class API
 {
 	LevelSystem plugin;
 	public API(LevelSystem plugin)
@@ -12,10 +13,9 @@ public class API
 	
 	public int getLevel(Player p)
 	{
-		if(plugin.player.containsKey(p.getName()))
-		{
-			PlayerData pd = plugin.player.get(p.getName());
-			return pd.getLevel();
+		if(plugin.players.containsKey(p.getUniqueId())) {
+			LevelPlayer levelPlayer = plugin.players.get(p.getUniqueId());
+			return levelPlayer.getLevel();
 		}
 		return 1;
 	}
