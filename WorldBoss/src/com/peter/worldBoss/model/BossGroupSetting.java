@@ -15,10 +15,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 
 public class BossGroupSetting {
     private String groupName;
-    private int dayOfWeek;
+    private List<Integer> dayOfWeek;
     private LocalTime startTime;
     private LocalDateTime prevStartTime = null;
     private String displayName = "";
@@ -30,7 +31,7 @@ public class BossGroupSetting {
     private WorldBoss plugin;
     private ItemStack icon;
 
-    public BossGroupSetting(String groupName, String startTimeString, int dayOfWeek, String startGameCmd, int minuteBefore, ItemStack icon, WorldBoss plugin) {
+    public BossGroupSetting(String groupName, String startTimeString, List<Integer> dayOfWeek, String startGameCmd, int minuteBefore, ItemStack icon, WorldBoss plugin) {
         this.groupName = groupName;
         this.startTime = LocalTime.parse(startTimeString, DateTimeFormatter.ofPattern("HH:mm"));
         this.dayOfWeek = dayOfWeek;
@@ -56,11 +57,11 @@ public class BossGroupSetting {
         this.startTime = startTime;
     }
 
-    public int getDayOfWeek() {
+    public List<Integer> getDayOfWeek() {
         return dayOfWeek;
     }
 
-    public void setDayOfWeek(int dayOfWeek) {
+    public void setDayOfWeek(List<Integer> dayOfWeek) {
         this.dayOfWeek = dayOfWeek;
     }
 
@@ -118,10 +119,7 @@ public class BossGroupSetting {
     public Boolean isTodayBossActivity() {
         LocalDateTime now = LocalDateTime.now();
         int nowDayOfWeek = now.getDayOfWeek().getValue();
-        if(this.dayOfWeek!=0 && nowDayOfWeek != this.dayOfWeek){
-            return false;
-        }
-        return true;
+        return !this.dayOfWeek.isEmpty() && this.dayOfWeek.contains(nowDayOfWeek);
     }
 
     public Boolean canStart() {

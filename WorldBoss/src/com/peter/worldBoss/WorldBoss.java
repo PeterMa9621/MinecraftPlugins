@@ -6,8 +6,10 @@ import com.peter.worldBoss.expansion.WorldBossExpansion;
 
 import com.peter.worldBoss.gui.GuiListener;
 import com.peter.worldBoss.gui.GuiManager;
+import com.peter.worldBoss.manager.BossGroupManager;
 import com.peter.worldBoss.model.BossGroup;
 import com.peter.worldBoss.model.BossGroupSetting;
+import com.peter.worldBoss.model.BossPlayer;
 import de.erethon.dungeonsxl.api.DungeonsAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -21,12 +23,10 @@ import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
+import java.util.UUID;
 
 public class WorldBoss extends JavaPlugin
 {
-	public static HashMap<String, BossGroupSetting> bossGroupSetting = new HashMap<>();
-	public static HashMap<String, BossGroup> bossGroups = new HashMap<>();
-
 	public BukkitTask timer;
 	@Override
 	public void onEnable()
@@ -56,6 +56,8 @@ public class WorldBoss extends JavaPlugin
 				GuiManager.openWorldBossGui(player);
 				return true;
 			} else {
+				if(!sender.isOp())
+					return true;
 				if(args[0].equalsIgnoreCase("reload")){
 					ConfigManager.loadConfig(this);
 
@@ -79,7 +81,7 @@ public class WorldBoss extends JavaPlugin
 			@Override
 			public void run() {
 				LocalDateTime now = LocalDateTime.now();
-				for(BossGroupSetting setting:bossGroupSetting.values()){
+				for(BossGroupSetting setting: BossGroupManager.bossGroupSetting.values()){
 					if(!setting.isTodayBossActivity())
 						continue;
 					if(setting.isStartedToday())
@@ -89,10 +91,10 @@ public class WorldBoss extends JavaPlugin
 					if(setting.canStart()){
 						setting.setPrevStartTime(now);
 						Bukkit.broadcastMessage("§6[世界Boss] §2世界BOSS活动§5" + setting.getDisplayName() + "§2开始了!");
-						BossGroup bossGroup = bossGroups.get(setting.getGroupName());
+						BossGroup bossGroup = BossGroupManager.bossGroups.get(setting.getGroupName());
 						if(bossGroup!=null){
 							bossGroup.startGame(setting.getStartGameCmd(), WorldBoss.this);
-							bossGroups.remove(bossGroup.getGroupName());
+							BossGroupManager.bossGroups.remove(bossGroup.getGroupName());
 						}
 					}
 				}

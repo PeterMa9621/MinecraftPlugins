@@ -2,6 +2,7 @@ package com.peter.worldBoss.gui;
 
 import com.peter.worldBoss.WorldBoss;
 import com.peter.worldBoss.config.ConfigManager;
+import com.peter.worldBoss.manager.BossGroupManager;
 import com.peter.worldBoss.model.BossGroup;
 import com.peter.worldBoss.model.BossGroupSetting;
 import com.peter.worldBoss.util.Util;
@@ -28,14 +29,14 @@ public class GuiManager {
     public static Inventory createGui(Player player) {
         Inventory inventory = Bukkit.createInventory(null, inventorySize, GuiTitle);
         int count = 0;
-        for(BossGroupSetting setting: WorldBoss.bossGroupSetting.values()){
+        for(BossGroupSetting setting: BossGroupManager.bossGroupSetting.values()){
             if(setting.isComingSoon()){
                 String groupName = setting.getGroupName();
-                BossGroup bossGroup = WorldBoss.bossGroups.get(groupName);
+                BossGroup bossGroup = BossGroupManager.bossGroups.get(groupName);
 
                 if(bossGroup == null){
                     bossGroup = new BossGroup(groupName);
-                    WorldBoss.bossGroups.put(groupName, bossGroup);
+                    BossGroupManager.bossGroups.put(groupName, bossGroup);
                 }
 
                 ItemStack icon;

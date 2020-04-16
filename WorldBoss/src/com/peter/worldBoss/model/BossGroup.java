@@ -1,6 +1,7 @@
 package com.peter.worldBoss.model;
 
 import com.peter.worldBoss.WorldBoss;
+import com.peter.worldBoss.manager.BossGroupManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -9,7 +10,7 @@ import java.util.ArrayList;
 
 public class BossGroup {
     private String groupName;
-    private ArrayList<Player> players;
+    private ArrayList<BossPlayer> players;
 
     public BossGroup(String groupName) {
         this.groupName = groupName;
@@ -24,20 +25,24 @@ public class BossGroup {
         this.groupName = groupName;
     }
 
-    public ArrayList<Player> getPlayers() {
+    public ArrayList<BossPlayer> getPlayers() {
         return players;
     }
 
-    public void addPlayer(Player player) {
+    public void addPlayer(BossPlayer player) {
         this.players.add(player);
     }
 
-    public void removePlayer(Player player) {
+    public void removePlayer(BossPlayer player) {
         this.players.remove(player);
     }
 
-    public Boolean containsPlayer(Player player) {
+    public Boolean containsPlayer(BossPlayer player) {
         return players.contains(player);
+    }
+
+    public Boolean containsPlayer(Player player) {
+        return BossGroupManager.containPlayer(player, this);
     }
 
     public void startGame(String startGameCmd, WorldBoss plugin) {
@@ -48,12 +53,13 @@ public class BossGroup {
         if(numPlayer<=0){
             return;
         }
-        Player leader = this.players.get(0);
+        BossPlayer bossPlayer = this.players.get(0);
+        Player leader = bossPlayer.getPlayer();
 
         dispatchDungeonCommand(leader, false, plugin);
 
         for(int i=1; i<numPlayer; i++){
-            dispatchDungeonCommand(players.get(i), true, plugin);
+            dispatchDungeonCommand(players.get(i).getPlayer(), true, plugin);
         }
         dispatchStartGameCommand(leader, startGameCmd, plugin);
     }
@@ -67,11 +73,11 @@ public class BossGroup {
         }
 
         if(isJoin){
-            Bukkit.dispatchCommand(player, "dxl leave " + this.groupName);
+            //Bukkit.dispatchCommand(player, "dxl leave " + this.groupName);
             Bukkit.dispatchCommand(player, "dxl group join " + this.groupName);
         }
         else{
-            Bukkit.dispatchCommand(player, "dxl leave " + this.groupName);
+            //Bukkit.dispatchCommand(player, "dxl leave " + this.groupName);
             Bukkit.dispatchCommand(player, "dxl group create " + this.groupName);
         }
 

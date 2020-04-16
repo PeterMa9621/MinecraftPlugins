@@ -1,9 +1,12 @@
 package com.peter.worldBoss.gui;
 
 import com.peter.worldBoss.WorldBoss;
+import com.peter.worldBoss.manager.BossGroupManager;
 import com.peter.worldBoss.model.BossGroup;
 import com.peter.worldBoss.model.BossGroupSetting;
+import com.peter.worldBoss.util.GroupResponse;
 import com.peter.worldBoss.util.Util;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -14,6 +17,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.ArrayList;
 
 public class GuiListener implements Listener
 {
@@ -48,16 +53,29 @@ public class GuiListener implements Listener
 				}
 
 				String groupName = Util.getPersistentData(itemStack, new NamespacedKey(plugin, "groupName"));
-				BossGroup bossGroup = WorldBoss.bossGroups.get(groupName);
+				BossGroup bossGroup = BossGroupManager.bossGroups.get(groupName);
 				ItemStack icon;
-				BossGroupSetting setting = WorldBoss.bossGroupSetting.get(bossGroup.getGroupName());
-				if(bossGroup.containsPlayer(player)){
-					bossGroup.removePlayer(player);
-					icon = GuiManager.createJoinIcon(bossGroup, setting);
+				if(bossGroup!=null) {
+					BossGroupSetting setting = BossGroupManager.bossGroupSetting.get(bossGroup.getGroupName());
+					GroupResponse groupResponse = BossGroupManager.joinGroup(player, bossGroup);
+					if(groupResponse.equals(GroupResponse.joinSameGroup)){
+						icon = GuiManager.createJoinIcon(bossGroup, setting);
+					} else if(groupResponse.equals(GroupResponse.canJoin)) {
+						icon = GuiManager.createLeaveIcon(bossGroup, setting.getDisplayName());
+					} else {
+						Util.setLoreForItem(itemStack, new ArrayList<String>() {{
+							add(ChatColor.RED + "你已经加入一个队伍了!");
+						}});
+						icon = itemStack;
+					}
 				} else {
-					bossGroup.addPlayer(player);
-					icon = GuiManager.createLeaveIcon(bossGroup, setting.getDisplayName());
+					Util.setLoreForItem(itemStack, new ArrayList<String>() {{
+						add(ChatColor.RED + "这个活动" + ChatColor.GREEN + "已经" + ChatColor.RED + "开始了!");
+					}});
+					icon = itemStack;
 				}
+
+
 				event.getInventory().setItem(index, icon);
 			}
 		}
@@ -66,9 +84,6 @@ public class GuiListener implements Listener
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent event) {
 		Player player = event.getPlayer();
-		for(BossGroup bossGroup:WorldBoss.bossGroups.values()){
-			if(bossGroup.containsPlayer(player))
-				bossGroup.removePlayer(player);
-		}
+		BossGroupManager.leaveGroup(player);
 	}
 }

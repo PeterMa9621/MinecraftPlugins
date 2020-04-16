@@ -15,6 +15,7 @@ public class Util {
     public static ItemStack createItem(Material material, String displayName, int customModelData) {
         ItemStack itemStack = new ItemStack(material);
         ItemMeta itemMeta = itemStack.getItemMeta();
+        assert itemMeta != null;
         itemMeta.setDisplayName(displayName);
         itemMeta.setCustomModelData(customModelData);
         itemMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
@@ -25,6 +26,7 @@ public class Util {
     public static ItemStack createItem(Material material, String displayName) {
         ItemStack itemStack = new ItemStack(material);
         ItemMeta itemMeta = itemStack.getItemMeta();
+        assert itemMeta != null;
         itemMeta.setDisplayName(displayName);
         itemMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         itemStack.setItemMeta(itemMeta);
@@ -33,23 +35,27 @@ public class Util {
 
     public static void setLoreForItem(ItemStack item, ArrayList<String> lore) {
         ItemMeta itemMeta = item.getItemMeta();
+        assert itemMeta != null;
         itemMeta.setLore(lore);
         item.setItemMeta(itemMeta);
     }
 
     public static void setPersistentData(ItemStack item, NamespacedKey key, String value) {
         ItemMeta itemMeta = item.getItemMeta();
+        assert itemMeta != null;
         itemMeta.getPersistentDataContainer().set(key, PersistentDataType.STRING, value);
         item.setItemMeta(itemMeta);
     }
 
     public static String getPersistentData(ItemStack item, NamespacedKey key) {
         ItemMeta itemMeta = item.getItemMeta();
+        assert itemMeta != null;
         return itemMeta.getPersistentDataContainer().get(key, PersistentDataType.STRING);
     }
 
     public static void setDisplayName(ItemStack item, String displayName) {
         ItemMeta itemMeta = item.getItemMeta();
+        assert itemMeta != null;
         itemMeta.setDisplayName(displayName);
         item.setItemMeta(itemMeta);
     }

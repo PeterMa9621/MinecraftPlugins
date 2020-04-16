@@ -12,6 +12,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
@@ -188,7 +189,9 @@ public class ClockGUI extends JavaPlugin
 			config.set("GUI.0.Name", "§1我的世界钟表菜单");
 			config.set("GUI.0.Item.1.Position", 1);
 			config.set("GUI.0.Item.1.ItemID", "CLOCK");
+			config.set("GUI.0.Item.1.Model", 0);
 			config.set("GUI.0.Item.1.Name", "示例1");
+			config.set("GUI.0.Item.1.HideItem", false);
 			config.set("GUI.0.Item.1.Lore", "这是第一行%这是第二行%这是第三行");
 			config.set("GUI.0.Item.1.Enchantment.ID", "fortune");
 			config.set("GUI.0.Item.1.Enchantment.Level", 1);
@@ -270,8 +273,10 @@ public class ClockGUI extends JavaPlugin
 				
 				int position = config.getInt("GUI."+i+".Item."+(x+1)+".Position");
 				String itemID = config.getString("GUI."+i+".Item."+(x+1)+".ItemID");
+				int customModelId = config.getInt("GUI."+i+".Item."+(x+1)+".Model", 0);
+				Boolean hideItem = config.getBoolean("GUI."+i+".Item."+(x+1)+".HideItem", false);
 				String itemName = config.getString("GUI."+i+".Item."+(x+1)+".Name");
-				String itemLore = config.getString("GUI."+i+".Item."+(x+1)+".Lore");
+				String itemLore = config.getString("GUI."+i+".Item."+(x+1)+".Lore", "");
 				Boolean openGUI = config.getBoolean("GUI."+i+".Item."+(x+1)+".Function.OpenAnotherGUI.Use");
 				int guiNumber = config.getInt("GUI."+i+".Item."+(x+1)+".Function.OpenAnotherGUI.Number");
 				Boolean command = config.getBoolean("GUI."+i+".Item."+(x+1)+".Function.Command.Use");
@@ -285,7 +290,7 @@ public class ClockGUI extends JavaPlugin
 				ArrayList<String> commandList = new ArrayList<String>();
 				ItemStack item = null;
 
-				item = this.createItem(itemID, 1, itemName, itemLore);
+				item = this.createItem(itemID, 1, customModelId, itemName, itemLore);
 
 				
 				if(enchantID!=null && enchantLevel>0)
@@ -327,7 +332,7 @@ public class ClockGUI extends JavaPlugin
 					function = new Function("none", null);
 				}
 				
-				ClockGuiItem guiItem = new ClockGuiItem(item, function, money, message, frequency, banInDungeon);
+				ClockGuiItem guiItem = new ClockGuiItem(item, function, money, message, frequency, hideItem);
 				
 				guiList.put(position, guiItem);
 
@@ -372,17 +377,19 @@ public class ClockGUI extends JavaPlugin
 		return YamlConfiguration.loadConfiguration(new File(path));
 	}
 	
-	public ItemStack createItem(String ID, int quantity, String displayName, String lore)
+	public ItemStack createItem(String ID, int quantity, int customModelId, String displayName, String lore)
 	{
 		ItemStack item = new ItemStack(Material.getMaterial(ID.toUpperCase()), quantity);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(displayName);
+		meta.setCustomModelData(customModelId);
 		ArrayList<String> loreList = new ArrayList<String>();
 		for(String l:lore.split("%"))
 		{
 			loreList.add(l);
 		}
 		meta.setLore(loreList);
+		meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 		item.setItemMeta(meta);
 		
 		return item;
@@ -414,6 +421,8 @@ public class ClockGUI extends JavaPlugin
 		
 		for(int i:guiItems.keySet())
 		{
+			if(guiItems.get(i).isHide())
+				continue;
 			if(guiItems.get(i).getFrequency()>=1)
 			{
 				if(playerData.containsKey(player.getName()))
