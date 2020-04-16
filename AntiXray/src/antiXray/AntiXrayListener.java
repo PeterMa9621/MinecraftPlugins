@@ -117,66 +117,6 @@ public class AntiXrayListener implements Listener
 		{
 			return;
 		}
-
 		plugin.playerData.put(p.getUniqueId(), currentPoint);
-
-	}
-	
-	@EventHandler
-	public void onPlayerInteraction(PlayerInteractEvent event)
-	{
-		Action action = event.getAction();
-		if(action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK)
-		{
-			Player p = event.getPlayer();
-			ItemStack item = p.getInventory().getItemInMainHand();
-			if(item==null || item.getType()==Material.AIR)
-				return;
-			if(!item.hasItemMeta())
-				return;
-			if(!item.getItemMeta().hasLore())
-				return;
-			if(!item.getItemMeta().hasDisplayName())
-				return;
-			if(!item.getItemMeta().getDisplayName().equals(plugin.recoverItem.getItemMeta().getDisplayName()))
-				return;
-			if(!item.getItemMeta().getLore().equals(plugin.recoverItem.getItemMeta().getLore()))
-				return;
-
-			int currentPoint = plugin.playerData.get(p.getName());
-			if(currentPoint>=plugin.totalPoints)
-			{
-				String msg = plugin.message.get("AlreadyHadEnoughPoints");
-				p.sendMessage(msg);
-				return;
-			}
-			
-			if(currentPoint+plugin.recoverPoint>plugin.totalPoints)
-			{
-				currentPoint = plugin.totalPoints;
-			}
-			else
-			{
-				currentPoint += plugin.recoverPoint;
-			}
-			plugin.playerData.put(p.getUniqueId(), currentPoint);
-			
-			String msg = plugin.message.get("RecoverPoints");
-			if(msg.contains("{recoverpoints}"))
-				msg = msg.replace("{recoverpoints}", String.valueOf(plugin.recoverPoint));
-			p.sendMessage(msg);
-			int amount = p.getInventory().getItemInMainHand().getAmount();
-			if(amount>1)
-			{
-				ItemStack recoverItem = p.getInventory().getItemInMainHand();
-				recoverItem.setAmount(amount-1);
-				p.getInventory().setItemInMainHand(recoverItem);
-			}
-			else
-			{
-				p.getInventory().setItemInMainHand(null);
-			}
-		}
-
 	}
 }

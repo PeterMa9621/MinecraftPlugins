@@ -33,7 +33,7 @@ public class AntiXray extends JavaPlugin
 	int recoverPointPerMinute = 0;
 	boolean notify = false;
 	int recoverPoint = 0;
-	ItemStack recoverItem = null;
+
 	DatabaseType databaseType;
 	StorageInterface database;
 	public HashMap<UUID, Integer> playerData = new HashMap<UUID, Integer>();
@@ -64,7 +64,6 @@ public class AntiXray extends JavaPlugin
 		String createTableQuery = "create table if not exists anti_xray(id varchar(100), points varchar(10), last_login varchar(10), primary key(id));";
 		database.connect("minecraft", "anti_xray", "root", "mjy159357", createTableQuery);
 
-		initRecoverItemRecipe();
 		loadMessageConfig();
 		recoverPointTask();
 
@@ -87,7 +86,6 @@ public class AntiXray extends JavaPlugin
 							currentPoint += recoverPointPerMinute;
 							playerData.put(uniqueId, Math.min(currentPoint, totalPoints));
 						}
-						//Bukkit.getConsoleSender().sendMessage("Recover " + recoverPointPerMinute + " point for " + uniqueId.toString());
 					}
 				}
 			}
@@ -99,26 +97,6 @@ public class AntiXray extends JavaPlugin
 		saveConfig();
 		Bukkit.getConsoleSender().sendMessage("§a[AntiXray] §e限制挖矿系统卸载完毕");
 		Bukkit.getConsoleSender().sendMessage("§a[AntiXray] §e制作者QQ:920157557");
-	}
-	
-	public void initRecoverItemRecipe()
-	{
-		String [] recipes = {"ABC",
-							 "DEF",
-							 "GHI"};
-		ShapedRecipe recipe = new ShapedRecipe(NamespacedKey.minecraft("antixray"), recoverItem);
-		recipe.shape(recipes);
-		ItemStack item = null;
-
-		for(int i=0; i<9; i++) {
-			if(!this.recipe.get(i).equals("0"))
-			{
-				item = new ItemStack(Material.getMaterial(this.recipe.get(i)));
-				recipe.setIngredient((char)(i+65), item.getData());
-			}
-		}
-		
-		getServer().addRecipe(recipe);
 	}
 
 	public FileConfiguration load(File file)
@@ -218,28 +196,6 @@ public class AntiXray extends JavaPlugin
 		}
 		this.lastLogin.put(uuid, todayDate);
 	}
-
-	/*
-	public void task()
-	{
-		new BukkitRunnable()
-		{
-    		String previousDate = null;
-			public void run()
-			{
-				if(previousDate!=null && (!previousDate.equalsIgnoreCase(date.format(new Date()))))
-				{
-					for(Player p:Bukkit.getOnlinePlayers())
-					{
-						playerData.put(p.getName(), totalPoints);
-					}
-				}
-				previousDate = date.format(new Date());
-			}
-		}.runTaskTimer(this, 0L, 20L);
-	}
-
-	 */
 	
 	public void loadMessageConfig()
 	{
@@ -289,7 +245,6 @@ public class AntiXray extends JavaPlugin
 		
 		message.put("DontHaveEnoughPoints", config.getString("DontHaveEnoughPoints"));
 		message.put("AlreadyHadEnoughPoints", config.getString("AlreadyHadEnoughPoints"));
-		message.put("DontHaveEnoughPoints", config.getString("DontHaveEnoughPoints"));
 		message.put("RecoverPoints", config.getString("RecoverPoints"));
 	}
 	
@@ -303,12 +258,6 @@ public class AntiXray extends JavaPlugin
 			config.set("Database", "YML");
 			config.set("RecoverPointPerMinute", 30);
 			config.set("Points", 600);
-			
-			config.set("RecoverItem.ID", "gold_ingot");
-			config.set("RecoverItem.Point", 100);
-			config.set("RecoverItem.Name", "§2矿工玉米");
-			config.set("RecoverItem.Lore", "§a这是一瓶神奇的玉米%§a右键吃掉它可以增加100挖矿点数");
-			config.set("RecoverItem.Recipe", "0-gold_ingot-0-gold_ingot-gold_ingot-gold_ingot-0-gold_ingot-0");
 			
 			config.set("ToolsLimit", "iron_pickaxe,wooden_pickaxe,stone_pickaxe,diamond_pickaxe,golden_pickaxe");
 			
@@ -357,25 +306,6 @@ public class AntiXray extends JavaPlugin
 		totalPoints = config.getInt("Points");
 		
 		notify = config.getBoolean("Notify");
-		
-		// Get the information of the recover item
-		String id = config.getString("RecoverItem.ID");
-		String itemName = config.getString("RecoverItem.Name");
-		String itemLore = config.getString("RecoverItem.Lore");
-		recoverPoint = config.getInt("RecoverItem.Point");
-		
-		recoverItem = new ItemStack(Material.getMaterial(id.toUpperCase()));
-		ItemMeta meta = recoverItem.getItemMeta();
-		meta.setDisplayName(itemName);
-
-		ArrayList<String> lore = new ArrayList<String>();
-		for(String l:itemLore.split("%"))
-		{
-			lore.add(l);
-		}
-		meta.setLore(lore);
-
-		recoverItem.setItemMeta(meta);
 		
 		// Get different worlds' settings
 		for(String w:config.getString("Worlds").split(","))
@@ -444,7 +374,6 @@ public class AntiXray extends JavaPlugin
 				sender.sendMessage("§a/ax my §3查看当前剩余挖矿点数");
 				if(sender.isOp())
 				{
-					sender.sendMessage("§a/ax get §3获得一个矿工药水");
 					sender.sendMessage("§a/ax check [玩家名] §3查看目标玩家剩余挖矿点数");
 					sender.sendMessage("§a/ax give [玩家名] [挖矿点数] §3给予目标玩家相应的挖矿点数");
 					sender.sendMessage("§a/ax reset [玩家名] §3重置该玩家的挖矿点数");
@@ -584,24 +513,6 @@ public class AntiXray extends JavaPlugin
 				{
 					sender.sendMessage(DontHavePermission);
 				}
-			}
-			
-			if(args[0].equalsIgnoreCase("get"))
-			{
-				if(sender instanceof Player)
-				{
-					if(sender.isOp())
-					{
-						Player p = (Player)sender;
-						p.getInventory().addItem(recoverItem);
-						p.sendMessage(GetRecoverItem);
-					}
-					else
-					{
-						sender.sendMessage(DontHavePermission);
-					}
-				}
-				
 			}
 			
 			if(args[0].equalsIgnoreCase("reset"))

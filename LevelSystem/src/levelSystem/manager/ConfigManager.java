@@ -22,6 +22,7 @@ public class ConfigManager
 {
 	private LevelSystem plugin;
 	public static int maxLevel;
+	public static boolean useChatPrefix;
 	private HashMap<Integer, Integer> expFormat = new HashMap<>();
 	private StorageInterface database;
 	
@@ -39,6 +40,7 @@ public class ConfigManager
 			config = load(file);
 
 			config.set("maxLevel", 30);
+			config.set("chatPrefix", true);
 
 			// y = c1*x^p1 + c2*x^p2 + c3*x^p3
 			// y = 10*x^2 + 10*x^1.5 + 80*x
@@ -69,6 +71,7 @@ public class ConfigManager
 		config = load(file);
 
 		maxLevel = config.getInt("maxLevel", 1);
+		useChatPrefix = config.getBoolean("chatPrefix", true);
 
 		List<Double> coefficients = config.getDoubleList("formula.coefficient");
 		List<Double> powers = config.getDoubleList("formula.power");

@@ -18,6 +18,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import java.io.IOException;
 import java.util.List;
 
+import static levelSystem.manager.ConfigManager.useChatPrefix;
+
 public class LevelSystemListener implements Listener
 {
 	private LevelSystem plugin;
@@ -40,7 +42,8 @@ public class LevelSystemListener implements Listener
 		//String prefix = event.getFormat().re.replace(message, "")+"¡ì2[1¼¶]";
 		String message = event.getMessage();
 		*/
-		event.setFormat("¡ìf[¡ì2"+plugin.players.get(event.getPlayer().getUniqueId()).getLevel()+"¼¶]¡ìf"+event.getFormat());
+		if(useChatPrefix)
+			event.setFormat("¡ìf[¡ì2"+plugin.players.get(event.getPlayer().getUniqueId()).getLevel()+"¼¶¡ìf]"+event.getFormat());
     }
 	
 	@EventHandler
