@@ -21,9 +21,6 @@ import org.bukkit.inventory.meta.BookMeta;
 
 public class OpenVirtualBook extends JavaPlugin
 {
-	BookUtil bookUtil = new BookUtil();
-	ItemStack book;
-	
 	ArrayList<ItemStack> books = new ArrayList<ItemStack>();
 	
 	boolean set = false;
@@ -180,29 +177,27 @@ public class OpenVirtualBook extends JavaPlugin
 			{
 				if(sender.isOp())
 				{
-					if(sender instanceof Player)
+					initBooks();
+					sender.sendMessage("§6==================");
+					sender.sendMessage("§6编号      书名");
+					if(!books.isEmpty())
 					{
-						Player p = (Player)sender;
-						p.sendMessage("§6==================");
-						p.sendMessage("§6编号      书名");
-						if(!books.isEmpty())
+						int index = 0;
+						for(ItemStack book:books)
 						{
-							int index = 0;
-							for(ItemStack book:books)
-							{
-								BookMeta meta = (BookMeta)book.getItemMeta();
-								String name = meta.getTitle();
+							BookMeta meta = (BookMeta)book.getItemMeta();
+							String name = meta.getTitle();
 
-								String result = String.format(" §e%2d  %8s", index,name);
-								p.sendMessage(result);
-								
-								index++;
-							}
+							String result = String.format(" §e%2d  %8s", index,name);
+							sender.sendMessage(result);
+
+							index++;
 						}
-						else
-							p.sendMessage("§a  目前没有书籍");
-						p.sendMessage("§6==================");
 					}
+					else
+						sender.sendMessage("§a  目前没有书籍");
+					sender.sendMessage("§6==================");
+
 				}
 				return true;
 			}
@@ -228,9 +223,9 @@ public class OpenVirtualBook extends JavaPlugin
 					Player p = (Player)sender;
 					if(args.length==2)
 					{
-						if(args[1].matches("[0-9]*") && Integer.valueOf(args[1])<books.size())
+						if(args[1].matches("[0-9]*") && Integer.parseInt(args[1])<books.size())
 						{
-							BookUtil.openBook(books.get(Integer.valueOf(args[1])), p);
+							p.openBook(books.get(Integer.parseInt(args[1])));
 						}
 						else
 						{

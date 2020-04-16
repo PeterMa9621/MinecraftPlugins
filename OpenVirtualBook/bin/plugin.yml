@@ -1,8 +1,8 @@
 name: OpenVirtualBook
 main: openVirtualBook.OpenVirtualBook
-version: 1.0
+version: '1.0'
+api-version: '1.15'
 author: Jingyuan Ma
-depend: [Multiverse-Core]
 commands:
   ob:
     description: used to switch if allow to pvp

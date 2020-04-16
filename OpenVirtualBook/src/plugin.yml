@@ -1,0 +1,15 @@
+name: OpenVirtualBook
+main: openVirtualBook.OpenVirtualBook
+version: '1.0'
+api-version: '1.15'
+author: Jingyuan Ma
+commands:
+  ob:
+    description: used to switch if allow to pvp
+    usage: /ob
+    permission-message: §c无权执行！
+permissions: 
+  openVirtualBook.op: 
+    default: op
+  openVirtualBook.player: 
+    default: true

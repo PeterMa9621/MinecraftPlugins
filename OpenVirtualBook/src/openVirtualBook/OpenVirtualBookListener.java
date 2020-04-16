@@ -18,7 +18,7 @@ public class OpenVirtualBookListener implements Listener
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent event)
     {
-		if(plugin.set==true)
+		if(plugin.set)
 		{
 			if(event.getClickedBlock().getType()==Material.CHEST ||
 					event.getClickedBlock().getType()==Material.TRAPPED_CHEST)
