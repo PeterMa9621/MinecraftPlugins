@@ -41,10 +41,10 @@ public class BossGroup {
     }
 
     public void startGame(String startGameCmd, WorldBoss plugin) {
-        Bukkit.getConsoleSender().sendMessage("Start Game!");
+        //Bukkit.getConsoleSender().sendMessage("Start Game!");
 
         int numPlayer = this.players.size();
-        Bukkit.getConsoleSender().sendMessage("Total Players: " + numPlayer);
+        //Bukkit.getConsoleSender().sendMessage("Total Players: " + numPlayer);
         if(numPlayer<=0){
             return;
         }

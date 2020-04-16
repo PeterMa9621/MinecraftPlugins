@@ -6,6 +6,7 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -27,13 +28,15 @@ public class BossGroupSetting {
     private int minuteBefore = 10;
     private ArrayList<BukkitTask> tasks = new ArrayList<>();
     private WorldBoss plugin;
+    private ItemStack icon;
 
-    public BossGroupSetting(String groupName, String startTimeString, int dayOfWeek, String startGameCmd, int minuteBefore, WorldBoss plugin) {
+    public BossGroupSetting(String groupName, String startTimeString, int dayOfWeek, String startGameCmd, int minuteBefore, ItemStack icon, WorldBoss plugin) {
         this.groupName = groupName;
         this.startTime = LocalTime.parse(startTimeString, DateTimeFormatter.ofPattern("HH:mm"));
         this.dayOfWeek = dayOfWeek;
         this.startGameCmd = startGameCmd;
         this.minuteBefore = minuteBefore;
+        this.icon = icon;
         this.plugin = plugin;
     }
 
@@ -93,6 +96,10 @@ public class BossGroupSetting {
         this.isComingSoon = isComingSoon;
     }
 
+    public ItemStack getIcon() {
+        return icon;
+    }
+
     public void stopTasks() {
         for(BukkitTask task:this.tasks)
             task.cancel();
@@ -144,7 +151,7 @@ public class BossGroupSetting {
         if(nowHour == tenMinutesBefore.getHour() && nowMinute == tenMinutesBefore.getMinute() && !hasNotified){
             this.isComingSoon = true;
             //TextComponent msg = new TextComponent("§6[WorldBoss] §2世界BOSS活动§5" + displayName + "§2将在" + 10 + "分钟后开始!");
-            String announcement = "§6[WorldBoss] §2世界BOSS活动§5%s§2将在%d分钟后开始!§d§n点击打开活动界面";
+            String announcement = "§6[世界Boss] §2世界BOSS活动§5%s§2将在%d分钟后开始!§d§n点击打开活动界面";
             TextComponent textComponent = new TextComponent(String.format(announcement, displayName, minuteBefore));
             textComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("§2点击打开活动界面!").create()));
             textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/boss"));

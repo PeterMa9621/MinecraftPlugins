@@ -1,6 +1,7 @@
 package com.peter.worldBoss.gui;
 
 import com.peter.worldBoss.WorldBoss;
+import com.peter.worldBoss.config.ConfigManager;
 import com.peter.worldBoss.model.BossGroup;
 import com.peter.worldBoss.model.BossGroupSetting;
 import com.peter.worldBoss.util.Util;
@@ -41,7 +42,7 @@ public class GuiManager {
                 if(bossGroup.containsPlayer(player)){
                     icon = createLeaveIcon(bossGroup, setting.getDisplayName());
                 } else {
-                    icon = createJoinIcon(bossGroup, setting.getDisplayName());
+                    icon = createJoinIcon(bossGroup, setting);
                 }
                 inventory.setItem(count, icon);
                 count++;
@@ -58,8 +59,9 @@ public class GuiManager {
         player.openInventory(createGui(player));
     }
 
-    public static ItemStack createJoinIcon(BossGroup bossGroup, String groupDisplayName) {
-        ItemStack icon = Util.createItem(Material.DIAMOND_SWORD, joinPrefix + groupDisplayName);
+    public static ItemStack createJoinIcon(BossGroup bossGroup, BossGroupSetting setting) {
+        ItemStack icon = setting.getIcon();
+        Util.setDisplayName(icon, joinPrefix + setting.getDisplayName());
 
         ArrayList<String> lore = new ArrayList<String>() {{
             add(numPeopleLore + bossGroup.getPlayers().size());
@@ -70,7 +72,8 @@ public class GuiManager {
     }
 
     public static ItemStack createLeaveIcon(BossGroup bossGroup, String groupDisplayName) {
-        ItemStack icon = Util.createItem(Material.DIAMOND_SWORD, leavePrefix + groupDisplayName, 16);
+        ItemStack icon = ConfigManager.leaveGroupIcon;
+        Util.setDisplayName(icon, leavePrefix + groupDisplayName);
 
         ArrayList<String> lore = new ArrayList<String>() {{
             add(numPeopleLore + bossGroup.getPlayers().size());

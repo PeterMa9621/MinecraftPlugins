@@ -39,12 +39,12 @@ public class WorldBoss extends JavaPlugin
 		getServer().getPluginManager().registerEvents(new GuiListener(this), this);
 		runTimerToCheckBeginTime();
 		GuiManager.plugin = this;
-		Bukkit.getConsoleSender().sendMessage("§a[WorldBoss] §eWorldBoss loaded");
+		Bukkit.getConsoleSender().sendMessage("§a[世界Boss] §eWorldBoss loaded");
 	}
 
 	public void onDisable()
 	{
-		Bukkit.getConsoleSender().sendMessage("§a[WorldBoss] §eWorldBoss unloaded");
+		Bukkit.getConsoleSender().sendMessage("§a[世界Boss] §eWorldBoss unloaded");
 	}
 
 	public boolean onCommand(CommandSender sender,Command cmd,String label,String[] args)
@@ -59,10 +59,10 @@ public class WorldBoss extends JavaPlugin
 				if(args[0].equalsIgnoreCase("reload")){
 					ConfigManager.loadConfig(this);
 
-					sender.sendMessage("§6[WorldBoss] §3重载配置成功!");
+					sender.sendMessage("§6[世界Boss] §3重载配置成功!");
 					return true;
 				} else if(args[0].equalsIgnoreCase("help")){
-					sender.sendMessage("§a=========[WorldBoss]=========");
+					sender.sendMessage("§a=========[世界Boss]=========");
 					sender.sendMessage("§a/boss §3打开BOSS活动界面");
 					sender.sendMessage("§a/boss help §3显示帮助菜单");
 					sender.sendMessage("§a/boss reload §3重载配置");
@@ -88,7 +88,7 @@ public class WorldBoss extends JavaPlugin
 					setting.notifyPlayers(WorldBoss.this);
 					if(setting.canStart()){
 						setting.setPrevStartTime(now);
-						Bukkit.broadcastMessage("§6[WorldBoss] §2世界BOSS活动§5" + setting.getDisplayName() + "§2开始了!");
+						Bukkit.broadcastMessage("§6[世界Boss] §2世界BOSS活动§5" + setting.getDisplayName() + "§2开始了!");
 						BossGroup bossGroup = bossGroups.get(setting.getGroupName());
 						if(bossGroup!=null){
 							bossGroup.startGame(setting.getStartGameCmd(), WorldBoss.this);

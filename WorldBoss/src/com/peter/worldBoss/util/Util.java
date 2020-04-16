@@ -47,4 +47,10 @@ public class Util {
         ItemMeta itemMeta = item.getItemMeta();
         return itemMeta.getPersistentDataContainer().get(key, PersistentDataType.STRING);
     }
+
+    public static void setDisplayName(ItemStack item, String displayName) {
+        ItemMeta itemMeta = item.getItemMeta();
+        itemMeta.setDisplayName(displayName);
+        item.setItemMeta(itemMeta);
+    }
 }

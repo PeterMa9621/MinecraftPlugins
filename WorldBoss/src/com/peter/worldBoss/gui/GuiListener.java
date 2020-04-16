@@ -2,6 +2,7 @@ package com.peter.worldBoss.gui;
 
 import com.peter.worldBoss.WorldBoss;
 import com.peter.worldBoss.model.BossGroup;
+import com.peter.worldBoss.model.BossGroupSetting;
 import com.peter.worldBoss.util.Util;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -37,7 +38,6 @@ public class GuiListener implements Listener
 					return;
 
 				if(index == GuiManager.refreshIndex){
-					player.closeInventory();
 					new BukkitRunnable() {
 						@Override
 						public void run() {
@@ -50,12 +50,13 @@ public class GuiListener implements Listener
 				String groupName = Util.getPersistentData(itemStack, new NamespacedKey(plugin, "groupName"));
 				BossGroup bossGroup = WorldBoss.bossGroups.get(groupName);
 				ItemStack icon;
+				BossGroupSetting setting = WorldBoss.bossGroupSetting.get(bossGroup.getGroupName());
 				if(bossGroup.containsPlayer(player)){
 					bossGroup.removePlayer(player);
-					icon = GuiManager.createJoinIcon(bossGroup, WorldBoss.bossGroupSetting.get(bossGroup.getGroupName()).getDisplayName());
+					icon = GuiManager.createJoinIcon(bossGroup, setting);
 				} else {
 					bossGroup.addPlayer(player);
-					icon = GuiManager.createLeaveIcon(bossGroup, WorldBoss.bossGroupSetting.get(bossGroup.getGroupName()).getDisplayName());
+					icon = GuiManager.createLeaveIcon(bossGroup, setting.getDisplayName());
 				}
 				event.getInventory().setItem(index, icon);
 			}
