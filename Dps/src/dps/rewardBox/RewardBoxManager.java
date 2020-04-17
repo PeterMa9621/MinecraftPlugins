@@ -37,26 +37,29 @@ public class RewardBoxManager {
 
         Player player = dpsPlayer.getPlayer();
         Inventory inventory = Bukkit.createInventory(null, 27, rewardBoxTitle);
-        ItemStack itemStack = new ItemStack(Material.ACACIA_DOOR);
+        ItemStack itemStack = new ItemStack(Material.PAPER);
         ItemMeta itemMeta = itemStack.getItemMeta();
         itemMeta.setDisplayName("¡ì6ÍË³ö");
+        itemMeta.setCustomModelData(13);
         itemStack.setItemMeta(itemMeta);
         inventory.setItem(26, itemStack);
 
         // Add normal rewards to the reward box
         int numReward = getNumReward(dpsPlayer);
         for(int i=0; i<numReward; i++){
-            itemStack = new ItemStack(Material.ORANGE_WOOL);
+            itemStack = new ItemStack(Material.PAPER);
             itemMeta = itemStack.getItemMeta();
             itemMeta.setDisplayName(rewardTitle);
+            itemMeta.setCustomModelData(42);
             itemStack.setItemMeta(itemMeta);
             inventory.setItem(i, itemStack);
         }
         // Add extra bonus rewards to the reward box
         for(int i=0; i<dpsPlayer.getNumBonusReward(); i++) {
-            itemStack = new ItemStack(Material.BLUE_WOOL);
+            itemStack = new ItemStack(Material.PAPER);
             itemMeta = itemStack.getItemMeta();
             itemMeta.setDisplayName(bonusRewardTitle);
+            itemMeta.setCustomModelData(45);
             itemStack.setItemMeta(itemMeta);
             inventory.setItem(i+numReward, itemStack);
         }

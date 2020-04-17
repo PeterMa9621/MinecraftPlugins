@@ -13,10 +13,13 @@ import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ConfigManager {
     public static int maxInstancePerDungeon;
     public static int startGameDelay = 30;
+    public static ArrayList<Material> itemForbid = new ArrayList<>();
 
     public static void loadConfig(DungeonManager plugin) {
         File file = new File(plugin.getDataFolder(), "/config.yml");
@@ -26,6 +29,10 @@ public class ConfigManager {
 
             config.set("maxInstancePerDungeon", 2);
             config.set("startGameDelay", 30);
+
+            config.set("itemForbid", new ArrayList<String >() {{
+                add("ender_pearl".toUpperCase());
+            }});
 
             try {
                 config.save(file);
@@ -41,6 +48,11 @@ public class ConfigManager {
         config = load(file);
         maxInstancePerDungeon = config.getInt("maxInstancePerDungeon", 2);
         startGameDelay = config.getInt("startGameDelay", 30);
+
+        List<String> itemIds = config.getStringList("itemForbid");
+        for(String itemId:itemIds) {
+            itemForbid.add(Material.getMaterial(itemId.toUpperCase()));
+        }
 
         File dungeonsXLMapDir = new File(plugin.getDataFolder().getParentFile().getAbsolutePath() + "/DungeonsXL/maps");
         int numDungeon = 0;

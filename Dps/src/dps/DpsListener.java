@@ -16,13 +16,13 @@ import dps.util.ScoreBoardUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.*;
@@ -41,6 +41,7 @@ public class DpsListener implements Listener
 	@EventHandler
 	public void onPlayerDamaged(EntityDamageByEntityEvent event)
     {
+
 		if(event.getEntity() instanceof Player)
 			return;
 		UUID currentWorldId = event.getDamager().getWorld().getUID();
@@ -60,25 +61,26 @@ public class DpsListener implements Listener
 			}
 
 		}
-		else if(event.getDamager().getType().equals(EntityType.ARROW))
-		{
-			if(event.getDamager().getCustomName()==null)
-				return;
-			if(Bukkit.getPlayer(event.getDamager().getCustomName())==null)
-				return;
-			HashMap<UUID, DpsPlayer> players = DpsPlayerManager.dpsData.get(currentWorldId);
-			Player damager = Bukkit.getPlayer(event.getDamager().getCustomName());
-			assert damager != null;
-			if(players.containsKey(damager.getUniqueId()))
-			{
-				DpsPlayer dpsPlayer = players.get(damager.getUniqueId());
-				double dpsScore = dpsPlayer.getDpsScore() + (event.getDamage()/3.0);
+    }
 
-				dpsPlayer.setDpsScore(dpsScore);
+    @EventHandler
+	public void onProjectileHit(ProjectileHitEvent event) {
+		if(event.getHitEntity() instanceof Player)
+			return;
+		if(!(event.getEntity().getShooter() instanceof Player))
+			return;
+		Player player = (Player) event.getEntity().getShooter();
+		if(DpsPlayerManager.isPlayerInDps(player)) {
+			if(event.getHitEntity()!=null) {
+				DpsPlayer dpsPlayer = DpsPlayerManager.getDpsPlayer(player);
+				Bukkit.getScheduler().runTaskLater(plugin, () -> {
+					double dpsScore = dpsPlayer.getDpsScore() + (event.getHitEntity().getLastDamageCause().getDamage()/3.0);
+					dpsPlayer.setDpsScore(dpsScore);
+				}, 1);
 			}
 		}
-    }
-	
+	}
+
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent event)
     {
@@ -87,29 +89,6 @@ public class DpsListener implements Listener
 		if(DpsPlayerManager.dpsData.containsKey(currentWorldId)){
 			HashMap<UUID, DpsPlayer> dpsPlayers = DpsPlayerManager.dpsData.get(currentWorldId);
 			dpsPlayers.remove(player.getUniqueId());
-		}
-    }
-	
-	/*
-	@EventHandler
-	private void onPlayerCommand(PlayerCommandPreprocessEvent event)
-	{
-		if(plugin.singleDps.containsKey(event.getPlayer()))
-		{
-			event.setCancelled(true);
-			Player p = (Player)event.getPlayer();
-			p.sendMessage("§a[挑战系统] §c挑战过程中你无法使用该指令");
-			return;
-		}
-	}
-	*/
-	
-	@EventHandler
-	public void onPlayerIsShot(EntityShootBowEvent event)
-    {
-		if(event.getEntity() instanceof Player)
-		{
-			event.getProjectile().setCustomName(event.getEntity().getName());
 		}
     }
 

@@ -162,14 +162,14 @@ public class PVPSwitch extends JavaPlugin
 					{
 						pvpPlayer.setPvp(!pvpPlayer.canPvp());
 						if(pvpPlayer.canPvp()) {
-							p.sendMessage("§a[PVP]§3 PVP已打开");
+							p.sendMessage("§6[PVP]§3 PVP已打开");
 						}
 						else {
-							p.sendMessage("§a[PVP]§3 PVP已关闭");
+							p.sendMessage("§6[PVP]§3 PVP已关闭");
 						}
 					}
 					else {
-						p.sendMessage("§a[PVP]§c 你现在不能切换PVP开关!");
+						p.sendMessage("§6[PVP]§c 你现在不能切换PVP开关!");
 					}
 				}
 				return true;
@@ -178,8 +178,8 @@ public class PVPSwitch extends JavaPlugin
 			if(args[0].equalsIgnoreCase("help"))
 			{
 				sender.sendMessage("§a=========§6[PVP系统]§a=========");
-				sender.sendMessage("§a/pvp state §3查看当前PVP开关状态");
-				sender.sendMessage("§a/pvp help §3查看帮助");
+				sender.sendMessage("§6/pvp state §3查看当前PVP开关状态");
+				sender.sendMessage("§6/pvp help §3查看帮助");
 				if(sender.hasPermission("pvpSwitch.op"))
 				{
 					sender.sendMessage("§a/pvp on [玩家名] §3强制打开目标玩家的PVP");
@@ -194,7 +194,7 @@ public class PVPSwitch extends JavaPlugin
 			{
 				if(!sender.hasPermission("pvpSwitch.op"))
 				{
-					sender.sendMessage("§a[PVP]§c 你没有权限");
+					sender.sendMessage("§6[PVP]§c 你没有权限");
 					return true;
 				}
 				
@@ -202,7 +202,7 @@ public class PVPSwitch extends JavaPlugin
 				{
 					if(Bukkit.getServer().getPlayer(args[1])==null)
 					{
-						sender.sendMessage("§a[PVP]§c 该玩家不存在或不在线");
+						sender.sendMessage("§6[PVP]§c 该玩家不存在或不在线");
 						return true;
 					}
 					Player p = Bukkit.getServer().getPlayer(args[1]);
@@ -211,13 +211,13 @@ public class PVPSwitch extends JavaPlugin
 					pvpPlayer.setBanned(true);
 					playerData.put(p.getUniqueId(), pvpPlayer);
 					
-					sender.sendMessage("§a[PVP]§3 已禁止玩家§c"+p.getName()+"§3切换PVP");
-					p.sendMessage("§a[PVP]§c 注意：你现在已被禁止切换PVP状态");
+					sender.sendMessage("§6[PVP]§3 已禁止玩家§c"+p.getName()+"§3切换PVP");
+					p.sendMessage("§6[PVP]§c 注意：你现在已被禁止切换PVP状态");
 					return true;
 				}
 				else
 				{
-					sender.sendMessage("§a/pvp ban [玩家名] §3禁止目标玩家切换PVP状态");
+					sender.sendMessage("§6/pvp ban [玩家名] §3禁止目标玩家切换PVP状态");
 				}
 			}
 			
@@ -225,7 +225,7 @@ public class PVPSwitch extends JavaPlugin
 			{
 				if(!sender.hasPermission("pvpSwitch.op"))
 				{
-					sender.sendMessage("§a[PVP]§c 你没有权限");
+					sender.sendMessage("§6[PVP]§c 你没有权限");
 					return true;
 				}
 				
@@ -233,7 +233,7 @@ public class PVPSwitch extends JavaPlugin
 				{
 					if(Bukkit.getServer().getPlayer(args[1])==null)
 					{
-						sender.sendMessage("§a[PVP]§c 该玩家不存在或不在线");
+						sender.sendMessage("§6[PVP]§c 该玩家不存在或不在线");
 						return true;
 					}
 					Player p = Bukkit.getServer().getPlayer(args[1]);
@@ -242,13 +242,13 @@ public class PVPSwitch extends JavaPlugin
 					pvpPlayer.setBanned(false);
 					playerData.put(p.getUniqueId(), pvpPlayer);
 					
-					sender.sendMessage("§a[PVP]§3 已允许玩家§c"+p.getName()+"§3切换PVP");
-					p.sendMessage("§a[PVP]§c 注意：你现在已被允许切换PVP状态");
+					sender.sendMessage("§6[PVP]§3 已允许玩家§c"+p.getName()+"§3切换PVP");
+					p.sendMessage("§6[PVP]§c 注意：你现在已被允许切换PVP状态");
 					return true;
 				}
 				else
 				{
-					sender.sendMessage("§a/pvp unban [玩家名] §3允许目标玩家切换PVP状态");
+					sender.sendMessage("§6/pvp unban [玩家名] §3允许目标玩家切换PVP状态");
 				}
 			}
 			
@@ -256,7 +256,7 @@ public class PVPSwitch extends JavaPlugin
 			{
 				if(!sender.hasPermission("pvpSwitch.op"))
 				{
-					sender.sendMessage("§a[PVP]§c 你没有权限");
+					sender.sendMessage("§6[PVP]§c 你没有权限");
 					return true;
 				}
 				
@@ -264,7 +264,7 @@ public class PVPSwitch extends JavaPlugin
 				{
 					if(Bukkit.getServer().getPlayer(args[1])==null)
 					{
-						sender.sendMessage("§a[PVP]§c 该玩家不存在或不在线");
+						sender.sendMessage("§6[PVP]§c 该玩家不存在或不在线");
 						return true;
 					}
 					Player p = Bukkit.getServer().getPlayer(args[1]);
@@ -273,13 +273,13 @@ public class PVPSwitch extends JavaPlugin
 					pvpPlayer.setPvp(true);
 					playerData.put(p.getUniqueId(), pvpPlayer);
 
-					sender.sendMessage("§a[PVP]§3 已强制打开玩家§c"+p.getName()+"§3的PVP");
-					p.sendMessage("§a[PVP]§c 注意：你的PVP开关已被强制打开");
+					sender.sendMessage("§6[PVP]§3 已强制打开玩家§c"+p.getName()+"§3的PVP");
+					p.sendMessage("§6[PVP]§c 注意：你的PVP开关已被强制打开");
 					return true;
 				}
 				else
 				{
-					sender.sendMessage("§a/pvp on [玩家名] §3强制打开目标玩家的PVP");
+					sender.sendMessage("§6/pvp on [玩家名] §3强制打开目标玩家的PVP");
 				}
 			}
 			
@@ -287,7 +287,7 @@ public class PVPSwitch extends JavaPlugin
 			{
 				if(!sender.hasPermission("pvpSwitch.op"))
 				{
-					sender.sendMessage("§a[PVP]§c 你没有权限");
+					sender.sendMessage("§6[PVP]§c 你没有权限");
 					return true;
 				}
 				
@@ -295,7 +295,7 @@ public class PVPSwitch extends JavaPlugin
 				{
 					if(Bukkit.getServer().getPlayer(args[1])==null)
 					{
-						sender.sendMessage("§a[PVP]§c 该玩家不存在或不在线");
+						sender.sendMessage("§6[PVP]§c 该玩家不存在或不在线");
 						return true;
 					}
 					Player p = Bukkit.getServer().getPlayer(args[1]);
@@ -304,13 +304,13 @@ public class PVPSwitch extends JavaPlugin
 					pvpPlayer.setPvp(false);
 					playerData.put(p.getUniqueId(), pvpPlayer);
 
-					sender.sendMessage("§a[PVP]§3 已强制关闭玩家§c"+p.getName()+"§3的PVP");
-					p.sendMessage("§a[PVP]§c 注意：你的PVP开关已被强制关闭");
+					sender.sendMessage("§6[PVP]§3 已强制关闭玩家§c"+p.getName()+"§3的PVP");
+					p.sendMessage("§6[PVP]§c 注意：你的PVP开关已被强制关闭");
 					return true;
 				}
 				else
 				{
-					sender.sendMessage("§a/pvp off [玩家名] §3强制关闭目标玩家的PVP");
+					sender.sendMessage("§6/pvp off [玩家名] §3强制关闭目标玩家的PVP");
 				}
 			}
 			
@@ -323,9 +323,9 @@ public class PVPSwitch extends JavaPlugin
 					PvpPlayer pvpPlayer = playerData.get(p.getUniqueId());
 
 					if(!pvpPlayer.canPvp())
-						sender.sendMessage("§a[PVP]§3 你的PVP为关闭状态");
+						sender.sendMessage("§6[PVP]§3 你的PVP为关闭状态");
 					else
-						sender.sendMessage("§a[PVP]§3 你的PVP为打开状态");
+						sender.sendMessage("§6[PVP]§3 你的PVP为打开状态");
 				}
 				return true;
 			}
