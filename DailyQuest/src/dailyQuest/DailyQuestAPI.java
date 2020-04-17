@@ -20,7 +20,7 @@ public class DailyQuestAPI
 				questLimit = plugin.group.get(permission);
 			}
 		}
-		int finishedQuest = plugin.playerData.get(p.getName()).getTotalQuest();
+		int finishedQuest = plugin.questPlayers.get(p.getName()).getTotalQuest();
 		return (questLimit-finishedQuest);
 	}
 

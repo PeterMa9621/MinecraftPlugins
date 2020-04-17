@@ -4,20 +4,20 @@ import org.bukkit.inventory.ItemStack;
 
 public class Quest 
 {
-	String type = "";
-	int mobId = 0;
+	String type;
+	String mobId = null;
 	int mobAmount = 0;
 	ItemStack item = null;
 	String mobName = null;
 	
-	public Quest(String type, int mobId, int mobAmount)
+	public Quest(String type, String mobId, int mobAmount)
 	{
 		this.type=type;
 		this.mobId=mobId;
 		this.mobAmount=mobAmount;
 	}
 	
-	public Quest(String type, int mobId, int mobAmount, String mobName)
+	public Quest(String type, String mobId, int mobAmount, String mobName)
 	{
 		this.type=type;
 		this.mobId=mobId;
@@ -36,10 +36,7 @@ public class Quest
 		return type;
 	}
 	
-	public int getMobId()
-	{
-		if(mobId==0)
-			return -1;
+	public String getMobId() {
 		return mobId;
 	}
 	

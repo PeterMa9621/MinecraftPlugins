@@ -19,8 +19,8 @@ public class DailyQuestListener implements Listener
 	public void onPlayerRightClickNPC(NPCRightClickEvent event)
     {
 		if(plugin.npcID.contains(event.getNPC().getId()) && 
-				plugin.playerData.get(event.getClicker().getName()).getCurrentNumber()!=0 &&
-				plugin.quests.get(plugin.playerData.get(event.getClicker().getName()).getWhatTheQuestIs()).getNPCId()==event.getNPC().getId())
+				plugin.questPlayers.get(event.getClicker().getName()).getCurrentNumber()!=0 &&
+				plugin.quests.get(plugin.questPlayers.get(event.getClicker().getName()).getWhatTheQuestIs()).getNPCId()==event.getNPC().getId())
 		{
 			Player p = event.getClicker();
 			int id = event.getNPC().getId();

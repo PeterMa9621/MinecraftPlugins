@@ -1,6 +1,8 @@
 package dailyQuest;
 
-public class PlayerData 
+import org.bukkit.entity.Player;
+
+public class QuestPlayer
 {
 	/**
 	 *  When currentNumber equals to 0, it means this player does not receive any quests.
@@ -9,15 +11,17 @@ public class PlayerData
 	int whatTheQuestIs = 0;
 	int totalQuest = 0;
 	String lastLogout = null;
-	public PlayerData(int currentNumber, int whatTheQuestIs, int totalQuest, String lastLogout)
+	Player player;
+	public QuestPlayer(Player player, int currentNumber, int whatTheQuestIs, int totalQuest, String lastLogout)
 	{
+		this.player = player;
 		this.currentNumber = currentNumber;
 		this.whatTheQuestIs = whatTheQuestIs;
 		this.totalQuest = totalQuest;
 		this.lastLogout = lastLogout;
 	}
 	
-	public PlayerData(int currentNumber, int whatTheQuestIs, int totalQuest)
+	public QuestPlayer(int currentNumber, int whatTheQuestIs, int totalQuest)
 	{
 		this.currentNumber = currentNumber;
 		this.whatTheQuestIs = whatTheQuestIs;
@@ -62,5 +66,9 @@ public class PlayerData
 	public void setLastLogout(String newLastLogout)
 	{
 		lastLogout = newLastLogout;
+	}
+
+	public Player getPlayer() {
+		return player;
 	}
 }

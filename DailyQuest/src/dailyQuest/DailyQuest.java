@@ -1,5 +1,7 @@
 package dailyQuest;
 
+import dailyQuest.config.ConfigManager;
+import dailyQuest.manager.QuestPlayerManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -23,46 +25,33 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import peterUtil.database.Database;
+import peterUtil.database.DatabaseType;
+import peterUtil.database.StorageInterface;
 
 public class DailyQuest extends JavaPlugin
 {
 	Random rand = new Random();
 	
 	//HashMap<Integer, String> npc = new HashMap<Integer, String>();
-	ArrayList<Integer> npcID = new ArrayList<Integer>();
-	ArrayList<QuestInfo> quests = new ArrayList<QuestInfo>();
+
+
 	/**
 	 *  In the hash map, keys are players' names. The value means the status of players
 	 *  The first index means the current index of the quest		
 	 *  The second index means what the quest is
 	 *	The last index means how many quests totally this player has already finished
 	 */
-	HashMap<String, PlayerData> playerData = new HashMap<String, PlayerData>();
+
 	ArrayList<String> cancelQuestPlayer = new ArrayList<String>();
 	HashMap<String, Integer> cancelTask = new HashMap<String, Integer>();
-	ArrayList<ItemStack> rewardItem = new ArrayList<ItemStack>();
-	HashMap<String, Integer> group = new HashMap<String, Integer>();
-	
-	HashMap<String, MobQuest> mobQuest = new HashMap<String, MobQuest>();
-	
-	SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
-	
-	int defaultQuantity = 0;
-	
-	int randomItemMaxQuantity = 1;
-	
-	int additionMoney = 10;
-	
-	int extraRewarItemQuantity = 1;
-	
-	int getQuestNPCId = 0;
-	
-	boolean enableCommandGetQuest = false;
-	
+
 	DailyQuestAPI api = new DailyQuestAPI(this);
+
+	private ConfigManager configManager;
+	public QuestPlayerManager questPlayerManager;
 	
 	public Economy economy;
 	
@@ -89,10 +78,14 @@ public class DailyQuest extends JavaPlugin
 		}
 		if(setupEconomy()==false)
 			Bukkit.getConsoleSender().sendMessage("§a[DailyQuest] §cVault插件未加载!");
-		loadConfig();
-		loadItemConfig();
-		loadQuestConfig();
-		loadPlayerConfig();
+
+		configManager = new ConfigManager(this);
+		questPlayerManager = new QuestPlayerManager(this);
+
+		configManager.loadItemConfig();
+		configManager.loadQuestConfig();
+		configManager.initDatabase();
+
 		task();
 		getServer().getPluginManager().registerEvents(new MobQuestListener(this), this);
 		getServer().getPluginManager().registerEvents(new FinishQuestListener(this), this);
@@ -101,9 +94,14 @@ public class DailyQuest extends JavaPlugin
 		Bukkit.getConsoleSender().sendMessage("§a[DailyQuest] §e日常任务系统加载完毕");
 	}
 
+
+
 	public void onDisable() 
 	{
-		savePlayerConfig();
+		for(QuestPlayer questPlayer:questPlayerManager.getQuestPlayers().values()) {
+			configManager.savePlayerConfig(questPlayer);
+		}
+
 		saveConfig();
 		Bukkit.getConsoleSender().sendMessage("§a[DailyQuest] §e日常任务系统卸载完毕");
 	}
@@ -119,7 +117,7 @@ public class DailyQuest extends JavaPlugin
 				{
 					for(Player p:Bukkit.getOnlinePlayers())
 					{
-						PlayerData pd = playerData.get(p.getName());
+						QuestPlayer pd = questPlayers.get(p.getName());
 						if(pd.getCurrentNumber()==0)
 						{
 							pd.setTotalQuest(0);
@@ -138,424 +136,7 @@ public class DailyQuest extends JavaPlugin
 		}.runTaskTimer(this, 0L, 20L);
 	}
 	
-	public void loadItemConfig()
-	{
-		File file=new File(getDataFolder(),"item.yml");
-		FileConfiguration config;
-		if (!file.exists())
-		{
-			config = load(file);
-			config.set("Item.1.ID", 1);
-			config.set("Item.1.Data", 0);
-			config.set("Item.1.Amount", 1);
 
-			config.set("Item.2.ID", 263);
-			config.set("Item.2.Data", 1);
-			config.set("Item.2.Amount", 1);
-			config.set("Item.2.Name", "§f未鉴定的宝石");
-			config.set("Item.2.Lore", "§e[未鉴定]%§6一块看起来普通的石头");
-			config.set("Item.2.Enchantment.ID", -1);
-			config.set("Item.2.Enchantment.Level", 0);
-			config.set("Item.2.HideEnchant", true);
-			
-			try {
-				config.save(file);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			loadItemConfig();
-		}
-		config = load(file);
-		
-		for(int i=0; config.contains("Item."+(i+1)); i++)
-		{
-			ItemStack item = null;
-			boolean hide = config.getBoolean("Item."+(i+1)+".HideEnchant");
-			int id = config.getInt("Item."+(i+1)+".ID");
-			int data = config.getInt("Item."+(i+1)+".Data");
-			int amount = config.getInt("Item."+(i+1)+".Amount");
-			
-			String name = config.getString("Item."+(i+1)+".Name");
-			String lore = config.getString("Item."+(i+1)+".Lore");
-			int enchantID = config.getInt("Item."+(i+1)+".Enchantment.ID");
-			int enchantLevel = config.getInt("Item."+(i+1)+".Enchantment.Level");
-			
-			if(name==null || lore==null)
-				item = new ItemStack(id, amount, (short)data);
-			else
-				item = createItem(id, amount, data, name, lore);
-			ItemMeta meta = item.getItemMeta();
-			if(hide==true)
-				meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-			item.setItemMeta(meta);
-			if(enchantID!=-1 && enchantLevel>0)
-				item.addUnsafeEnchantment(Enchantment.getById(enchantID), enchantLevel);
-			rewardItem.add(item);
-		}
-	}
-	
-	public void loadConfig()
-	{
-		File file=new File(getDataFolder(),"config.yml");
-		FileConfiguration config;
-		if (!file.exists())
-		{
-			config = load(file);
-			
-			String[] group = {"VIP1:40","VIP2:60","VIP3:70","VIP3:100"};
-			
-			config.set("DefaultQuantity", 30);
-			
-			config.set("Group", group);
-			
-			config.set("RandomItemMaxQuantity", 3);
-			config.set("SeriesFinish.AdditionMoney", 100);
-			config.set("SeriesFinish.ExtraRewardItemQuantity", 1);
-			
-			config.set("GetQuestNPCId", 9);
-			
-			config.set("EnableCommandGetQuest", false);
-			try {
-				config.save(file);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			loadConfig();
-		}
-		
-		config = load(file);
-		
-		defaultQuantity = config.getInt("DefaultQuantity");
-		randomItemMaxQuantity = config.getInt("RandomItemMaxQuantity");
-		
-		additionMoney = config.getInt("SeriesFinish.AdditionMoney");
-		
-		extraRewarItemQuantity = config.getInt("SeriesFinish.ExtraRewardItemQuantity");
-		
-		getQuestNPCId = config.getInt("GetQuestNPCId");
-		
-		enableCommandGetQuest = config.getBoolean("EnableCommandGetQuest");
-		
-		List<String> group = config.getStringList("Group");
-		
-		for(String g:group)
-		{
-			this.group.put(g.split(":")[0], Integer.valueOf(g.split(":")[1]));
-		}
-	}
-	
-	public void saveConfig()
-	{
-		File file=new File(getDataFolder(),"config.yml");
-		FileConfiguration config;
-		
-		config = load(file);
-		
-		config.set("GetQuestNPCId", getQuestNPCId);
-		
-		try {
-			config.save(file);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void loadPlayerConfig()
-	{
-		File file1=new File(getDataFolder(), "/Data");
-		String[] fileName = file1.list();
-		for(String name:fileName)
-		{
-			String playerName = name.substring(0, name.length()-4);
-			File file=new File(getDataFolder(),"/Data/" + playerName+ ".yml");
-			FileConfiguration config;
-			
-			if(file.exists())
-			{
-				config = load(file);
-				
-				int currentQuestNumber = config.getInt("CurrentQuestNumber");
-				int currentQuestIndex = config.getInt("CurrentQuestIndex");
-				int totalQuestNumber = config.getInt("TotalQuestNumber");
-				
-				String lastLogout = config.getString("LastLogout");
-				PlayerData player = new PlayerData(currentQuestNumber, currentQuestIndex, totalQuestNumber, lastLogout);
-				playerData.put(playerName, player);
-			}
-			
-		}
-		for(String playerName:playerData.keySet())
-		{
-			File file=new File(getDataFolder(),"/Data/" + playerName+ ".yml");
-			FileConfiguration config;
-			
-			config = load(file);
-			
-			PlayerData player = playerData.get(playerName);
-			config.set("LastLogout", player.getLastLogout());
-			
-			config.set("CurrentQuestNumber", player.getCurrentNumber());
-			config.set("CurrentQuestIndex", player.getWhatTheQuestIs());
-			config.set("TotalQuestNumber", player.getTotalQuest());
-			
-			try {
-				config.save(file);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	public void savePlayerConfig()
-	{
-		for(String playerName:playerData.keySet())
-		{
-			File file=new File(getDataFolder(),"Data/" + playerName+ ".yml");
-			FileConfiguration config;
-			
-			config = load(file);
-			
-			PlayerData player = playerData.get(playerName);
-			config.set("LastLogout", player.getLastLogout());
-			
-			config.set("CurrentQuestNumber", player.getCurrentNumber());
-			config.set("CurrentQuestIndex", player.getWhatTheQuestIs());
-			config.set("TotalQuestNumber", player.getTotalQuest());
-			
-			try {
-				config.save(file);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		for(Player p:Bukkit.getOnlinePlayers())
-		{
-			File file=new File(getDataFolder(),"Data/" + p.getName()+ ".yml");
-			FileConfiguration config;
-			
-			config = load(file);
-			
-			config.set("LastLogout", date.format(new Date()));
-			
-			try {
-				config.save(file);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	public void loadQuestConfig()
-	{
-		File file=new File(getDataFolder(),"quest.yml");
-		FileConfiguration config;
-		if (!file.exists())
-		{
-			config = load(file);
-			
-			config.set("Quest.1.Type", "mob");
-			config.set("Quest.1.Describe", "§a请前往坐标(-344,100,256)附近上交石头10个");
-			config.set("Quest.1.RewardMessage", "§7你完成了任务");
-			config.set("Quest.1.NPCID", 9);
-			config.set("Quest.1.Item.ID", 1);
-			config.set("Quest.1.Item.Data", 0);
-			config.set("Quest.1.Item.Amount", 10);
-			config.set("Quest.1.Item.Name", "AAA");
-			config.set("Quest.1.Item.Lore", "BBB%CCC");
-			config.set("Quest.1.Item.Enchantment.ID", 0);
-			config.set("Quest.1.Item.Enchantment.Level", 1);
-			config.set("Quest.1.Mob.ID", 54);
-			config.set("Quest.1.Mob.Amount", 2);
-			config.set("Quest.1.Mob.CustomName", "§e§l狩猎者");
-			config.set("Quest.1.Reward.Money", 50);
-			//config.set("Quest.1.Reward.Item", "Quest1");
-			
-			for(int i=1; i<10; i++)
-			{
-				config.set("Quest."+(i+1)+".Type", "item");
-				config.set("Quest."+(i+1)+".Describe", "§a请前往坐标(-344,100,256)附近上交石头10个");
-				config.set("Quest."+(i+1)+".RewardMessage", "§7你完成了任务");
-				config.set("Quest."+(i+1)+".NPCID", 9);
-				config.set("Quest."+(i+1)+".Item.ID", 1);
-				config.set("Quest."+(i+1)+".Item.Data", 0);
-				config.set("Quest."+(i+1)+".Item.Amount", 10);
-				config.set("Quest."+(i+1)+".Item.Enchantment.ID", -1);
-				config.set("Quest."+(i+1)+".Item.Enchantment.Level", 0);
-				config.set("Quest."+(i+1)+".Reward.Money", 100);
-				//config.set("Quest."+(i+1)+".Reward.Item", "Quest1");
-			}
-
-			try 
-			{
-				config.save(file);
-			} 
-			catch (IOException e) 
-			{
-				e.printStackTrace();
-			}
-			
-			loadQuestConfig();
-		}
-		
-		npcID.clear();
-		quests.clear();
-		
-		config = load(file);
-		
-		for(int i=0; config.contains("Quest."+(i+1)); i++)
-		{
-			String type = config.getString("Quest."+(i+1)+".Type");
-			String describe = config.getString("Quest."+(i+1)+".Describe");
-			String rewardMessage = config.getString("Quest."+(i+1)+".RewardMessage");
-			int NPCID = config.getInt("Quest."+(i+1)+".NPCID");
-			int itemID = config.getInt("Quest."+(i+1)+".Item.ID");
-			int itemData = config.getInt("Quest."+(i+1)+".Item.Data");
-			int amount = config.getInt("Quest."+(i+1)+".Item.Amount");
-			String name = config.getString("Quest."+(i+1)+".Item.Name");
-			String lore = config.getString("Quest."+(i+1)+".Item.Lore");
-			int enchantID = config.getInt("Quest."+(i+1)+".Item.Enchantment.ID");
-			int enchantLevel = config.getInt("Quest."+(i+1)+".Item.Enchantment.Level");
-			int mobID = config.getInt("Quest."+(i+1)+".Mob.ID");
-			int mobAmount = config.getInt("Quest."+(i+1)+".Mob.Amount");
-			int money = config.getInt("Quest."+(i+1)+".Reward.Money");
-			String mobName = config.getString("Quest."+(i+1)+".Mob.CustomName");
-			//String rewardItemList = config.getString("Quest."+(i+1)+".Reward.Item");
-			
-			/*
-			int rewardItemID = config.getInt("Quest."+(i+1)+".Reward.Item.ID");
-			int rewardItemData = config.getInt("Quest."+(i+1)+".Reward.Item.Data");
-			int rewardItemAmount = config.getInt("Quest."+(i+1)+".Reward.Item.Amount");
-			String rewardItemName = config.getString("Quest."+(i+1)+".Reward.Item.Name");
-			String rewardItemLore = config.getString("Quest."+(i+1)+".Reward.Item.Lore");
-			int rewardItemEnchantID = config.getInt("Quest."+(i+1)+".Reward.Item.Enchantment.ID");
-			int rewardItemEnchantLevel = config.getInt("Quest."+(i+1)+".Reward.Item.Enchantment.Level");
-			*/
-			
-			// Get the npcID
-			if(!npcID.contains(NPCID))
-				npcID.add(NPCID);
-			
-			//npc.put(NPCID, CitizensAPI.getNPCRegistry().getById(NPCID).getName());
-
-			// Get the quest item
-			ItemStack item = null;
-			if(name==null || lore==null)
-			{
-				item = new ItemStack(itemID, amount, (short)itemData);
-			}
-			else
-			{
-				item = createItem(itemID, amount, itemData, name, lore);
-			}
-			if(enchantID!=-1 && enchantLevel>0)
-				item.addUnsafeEnchantment(Enchantment.getById(enchantID), enchantLevel);
-
-			// Get the reward item
-			
-			/*ArrayList<ItemStack> itemList = null;
-			if(rewardItemList!=null)
-			{
-				itemList = this.item.get(rewardItemList);
-			}
-			*/
-			
-			/*
-			ItemStack rewardItem = null;
-			if(rewardItemName==null && rewardItemLore==null)
-			{
-				rewardItem = new ItemStack(rewardItemID, rewardItemAmount, (short)rewardItemData);
-			}
-			else
-			{
-				rewardItem = createItem(rewardItemID, rewardItemAmount, rewardItemData, rewardItemName, rewardItemLore);
-			}
-			if(rewardItemEnchantID!=-1 && rewardItemEnchantLevel>0)
-				rewardItem.addUnsafeEnchantment(Enchantment.getById(rewardItemEnchantID), rewardItemEnchantLevel);
-			 */
-			// Save data in Quest class
-			
-			Quest quest = null;
-			if(mobID!=0 && mobName==null)
-				quest = new Quest(type, mobID, mobAmount);
-			else if(mobID!=0 && mobName!=null)
-				quest = new Quest(type, mobID, mobAmount, mobName);
-			else
-				quest = new Quest(type, item);
-			
-			// Save data in QuestInfo class
-			if(rewardMessage==null)
-				rewardMessage = "null";
-			QuestInfo questInfo = new QuestInfo(quest, NPCID, money, describe, rewardMessage);
-			quests.add(questInfo);
-		}
-		return;
-		
-	}
-	
-	public int random(int range)
-	{
-		int i = rand.nextInt(range); //生成随机数
-		return i;
-	}
-	
-	public ItemStack createItem(int ID, int quantity, int durability, String displayName, String lore)
-	{
-		ItemStack item = new ItemStack(ID, quantity, (short)durability);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(displayName);
-		ArrayList<String> loreList = new ArrayList<String>();
-		for(String l:lore.split("%"))
-		{
-			loreList.add(l);
-		}
-		meta.setLore(loreList);
-		item.setItemMeta(meta);
-		
-		return item;
-	}
-	
-	public ItemStack createItem(int ID, int quantity, int durability, String displayName)
-	{
-		ItemStack item = new ItemStack(ID, quantity, (short)durability);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(displayName);
-		item.setItemMeta(meta);
-		
-		return item;
-	}
-	
-	public FileConfiguration load(File file)
-	{
-        if (!(file.exists())) 
-        { //假如文件不存在
-        	try   //捕捉异常，因为有可能创建不成功
-        	{
-        		file.createNewFile();
-        	}
-        	catch(IOException e)
-        	{
-        		e.printStackTrace();
-        	}
-        }
-        return YamlConfiguration.loadConfiguration(file);
-	}
-	public FileConfiguration load(String path)
-	{
-		File file=new File(path);
-		if(!file.exists())
-		{
-			try
-		{
-				file.createNewFile();
-		}
-			catch(IOException e)
-			{
-				e.printStackTrace();
-			}
-		}
-		return YamlConfiguration.loadConfiguration(new File(path));
-	}
 	
 	public Inventory getQuestGUI(Player p, String name, int NPCID)
 	{
@@ -584,8 +165,8 @@ public class DailyQuest extends JavaPlugin
 		ItemStack button2 = createItem(331, 1, 0, "§6我点错了");
 		describe = createItem(397, 1, 3, "§3"+name+"§a对你说:", "§5你找我有什么事吗?");
 		inv.setItem(0, describe);
-		if(playerData.get(p.getName()).getCurrentNumber()!=0 && 
-				quests.get(playerData.get(p.getName()).getWhatTheQuestIs()).getNPCId()==NPCID)
+		if(questPlayers.get(p.getName()).getCurrentNumber()!=0 &&
+				quests.get(questPlayers.get(p.getName()).getWhatTheQuestIs()).getNPCId()==NPCID)
 		{
 			inv.setItem(0, describe);
 			inv.setItem(3, button1);
@@ -641,7 +222,7 @@ public class DailyQuest extends JavaPlugin
 		{
 			if(quests.get(i).getQuest().getType().equalsIgnoreCase("item"))
 			{
-				for(ItemStack item:rewardItem)
+				for(ItemStack item: rewards)
 				{
 					inv.setItem(index%44, item);
 					index++;
@@ -680,12 +261,12 @@ public class DailyQuest extends JavaPlugin
 				if(sender instanceof Player)
 				{
 					Player p = (Player)sender;
-					if(playerData.get(p.getName()).getCurrentNumber()==0)
+					if(questPlayers.get(p.getName()).getCurrentNumber()==0)
 					{
 						p.sendMessage("§6[日常任务] §a你目前没有接受任务，输入/rw get获取任务!");
 						return true;
 					}
-					p.sendMessage("§6[第"+playerData.get(p.getName()).getCurrentNumber()+"环] §a"+quests.get(playerData.get(p.getName()).getWhatTheQuestIs()).getQuestDescribe());
+					p.sendMessage("§6[第"+ questPlayers.get(p.getName()).getCurrentNumber()+"环] §a"+quests.get(questPlayers.get(p.getName()).getWhatTheQuestIs()).getQuestDescribe());
 				}
 				return true;
 			}
@@ -734,18 +315,18 @@ public class DailyQuest extends JavaPlugin
 				{
 					if(args.length==2)
 					{
-						if(!this.playerData.containsKey(args[1]))
+						if(!this.questPlayers.containsKey(args[1]))
 						{
 							sender.sendMessage("§6[日常任务] §c没有该玩家的任务数据，无法重置");
 							return true;
 						}
 						if(Bukkit.getServer().getPlayer(args[1])!=null)
 						{
-							PlayerData player = playerData.get(args[1]);
+							QuestPlayer player = questPlayers.get(args[1]);
 							player.setCurrentNumber(0);
 							player.setWhatTheQuestIs(0);
 							player.setTotalQuest(0);
-							playerData.put(args[1], player);
+							questPlayers.put(args[1], player);
 							Bukkit.getServer().getPlayer(args[1]).sendMessage("§6[日常任务] §3你的任务数据已被重置");
 							sender.sendMessage("§6[日常任务] §e已重置玩家§d"+args[1]+"§e的任务数据");
 						}
@@ -815,7 +396,7 @@ public class DailyQuest extends JavaPlugin
 				if(sender instanceof Player)
 				{
 					Player p = (Player)sender;
-					if(playerData.containsKey(p.getName()))
+					if(questPlayers.containsKey(p.getName()))
 					{
 						int questLimit = defaultQuantity;
 						for(String permission:group.keySet())
@@ -825,11 +406,11 @@ public class DailyQuest extends JavaPlugin
 								questLimit = group.get(permission);
 							}
 						}
-						String msg = "§e你的任务上限:§d"+questLimit+"§e,你已完成:§d"+playerData.get(p.getName()).getTotalQuest()+"§e,";
-						if(playerData.get(p.getName()).getCurrentNumber()==0)
+						String msg = "§e你的任务上限:§d"+questLimit+"§e,你已完成:§d"+ questPlayers.get(p.getName()).getTotalQuest()+"§e,";
+						if(questPlayers.get(p.getName()).getCurrentNumber()==0)
 							msg += "你目前没有接受任务";
 						else
-							msg += "当前为第§d"+playerData.get(p.getName()).getCurrentNumber()+"§e环任务";
+							msg += "当前为第§d"+ questPlayers.get(p.getName()).getCurrentNumber()+"§e环任务";
 						p.sendMessage(msg);
 					}
 				}
@@ -847,7 +428,7 @@ public class DailyQuest extends JavaPlugin
 						p.sendMessage("§6[日常任务] §c无法使用指令获取任务，请在"+CitizensAPI.getNPCRegistry().getById(getQuestNPCId).getFullName()+"处领取");
 						return true;
 					}
-					if(playerData.get(p.getName()).getCurrentNumber()!=0)
+					if(questPlayers.get(p.getName()).getCurrentNumber()!=0)
 					{
 						p.sendMessage("§6[日常任务] §a你目前正在做任务，请先取消任务再重新领取任务!");
 						return true;
@@ -860,7 +441,7 @@ public class DailyQuest extends JavaPlugin
 							questLimit = this.group.get(permission);
 						}
 					}
-					if(playerData.get(p.getName()).getTotalQuest()>=questLimit)
+					if(questPlayers.get(p.getName()).getTotalQuest()>=questLimit)
 					{
 						p.sendMessage("§6[日常任务] §a你今天的任务已达上限，请明天再来!");
 						return true;
@@ -870,10 +451,10 @@ public class DailyQuest extends JavaPlugin
 					// the first index means the current index of the quest
 					// the second index means what the quest is
 					// the last index means how many quests totally this player has already finished
-					PlayerData player = playerData.get(p.getName());
+					QuestPlayer player = questPlayers.get(p.getName());
 					player.setCurrentNumber(1);
 					player.setWhatTheQuestIs(index);
-					playerData.put(p.getName(), player);
+					questPlayers.put(p.getName(), player);
 					p.sendMessage("§6[第 1 环] §a"+quests.get(index).getQuestDescribe());
 				}
 				return true;
@@ -884,15 +465,15 @@ public class DailyQuest extends JavaPlugin
 				if(sender instanceof Player)
 				{
 					Player p = (Player)sender;
-					if(playerData.get(p.getName()).getCurrentNumber()!=0)
+					if(questPlayers.get(p.getName()).getCurrentNumber()!=0)
 					{
 						if(cancelQuestPlayer.contains(p.getName()))
 						{
-							PlayerData player = playerData.get(p.getName());
+							QuestPlayer player = questPlayers.get(p.getName());
 							player.setCurrentNumber(0);
 							player.setWhatTheQuestIs(0);
 
-							playerData.put(p.getName(), player);
+							questPlayers.put(p.getName(), player);
 							cancelQuestPlayer.remove(p.getName());
 							getServer().getScheduler().cancelTask(cancelTask.get(p.getName()));
 							p.sendMessage("§6[日常任务] §c已放弃当前的任务!");

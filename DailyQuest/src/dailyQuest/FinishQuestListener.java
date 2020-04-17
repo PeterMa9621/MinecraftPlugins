@@ -26,14 +26,14 @@ public class FinishQuestListener implements Listener
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event)
     {
-		if(!plugin.playerData.containsKey(event.getPlayer().getName()))
+		if(!plugin.questPlayers.containsKey(event.getPlayer().getName()))
 		{
-			PlayerData player = new PlayerData(0,0,0);
-			plugin.playerData.put(event.getPlayer().getName(), player);
+			QuestPlayer player = new QuestPlayer(0,0,0);
+			plugin.questPlayers.put(event.getPlayer().getName(), player);
 		}
 		else
 		{
-			PlayerData player = plugin.playerData.get(event.getPlayer().getName());
+			QuestPlayer player = plugin.questPlayers.get(event.getPlayer().getName());
 			if(!player.getLastLogout().equalsIgnoreCase(plugin.date.format(new Date())))
 			{
 				player.setCurrentNumber(0);
@@ -46,7 +46,7 @@ public class FinishQuestListener implements Listener
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent event)
     {
-		PlayerData player = plugin.playerData.get(event.getPlayer().getName());
+		QuestPlayer player = plugin.questPlayers.get(event.getPlayer().getName());
 		player.setLastLogout(plugin.date.format(new Date()));
     }
 	
@@ -98,7 +98,7 @@ public class FinishQuestListener implements Listener
 			event.setCancelled(true);
 			if(event.getRawSlot()==3 && event.getInventory().getItem(3)!=null)
 			{
-				int currentIndex = plugin.playerData.get(p.getName()).getWhatTheQuestIs();
+				int currentIndex = plugin.questPlayers.get(p.getName()).getWhatTheQuestIs();
 				String type = plugin.quests.get(currentIndex).getQuest().getType();
 				ItemStack questItem = plugin.quests.get(currentIndex).getQuest().getQuestItem();
 				//int amount = questItem.getAmount();
@@ -124,9 +124,9 @@ public class FinishQuestListener implements Listener
 						{
 							int money = plugin.quests.get(currentIndex).getRewardMoney();
 							money = plugin.random((money/2)+1)+(money/2);
-							int addition = plugin.random((plugin.playerData.get(p.getName()).getCurrentNumber()/2)+1)*3;
+							int addition = plugin.random((plugin.questPlayers.get(p.getName()).getCurrentNumber()/2)+1)*3;
 							
-							if(plugin.playerData.get(p.getName()).getCurrentNumber()%10==0)
+							if(plugin.questPlayers.get(p.getName()).getCurrentNumber()%10==0)
 							{
 								int seriesFinishMoney = plugin.additionMoney;
 								plugin.economy.depositPlayer(p.getName(), money+addition+seriesFinishMoney);
@@ -143,7 +143,7 @@ public class FinishQuestListener implements Listener
 						// =======================================================
 						// Get the random reward items and how many reward items this player can get and give them to this player
 						int maxQuantity = plugin.random(plugin.randomItemMaxQuantity)+1;
-						if(plugin.playerData.get(p.getName()).getCurrentNumber()%10==0)
+						if(plugin.questPlayers.get(p.getName()).getCurrentNumber()%10==0)
 						{
 							maxQuantity += plugin.extraRewarItemQuantity;
 							p.sendMessage("§6[日常任务] §7你额外获得了§c"+plugin.extraRewarItemQuantity+"§7个物品奖励");
@@ -151,8 +151,8 @@ public class FinishQuestListener implements Listener
 						
 						for(int i=0; i<maxQuantity; i++)
 						{
-							int itemIndex = plugin.random(plugin.rewardItem.size());
-							p.getInventory().addItem(plugin.rewardItem.get(itemIndex));
+							int itemIndex = plugin.random(plugin.rewards.size());
+							p.getInventory().addItem(plugin.rewards.get(itemIndex));
 						}
 
 						// =======================================================
@@ -163,7 +163,7 @@ public class FinishQuestListener implements Listener
 						// ======================================================
 						// Get the next quest's index in the total quest's list
 						int nextIndex = plugin.random(plugin.quests.size());
-						PlayerData player = plugin.playerData.get(p.getName());
+						QuestPlayer player = plugin.questPlayers.get(p.getName());
 						// =====================================================
 						
 						// ====================================================
@@ -187,7 +187,7 @@ public class FinishQuestListener implements Listener
 							player.setWhatTheQuestIs(0);
 							player.setTotalQuest(player.getTotalQuest()+1);
 							
-							plugin.playerData.put(p.getName(), player);
+							plugin.questPlayers.put(p.getName(), player);
 							p.closeInventory();
 							return;
 						}
@@ -212,7 +212,7 @@ public class FinishQuestListener implements Listener
 							plugin.mobQuest.put(p.getName(), mobQuest);
 						}
 						
-						plugin.playerData.put(p.getName(), player);
+						plugin.questPlayers.put(p.getName(), player);
 						// ====================================================
 						
 						p.sendMessage("§6[第 "+player.getCurrentNumber()+" 环] §a"+plugin.quests.get(nextIndex).getQuestDescribe());
@@ -241,9 +241,9 @@ public class FinishQuestListener implements Listener
 						{
 							int money = plugin.quests.get(currentIndex).getRewardMoney();
 							money = plugin.random((money/2)+1)+(money/2);
-							int addition = plugin.random((plugin.playerData.get(p.getName()).getCurrentNumber()/2)+1)*3;
+							int addition = plugin.random((plugin.questPlayers.get(p.getName()).getCurrentNumber()/2)+1)*3;
 							
-							if(plugin.playerData.get(p.getName()).getCurrentNumber()%10==0)
+							if(plugin.questPlayers.get(p.getName()).getCurrentNumber()%10==0)
 							{
 								int seriesFinishMoney = plugin.additionMoney;
 								plugin.economy.depositPlayer(p.getName(), money+addition+seriesFinishMoney);
@@ -260,7 +260,7 @@ public class FinishQuestListener implements Listener
 						// =======================================================
 						// Get the random reward items and how many reward items this player can get and give them to this player
 						int maxQuantity = plugin.random(plugin.randomItemMaxQuantity)+1;
-						if(plugin.playerData.get(p.getName()).getCurrentNumber()%10==0)
+						if(plugin.questPlayers.get(p.getName()).getCurrentNumber()%10==0)
 						{
 							maxQuantity += plugin.extraRewarItemQuantity;
 							p.sendMessage("§6[日常任务] §7你额外获得了§c"+plugin.extraRewarItemQuantity+"§7个物品奖励");
@@ -268,8 +268,8 @@ public class FinishQuestListener implements Listener
 						
 						for(int i=0; i<maxQuantity; i++)
 						{
-							int itemIndex = plugin.random(plugin.rewardItem.size());
-							p.getInventory().addItem(plugin.rewardItem.get(itemIndex));
+							int itemIndex = plugin.random(plugin.rewards.size());
+							p.getInventory().addItem(plugin.rewards.get(itemIndex));
 						}
 
 						// =======================================================
@@ -280,7 +280,7 @@ public class FinishQuestListener implements Listener
 						// ======================================================
 						// Get the next quest's index in the total quest's list
 						int nextIndex = plugin.random(plugin.quests.size());
-						PlayerData player = plugin.playerData.get(p.getName());
+						QuestPlayer player = plugin.questPlayers.get(p.getName());
 						// =====================================================
 						
 						// ====================================================
@@ -304,7 +304,7 @@ public class FinishQuestListener implements Listener
 							player.setWhatTheQuestIs(0);
 							player.setTotalQuest(player.getTotalQuest()+1);
 							
-							plugin.playerData.put(p.getName(), player);
+							plugin.questPlayers.put(p.getName(), player);
 							p.closeInventory();
 							return;
 						}
@@ -329,7 +329,7 @@ public class FinishQuestListener implements Listener
 							plugin.mobQuest.put(p.getName(), mobQuest);
 						}
 						
-						plugin.playerData.put(p.getName(), player);
+						plugin.questPlayers.put(p.getName(), player);
 						// ====================================================
 						
 						p.sendMessage("§6[第 "+player.getCurrentNumber()+" 环] §a"+plugin.quests.get(nextIndex).getQuestDescribe());

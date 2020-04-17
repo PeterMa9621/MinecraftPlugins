@@ -48,7 +48,7 @@ public class MobQuestListener implements Listener
 						mobQuest.setCurrentAmount(newCurrentAmount);
 						if(newCurrentAmount==plugin.mobQuest.get(p.getName()).getAmountRequested())
 						{
-							int npcID = plugin.quests.get(plugin.playerData.get(p.getName()).getWhatTheQuestIs()).getNPCId();
+							int npcID = plugin.quests.get(plugin.questPlayers.get(p.getName()).getWhatTheQuestIs()).getNPCId();
 							String npcName = CitizensAPI.getNPCRegistry().getById(npcID).getName();
 							p.sendMessage("§6[日常任务] §a你已完成任务，请前往"+npcName+"§a处，交付任务！");
 						}

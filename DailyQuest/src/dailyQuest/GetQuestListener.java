@@ -27,7 +27,7 @@ public class GetQuestListener implements Listener
 			{
 				int index = plugin.random(plugin.quests.size());
 
-				if(plugin.playerData.get(p.getName()).getCurrentNumber()!=0)
+				if(plugin.questPlayers.get(p.getName()).getCurrentNumber()!=0)
 				{
 					p.sendMessage("§6[日常任务] §a你目前正在做任务，请先取消任务再重新领取任务!");
 					return;
@@ -40,7 +40,7 @@ public class GetQuestListener implements Listener
 						questLimit = plugin.group.get(permission);
 					}
 				}
-				if(plugin.playerData.get(p.getName()).getTotalQuest()>=questLimit)
+				if(plugin.questPlayers.get(p.getName()).getTotalQuest()>=questLimit)
 				{
 					p.sendMessage("§6[日常任务] §a你今天的任务已达上限，请明天再来!");
 					return;
@@ -50,7 +50,7 @@ public class GetQuestListener implements Listener
 				// the first index means the current index of the quest
 				// the second index means what the quest is
 				// the last index means how many quests totally this player has already finished
-				PlayerData player = plugin.playerData.get(p.getName());
+				QuestPlayer player = plugin.questPlayers.get(p.getName());
 				player.setCurrentNumber(1);
 				player.setWhatTheQuestIs(index);
 				if(plugin.quests.get(index).getQuest().getType().equalsIgnoreCase("mob"))
@@ -66,7 +66,7 @@ public class GetQuestListener implements Listener
 						mobQuest = new MobQuest(amount, 0, mobID, mobName);
 					plugin.mobQuest.put(p.getName(), mobQuest);
 				}
-				plugin.playerData.put(p.getName(), player);
+				plugin.questPlayers.put(p.getName(), player);
 				p.sendMessage("§6[第 1 环] §a"+plugin.quests.get(index).getQuestDescribe());
 				p.closeInventory();
 				return;
