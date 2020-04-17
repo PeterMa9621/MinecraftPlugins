@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -25,15 +26,11 @@ import peterUtil.database.StorageInterface;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 public class CheckInSystem extends JavaPlugin
 {
-	ArrayList<Integer> moneyList = new ArrayList<Integer>();
-	private ArrayList<String> commandList = new ArrayList<String>();
+	public ArrayList<List<String>> commandList = new ArrayList<List<String>>();
 	ArrayList<ItemStack> itemList = new ArrayList<ItemStack>();
 	private ArrayList<String> describeList = new ArrayList<String>();
 
@@ -221,14 +218,17 @@ public class CheckInSystem extends JavaPlugin
 			{
 				config.set("CheckIn.Days."+(i+1)+".Describe", "§7奖品为绿宝石一个");
 				config.set("CheckIn.Days."+(i+1)+".Gift.TypeID", "diamond");
+				config.set("CheckIn.Days."+(i+1)+".Gift.Model", 0);
 				config.set("CheckIn.Days."+(i+1)+".Gift.Amount", 1);
 				config.set("CheckIn.Days."+(i+1)+".Gift.Name", "§f未鉴定的宝石");
 				config.set("CheckIn.Days."+(i+1)+".Gift.Lore", "§e[未鉴定]%§6一块看起来普通的石头");
 				config.set("CheckIn.Days."+(i+1)+".Gift.Enchantment.ID", "fortune");
 				config.set("CheckIn.Days."+(i+1)+".Gift.Enchantment.Level", 1);
 				config.set("CheckIn.Days."+(i+1)+".Gift.HideEnchant", true);
-				config.set("CheckIn.Days."+(i+1)+".Money", 0);
-				config.set("CheckIn.Days."+(i+1)+".Command", null);
+				config.set("CheckIn.Days."+(i+1)+".Command", new ArrayList<String>() {{
+					add("eco give %player% 100");
+					add("eco give %player% 200");
+				}}.toArray());
 			}
 
 			try {
@@ -244,16 +244,15 @@ public class CheckInSystem extends JavaPlugin
 		String itemID;
 		int itemAmount = 0;
 		int money = 0;
-		int itemDurability = 0;
+		int customModelId = 0;
 		String itemEnchantID;
 		int itemEnchantLevel = 1;
-		String command = null;
+		List<String> command;
 		String describe = null;
 		String itemName = null;
 		String lore = null;
 		describeList.clear();
 		itemList.clear();
-		moneyList.clear();
 		commandList.clear();
 
 		databaseType = DatabaseType.valueOf(config.getString("CheckIn.Database").toUpperCase());
@@ -261,40 +260,46 @@ public class CheckInSystem extends JavaPlugin
 		for(int i=0; i<31; i++)
 		{
 			describe = config.getString("CheckIn.Days."+(i+1)+".Describe").replaceAll("&", "§");
-			itemID = config.getString("CheckIn.Days."+(i+1)+".Gift.TypeID").toUpperCase();
-			itemAmount = config.getInt("CheckIn.Days."+(i+1)+".Gift.Amount");
-			itemName = config.getString("CheckIn.Days."+(i+1)+".Gift.Name");
-			lore = config.getString("CheckIn.Days."+(i+1)+".Gift.Lore");
-			itemEnchantID = config.getString("CheckIn.Days."+(i+1)+".Gift.Enchantment.ID");
-			itemEnchantLevel = config.getInt("CheckIn.Days."+(i+1)+".Gift.Enchantment.Level");
-			boolean hide = config.getBoolean("CheckIn.Days."+(i+1)+".Gift.HideEnchant");
-			
-			money = config.getInt("CheckIn.Days."+(i+1)+".Money");
-			command = config.getString("CheckIn.Days."+(i+1)+".Command");
-			ItemStack item = null;
-			if(itemName==null && lore==null)
-				item = new ItemStack(Material.getMaterial(itemID), itemAmount);
-			else if(itemName==null && lore!=null)
-				item = createItem2(itemID, itemAmount, lore);
-			else if(itemName!=null && lore==null)
-				item = createItem(itemID, itemAmount, itemName);
-			else if(itemName!=null && lore!=null)
-				item = createItem(itemID, itemAmount, itemName, lore);
-			ItemMeta meta = item.getItemMeta();
-			if(hide==true)
-				meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-			item.setItemMeta(meta);
-			if(itemEnchantID!=null && itemEnchantLevel>0)
-			{
-				item.addUnsafeEnchantment(Enchantment.getByKey(NamespacedKey.minecraft(itemEnchantID)), itemEnchantLevel);
+			ConfigurationSection giftSection = config.getConfigurationSection("CheckIn.Days."+(i+1)+".Gift");
+			if(giftSection!=null) {
+				itemID = giftSection.getString("TypeID").toUpperCase();
+				customModelId = config.getInt("Model", 0);
+				itemAmount = config.getInt("Amount");
+				itemName = config.getString("Name");
+				lore = config.getString("Lore");
+				itemEnchantID = config.getString("Enchantment.ID");
+				itemEnchantLevel = config.getInt("Enchantment.Level");
+				boolean hide = config.getBoolean("HideEnchant");
+
+				ItemStack item = null;
+				if(itemName==null && lore==null)
+					item = new ItemStack(Material.getMaterial(itemID), itemAmount);
+				else if(itemName==null && lore!=null)
+					item = createItem2(itemID, itemAmount, lore);
+				else if(itemName!=null && lore==null)
+					item = createItem(itemID, itemAmount, itemName);
+				else if(itemName!=null && lore!=null)
+					item = createItem(itemID, itemAmount, itemName, lore);
+				ItemMeta meta = item.getItemMeta();
+				if(hide)
+					meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+				if(customModelId>0)
+					meta.setCustomModelData(customModelId);
+				item.setItemMeta(meta);
+				if(itemEnchantID!=null && itemEnchantLevel>0)
+				{
+					item.addUnsafeEnchantment(Enchantment.getByKey(NamespacedKey.minecraft(itemEnchantID)), itemEnchantLevel);
+				}
+				itemList.add(item);
+			} else {
+				itemList.add(null);
 			}
+
+			command = config.getStringList("CheckIn.Days."+(i+1)+".Command");
+
 			describeList.add(describe);
-			itemList.add(item);
-			moneyList.add(money);
 			commandList.add(command);
 		}
-		return;
-		
 	}
 	
 	public ItemStack createItem(String ID, int quantity, String displayName, String lore)
@@ -342,7 +347,7 @@ public class CheckInSystem extends JavaPlugin
 	{
 		int days = Integer.parseInt(playerData.get(player.getUniqueId()).get("days"));
 
-		Inventory inv = Bukkit.createInventory(player, 36, "签到");
+		Inventory inv = Bukkit.createInventory(player, 36, "§6每日签到");
 		for(int i=0; i<31; i++)
 		{
 			ItemStack item = new ItemStack(Material.BLUE_TERRACOTTA, 1);

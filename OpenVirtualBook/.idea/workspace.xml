@@ -6,20 +6,7 @@
     </artifacts-to-build>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9aa0224e-0eb6-4d4c-b31c-946a1d8557d6" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/OpenVirtualBook.iml" beforeDir="false" afterPath="$PROJECT_DIR$/OpenVirtualBook.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/openVirtualBook/BookUtil.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/openVirtualBook/OpenVirtualBook.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/openVirtualBook/OpenVirtualBook.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/openVirtualBook/OpenVirtualBookListener.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/openVirtualBook/OpenVirtualBookListener.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/openVirtualBook/ReflectionUtils$DataType.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/openVirtualBook/ReflectionUtils$PackageType.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/openVirtualBook/ReflectionUtils.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/plugin.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugin.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/openVirtualBook/BookUtil.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/openVirtualBook/OpenVirtualBook.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/openVirtualBook/OpenVirtualBook.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/openVirtualBook/OpenVirtualBookListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/openVirtualBook/OpenVirtualBookListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/openVirtualBook/ReflectionUtils.java" beforeDir="false" />
-    </list>
+    <list default="true" id="9aa0224e-0eb6-4d4c-b31c-946a1d8557d6" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -69,9 +56,13 @@
       <screen x="0" y="0" width="1549" height="831" />
     </state>
     <state x="505" y="162" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1549.831@0.0.1549.831" timestamp="1586998371372" />
-    <state x="555" y="170" key="FileChooserDialogImpl" timestamp="1586998413046">
+    <state x="555" y="170" key="FileChooserDialogImpl" timestamp="1587075304038">
       <screen x="0" y="0" width="1549" height="831" />
     </state>
-    <state x="555" y="170" key="FileChooserDialogImpl/0.0.1549.831@0.0.1549.831" timestamp="1586998413046" />
+    <state x="555" y="170" key="FileChooserDialogImpl/0.0.1549.831@0.0.1549.831" timestamp="1587075304038" />
+    <state x="468" y="240" key="com.intellij.ide.util.TipDialog" timestamp="1587075287838">
+      <screen x="0" y="0" width="1549" height="831" />
+    </state>
+    <state x="468" y="240" key="com.intellij.ide.util.TipDialog/0.0.1549.831@0.0.1549.831" timestamp="1587075287838" />
   </component>
 </project>
