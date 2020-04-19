@@ -2,8 +2,14 @@
 <project version="4">
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/src/dailyQuest/DailyQuest.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/src/dailyQuest/FinishQuestListener.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/src/dailyQuest/GetQuestListener.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/src/dailyQuest/MobQuestListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/dailyQuest/config/ConfigManager.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/dailyQuest/expansion/DailyQuestExpansion.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/dailyQuest/gui/GuiManager.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/dailyQuest/listener/DailyQuestListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/dailyQuest/listener/FinishQuestListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/dailyQuest/listener/GetQuestListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/dailyQuest/listener/MobQuestListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/dailyQuest/model/QuestPlayer.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/dailyQuest/model/QuestPlayer.java" charset="GBK" />
   </component>
 </project>

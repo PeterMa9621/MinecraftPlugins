@@ -5,6 +5,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -21,7 +22,7 @@ import org.bukkit.inventory.meta.BookMeta;
 
 public class OpenVirtualBook extends JavaPlugin
 {
-	ArrayList<ItemStack> books = new ArrayList<ItemStack>();
+	HashMap<String, ItemStack> books = new HashMap<>();
 	
 	boolean set = false;
 	
@@ -100,26 +101,25 @@ public class OpenVirtualBook extends JavaPlugin
 		books = getBooks(chestBlock);
 	}
 	
-	public ArrayList<ItemStack> getBooks(Block chestBlock)
+	public HashMap<String, ItemStack> getBooks(Block chestBlock)
 	{
 		Chest chest = (Chest)chestBlock.getState();
 		
 		Inventory inventory = chest.getInventory();
-		
-		ArrayList<ItemStack> books = new ArrayList<ItemStack>();
-		
-		for(ItemStack book:inventory.getContents())
-		{
-			if(book!=null)
+
+		return new HashMap<String, ItemStack>() {{
+			for(ItemStack book:inventory.getContents())
 			{
-				if(book.getType()==Material.WRITTEN_BOOK)
+				if(book!=null)
 				{
-					books.add(book);
+					if(book.getType().equals(Material.WRITTEN_BOOK))
+					{
+						BookMeta bookMeta = (BookMeta) book.getItemMeta();
+						put(bookMeta.getTitle(), book);
+					}
 				}
 			}
-		}
-
-		return books;
+		}};
 	}
 	
 	public FileConfiguration load(File file)
@@ -162,7 +162,7 @@ public class OpenVirtualBook extends JavaPlugin
 			{
 				if(sender.isOp())
 				{
-					sender.sendMessage("§9/ob open [书籍编号] §6- 打开一本虚拟的成书");
+					sender.sendMessage("§9/ob open [书名] §6- 打开一本虚拟的成书");
 					sender.sendMessage("§9/ob set §6- 设置一个存放成书的箱子");
 					sender.sendMessage("§9/ob list §6- 查看所有书籍列表");
 				}
@@ -182,8 +182,8 @@ public class OpenVirtualBook extends JavaPlugin
 					sender.sendMessage("§6编号      书名");
 					if(!books.isEmpty())
 					{
-						int index = 0;
-						for(ItemStack book:books)
+						int index = 1;
+						for(ItemStack book:books.values())
 						{
 							BookMeta meta = (BookMeta)book.getItemMeta();
 							String name = meta.getTitle();
@@ -223,20 +223,20 @@ public class OpenVirtualBook extends JavaPlugin
 					Player p = (Player)sender;
 					if(args.length==2)
 					{
-						if(args[1].matches("[0-9]*") && Integer.parseInt(args[1])<books.size())
+						if(books.containsKey(args[1]))
 						{
-							p.openBook(books.get(Integer.parseInt(args[1])));
+							p.openBook(books.get(args[1]));
 						}
 						else
 						{
 							if(p.isOp())
-								p.sendMessage("§6[虚拟书籍] §c编号错误!");
+								p.sendMessage("§6[虚拟书籍] §c书名错误!");
 						}
 					}
 					else
 					{
 						if(p.isOp())
-							p.sendMessage("§9/ob open [书籍编号] §6- 打开一本虚拟的成书");
+							p.sendMessage("§9/ob open [书名] §6- 打开一本虚拟的成书");
 					}
 				}
 				return true;

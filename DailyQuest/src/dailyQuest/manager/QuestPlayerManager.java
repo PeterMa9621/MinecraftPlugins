@@ -1,7 +1,7 @@
 package dailyQuest.manager;
 
 import dailyQuest.DailyQuest;
-import dailyQuest.QuestPlayer;
+import dailyQuest.model.QuestPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;

@@ -1,53 +1,57 @@
 package peterHelper;
 
-import dev.lone.itemsadder.api.ItemsAdder;
+import levelSystem.API;
+import levelSystem.LevelSystem;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import peterHelper.command.CommandTabCompleter;
+import peterHelper.config.ConfigManager;
 import peterHelper.expansion.PeterHelperExpansion;
-import peterHelper.util.AttributeModifierUtil;
+import peterHelper.listener.LevelListener;
+import peterHelper.manager.CustomItemManager;
 import peterHelper.util.Util;
-
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class PeterHelper extends JavaPlugin
 {
+	public ConfigManager configManager;
+	public CustomItemManager customItemManager;
+	public API levelSystemApi;
 	public void onEnable()
 	{
-
 		if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null){
 			new PeterHelperExpansion(this).register();
 		}
-
-		getServer().getPluginManager().registerEvents(new PeterHelperListener(this), this);
-		Bukkit.getConsoleSender().sendMessage("§a[PeterHelper] §ePeterHelper加载完毕");
+		if(Bukkit.getPluginManager().getPlugin("LevelSystem") != null){
+			LevelSystem levelSystem = ((LevelSystem) Bukkit.getPluginManager().getPlugin("LevelSystem"));
+			levelSystemApi = levelSystem.getAPI();
+		}
+		configManager = new ConfigManager(this);
+		customItemManager = new CustomItemManager(this);
+		configManager.loadConfig();
+		getCommand("ph").setTabCompleter(new CommandTabCompleter(this));
+		getServer().getPluginManager().registerEvents(new LevelListener(this), this);
+		Bukkit.getConsoleSender().sendMessage("§6[PeterHelper] §ePeterHelper加载完毕");
 	}
 
 	public void onDisable()
 	{
-		Bukkit.getConsoleSender().sendMessage("§a[PeterHelper] §ePeterHelper卸载完毕");
+		Bukkit.getConsoleSender().sendMessage("§6[PeterHelper] §ePeterHelper卸载完毕");
 	}
 	
 	public boolean onCommand(CommandSender sender,Command cmd,String label,String[] args)  
 	{
 		if (cmd.getName().equalsIgnoreCase("ph") && sender.isOp()) {
 			if (args.length==0) {
-				sender.sendMessage("§a=========[PeterHelper]=========");
-				sender.sendMessage("§a/ph item §3查看手上的物品信息");
-				sender.sendMessage("§a/ph give [playerName] [itemName] [amount] §3给予原版物品");
-				sender.sendMessage("§a/ph giveitem [playerName] [itemName] §3给予ItemAdders内的自定义物品");
+				sender.sendMessage("§6=========[PeterHelper]=========");
+				sender.sendMessage("§6/ph item §3查看手上的物品信息");
+				sender.sendMessage("§6/ph give [playerName] [itemName] [amount] §3给予原版物品");
+				sender.sendMessage("§6/ph giveitem [playerName] [itemName] §3给予ItemAdders内的自定义物品");
 				return true;
 			}
 			
@@ -68,12 +72,12 @@ public class PeterHelper extends JavaPlugin
 				int amount = Integer.parseInt(args[3]);
 				Player player = Bukkit.getPlayer(playerName);
 				if(player==null){
-					sender.sendMessage("§a[PeterHelper] §c玩家不存在");
+					sender.sendMessage("§6[PeterHelper] §c玩家不存在");
 					return true;
 				}
 				Material material = Material.getMaterial(itemName.toUpperCase());
 				if (material == null) {
-					sender.sendMessage("§a[PeterHelper] §c物品不存在");
+					sender.sendMessage("§6[PeterHelper] §c物品不存在");
 					return true;
 				}
 				ItemStack itemStack = new ItemStack(material, amount);
@@ -97,21 +101,13 @@ public class PeterHelper extends JavaPlugin
 				String itemName = args[2];
 				Player player = Bukkit.getPlayer(playerName);
 				if(player==null){
-					sender.sendMessage("§a[PeterHelper] §c玩家不存在");
+					sender.sendMessage("§6[PeterHelper] §c玩家不存在");
 					return true;
 				}
-				ItemStack itemStack = ItemsAdder.getCustomItem(itemName);
+				ItemStack itemStack = customItemManager.getCustomItem(itemName);
 				if(itemStack==null){
-					sender.sendMessage("§a[PeterHelper] §c自定义物品不存在");
+					sender.sendMessage("§6[PeterHelper] §c自定义物品不存在");
 					return true;
-				}
-				ItemMeta itemMeta = itemStack.getItemMeta();
-				if(Util.isWeapon(itemStack)) {
-					AttributeModifierUtil.randomWeaponAttribute(itemMeta);
-					itemStack.setItemMeta(itemMeta);
-				} else if(Util.isArmor(itemStack)) {
-					AttributeModifierUtil.randomArmorAttribute(itemMeta);
-					itemStack.setItemMeta(itemMeta);
 				}
 
 				if(player.getInventory().firstEmpty()!=-1) {
@@ -121,6 +117,12 @@ public class PeterHelper extends JavaPlugin
 					Bukkit.getServer().getWorld(player.getWorld().getName()).dropItem(player.getLocation(), itemStack);
 				}
 				player.sendMessage(ChatColor.GOLD + "已获得" + ChatColor.WHITE + itemStack.getItemMeta().getDisplayName());
+				return true;
+			}
+
+			if(args[0].equalsIgnoreCase("reload")) {
+				configManager.loadConfig();
+				sender.sendMessage("§6[PeterHelper] §e配置重载成功");
 				return true;
 			}
 		}

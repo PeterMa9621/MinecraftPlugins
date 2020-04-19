@@ -1,10 +1,11 @@
 name: PeterHelper
 main: peterHelper.PeterHelper
-version: '1.1.4'
-api-version: '1.14'
+version: '1.2.0'
+api-version: '1.15'
 author: Jingyuan Ma
 depend:
   - ItemsAdder
+  - ArmorEquipEvent
 softdepend:
   - PlaceholderAPI
 commands:

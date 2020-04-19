@@ -20,8 +20,8 @@ public class OpenVirtualBookListener implements Listener
     {
 		if(plugin.set)
 		{
-			if(event.getClickedBlock().getType()==Material.CHEST ||
-					event.getClickedBlock().getType()==Material.TRAPPED_CHEST)
+			if(event.getClickedBlock().getType().equals(Material.CHEST) ||
+					event.getClickedBlock().getType().equals(Material.TRAPPED_CHEST))
 			{
 				plugin.x = event.getClickedBlock().getLocation().getBlockX();
 				plugin.y = event.getClickedBlock().getLocation().getBlockY();
@@ -40,5 +40,4 @@ public class OpenVirtualBookListener implements Listener
 			}
 		}
     }
-	
 }

@@ -1,9 +1,16 @@
 package dailyQuest.config;
 
-import dailyQuest.*;
+import dailyQuest.DailyQuest;
+import dailyQuest.model.Quest;
+import dailyQuest.model.QuestInfo;
+import dailyQuest.model.QuestPlayer;
+import dailyQuest.manager.QuestManager;
+import dailyQuest.util.IconType;
+import dailyQuest.util.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -17,34 +24,40 @@ import peterUtil.database.StorageInterface;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class ConfigManager {
     private DailyQuest plugin;
 
-    ArrayList<Integer> npcID = new ArrayList<Integer>();
-    ArrayList<QuestInfo> quests = new ArrayList<QuestInfo>();
-    List<String> rewards;
-    HashMap<String, Integer> group = new HashMap<String, Integer>();
+    public ArrayList<Integer> npcIds = new ArrayList<Integer>();
 
-    HashMap<String, MobQuest> mobQuest = new HashMap<String, MobQuest>();
+    public List<String> rewards;
+    public static HashMap<String, Integer> group = new HashMap<String, Integer>();
 
-    SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
+    public SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
 
     private static DatabaseType databaseType = DatabaseType.YML;
     private static StorageInterface database;
 
-    int defaultQuantity = 0;
+    public static int defaultDailyLimit = 0;
 
-    int randomItemMaxQuantity = 1;
+    public static double chanceGetReward;
 
-    int additionMoney = 10;
+    public int randomItemMaxQuantity = 1;
 
-    int extraRewarItemQuantity = 1;
+    public int additionMoney = 10;
 
-    int getQuestNPCId = 0;
+    public int extraRewardItemQuantity = 1;
 
-    boolean enableCommandGetQuest = false;
+    public int getQuestNPCId = 0;
+
+    public boolean enableCommandGetQuest = false;
+
+    private String[] guiIconType = {"NPC", "GiveUp", "GoBack", "WhatIsDailyQuest", "Accept", "FinishQuest"};
+
+    public HashMap<IconType, ItemStack> guiIcons = new HashMap<>();
 
     public ConfigManager(DailyQuest plugin) {
         this.plugin = plugin;
@@ -160,9 +173,55 @@ public class ConfigManager {
 
             String[] group = {"vip1:30","vip2:50","vip3:70"};
 
-            config.set("DefaultQuantity", 20);
+            config.set("DefaultDailyLimit", 20);
+
+            config.set("ChanceGetReward", 0.3);
 
             config.set("Group", group);
+
+            // Gui icon settings
+            config.set("Gui.NPC.Id", "PLAYER_HEAD");
+            config.set("Gui.NPC.DisplayName", "&3%name%&a∂‘ƒ„Àµ:");
+            config.set("Gui.NPC.Lore", new ArrayList<String>() {{
+                add("&5ƒ„’“Œ“”– ≤√¥ ¬¬?");
+            }}.toArray());
+            config.set("Gui.NPC.Model", 0);
+
+            config.set("Gui.GiveUp.Id", "PLAYER_HEAD");
+            config.set("Gui.GiveUp.DisplayName", "&3%name%&a∂‘ƒ„Àµ:");
+            config.set("Gui.GiveUp.Lore", new ArrayList<String>() {{
+                add("&5ƒ„’“Œ“”– ≤√¥ ¬¬?");
+            }}.toArray());
+            config.set("Gui.GiveUp.Model", 0);
+
+            config.set("Gui.GoBack.Id", "PLAYER_HEAD");
+            config.set("Gui.GoBack.DisplayName", "&3%name%&a∂‘ƒ„Àµ:");
+            config.set("Gui.GoBack.Lore", new ArrayList<String>() {{
+                add("&5ƒ„’“Œ“”– ≤√¥ ¬¬?");
+            }}.toArray());
+            config.set("Gui.GoBack.Model", 0);
+
+            config.set("Gui.WhatIsDailyQuest.Id", "PLAYER_HEAD");
+            config.set("Gui.WhatIsDailyQuest.DisplayName", "&3%name%&a∂‘ƒ„Àµ:");
+            config.set("Gui.WhatIsDailyQuest.Lore", new ArrayList<String>() {{
+                add("&5ƒ„’“Œ“”– ≤√¥ ¬¬?");
+            }}.toArray());
+            config.set("Gui.WhatIsDailyQuest.Model", 0);
+
+            config.set("Gui.Accept.Id", "PLAYER_HEAD");
+            config.set("Gui.Accept.DisplayName", "&3%name%&a∂‘ƒ„Àµ:");
+            config.set("Gui.Accept.Lore", new ArrayList<String>() {{
+                add("&5ƒ„’“Œ“”– ≤√¥ ¬¬?");
+            }}.toArray());
+            config.set("Gui.Accept.Model", 0);
+
+            config.set("Gui.FinishQuest.Id", "PLAYER_HEAD");
+            config.set("Gui.FinishQuest.DisplayName", "&3%name%&a∂‘ƒ„Àµ:");
+            config.set("Gui.FinishQuest.Lore", new ArrayList<String>() {{
+                add("&5ƒ„’“Œ“”– ≤√¥ ¬¬?");
+            }}.toArray());
+            config.set("Gui.FinishQuest.Model", 0);
+            //
 
             config.set("RandomItemMaxQuantity", 3);
             config.set("SeriesFinish.AdditionMoney", 100);
@@ -179,16 +238,43 @@ public class ConfigManager {
                 e.printStackTrace();
             }
             loadConfig();
+            return;
         }
 
         config = load(file);
+        ConfigurationSection guiSection = config.getConfigurationSection("Gui");
+        if(guiSection!=null) {
+            for(String type:guiIconType) {
+                ConfigurationSection section = guiSection.getConfigurationSection(type);
+                assert section != null;
+                String id = section.getString("Id").toUpperCase();
+                String displayName = section.getString("DisplayName").replace("&","°Ï");
+                ArrayList<String> lore = new ArrayList<String>() {{
+                    for(String eachLore:section.getStringList("Lore")){
+                        add(eachLore.replace("&","°Ï"));
+                    }
+                }};
 
-        defaultQuantity = config.getInt("DefaultQuantity");
+                int customModelId = section.getInt("Model", 0);
+                ItemStack icon = new ItemStack(Material.getMaterial(id));
+                ItemMeta itemMeta = icon.getItemMeta();
+                itemMeta.setDisplayName(displayName);
+                itemMeta.setLore(lore);
+                itemMeta.setCustomModelData(customModelId);
+                icon.setItemMeta(itemMeta);
+                guiIcons.put(IconType.valueOf(type), icon);
+            }
+        }
+
+        defaultDailyLimit = config.getInt("DefaultDailyLimit", 20);
+
+        chanceGetReward = config.getDouble("ChanceGetReward", 0.3);
+
         randomItemMaxQuantity = config.getInt("RandomItemMaxQuantity");
 
         additionMoney = config.getInt("SeriesFinish.AdditionMoney");
 
-        extraRewarItemQuantity = config.getInt("SeriesFinish.ExtraRewardItemQuantity");
+        extraRewardItemQuantity = config.getInt("SeriesFinish.ExtraRewardItemQuantity");
 
         getQuestNPCId = config.getInt("GetQuestNPCId");
 
@@ -199,27 +285,27 @@ public class ConfigManager {
         List<String> group = config.getStringList("Group");
 
         for(String g:group) {
-            this.group.put(g.split(":")[0], Integer.valueOf(g.split(":")[1]));
+            ConfigManager.group.put(g.split(":")[0], Integer.valueOf(g.split(":")[1]));
         }
     }
 
     public void saveConfig()
     {
         File file=new File(plugin.getDataFolder(),"config.yml");
-        FileConfiguration config;
+        if(file.exists()) {
+            FileConfiguration config;
 
-        config = load(file);
+            config = load(file);
 
-        config.set("GetQuestNPCId", getQuestNPCId);
+            config.set("GetQuestNPCId", getQuestNPCId);
 
-        try {
-            config.save(file);
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                config.save(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
-
-
 
     public void loadQuestConfig()
     {
@@ -230,8 +316,8 @@ public class ConfigManager {
             config = load(file);
 
             config.set("Quest.1.Type", "mob");
-            config.set("Quest.1.Describe", "¬ßaËØ∑ÂâçÂæÄÂùêÊ†á(-344,100,256)ÈôÑËøë‰∏ä‰∫§Áü≥Â§¥10‰∏™");
-            config.set("Quest.1.RewardMessage", "¬ß7‰Ω†ÂÆåÊàê‰∫Ü‰ªªÂä°");
+            config.set("Quest.1.Describe", "°Ïa«Î«∞Õ˘◊¯±Í(-344,100,256)∏ΩΩ¸…œΩª ØÕ∑10∏ˆ");
+            config.set("Quest.1.RewardMessage", "°Ï7ƒ„ÕÍ≥…¡À»ŒŒÒ");
             config.set("Quest.1.NPCID", 9);
             config.set("Quest.1.Item.ID", "STONE");
             config.set("Quest.1.Item.Amount", 10);
@@ -240,24 +326,24 @@ public class ConfigManager {
                 add("&6AAA");
                 add("&5BBB");
             }});
-            config.set("Quest.1.Item.Enchantment.ID", "FORTUNE");
+            config.set("Quest.1.Item.Enchantment.ID", "fortune");
             config.set("Quest.1.Item.Enchantment.Level", 1);
             config.set("Quest.1.Mob.ID", "ZOMBIE");
             config.set("Quest.1.Mob.Amount", 2);
-            config.set("Quest.1.Mob.CustomName", "¬ße¬ßlÁã©ÁåéËÄÖ");
-            config.set("Quest.1.Reward.Money", 50);
+            config.set("Quest.1.Mob.CustomName", "°Ïe°Ïl·˜¡‘’ﬂ");
+            config.set("Quest.1.Reward.Money", "30:50");
 
             for(int i=1; i<10; i++) {
                 config.set("Quest."+(i+1)+".Type", "item");
-                config.set("Quest."+(i+1)+".Describe", "¬ßaËØ∑ÂâçÂæÄÂùêÊ†á(-344,100,256)ÈôÑËøë‰∏ä‰∫§Áü≥Â§¥10‰∏™");
-                config.set("Quest."+(i+1)+".RewardMessage", "¬ß7‰Ω†ÂÆåÊàê‰∫Ü‰ªªÂä°");
+                config.set("Quest."+(i+1)+".Describe", "°Ïa«Î«∞Õ˘◊¯±Í(-344,100,256)∏ΩΩ¸…œΩª ØÕ∑10∏ˆ");
+                config.set("Quest."+(i+1)+".RewardMessage", "°Ï7ƒ„ÕÍ≥…¡À»ŒŒÒ");
                 config.set("Quest."+(i+1)+".NPCID", 9);
                 config.set("Quest."+(i+1)+".Item.ID", "DIAMOND");
                 config.set("Quest."+(i+1)+".Item.Model", 1);
                 config.set("Quest."+(i+1)+".Item.Amount", 10);
-                config.set("Quest."+(i+1)+".Item.Enchantment.ID", -1);
+                config.set("Quest."+(i+1)+".Item.Enchantment.ID", "fortune");
                 config.set("Quest."+(i+1)+".Item.Enchantment.Level", 0);
-                config.set("Quest."+(i+1)+".Reward.Money", 100);
+                config.set("Quest."+(i+1)+".Reward.Money", "50:100");
             }
 
             try
@@ -272,8 +358,8 @@ public class ConfigManager {
             loadQuestConfig();
         }
 
-        npcID.clear();
-        quests.clear();
+        npcIds.clear();
+        QuestManager.quests.clear();
 
         config = load(file);
 
@@ -281,74 +367,57 @@ public class ConfigManager {
         {
             String type = config.getString("Quest."+(i+1)+".Type");
             String describe = config.getString("Quest."+(i+1)+".Describe");
-            String rewardMessage = config.getString("Quest."+(i+1)+".RewardMessage");
-            int NPCID = config.getInt("Quest."+(i+1)+".NPCID");
-            String itemID = config.getString("Quest."+(i+1)+".Item.ID");
-            int customModelId = config.getInt("Quest."+(i+1)+".Item.Model", 0);
-
-            int amount = config.getInt("Quest."+(i+1)+".Item.Amount", 1);
-            String name = config.getString("Quest."+(i+1)+".Item.Name");
-            List<String> lore = config.getStringList("Quest."+(i+1)+".Item.Lore");
-            String enchantID = config.getString("Quest."+(i+1)+".Item.Enchantment.ID");
-            int enchantLevel = config.getInt("Quest."+(i+1)+".Item.Enchantment.Level");
-            String mobID = config.getString("Quest."+(i+1)+".Mob.ID");
-            int mobAmount = config.getInt("Quest."+(i+1)+".Mob.Amount");
-            int money = config.getInt("Quest."+(i+1)+".Reward.Money");
-            String mobName = config.getString("Quest."+(i+1)+".Mob.CustomName");
+            String rewardMessage = config.getString("Quest."+(i+1)+".RewardMessage", "");
+            String money = config.getString("Quest."+(i+1)+".Reward.Money");
 
             // Get the npcID
-            if(!npcID.contains(NPCID))
-                npcID.add(NPCID);
+            int NPCID = config.getInt("Quest."+(i+1)+".NPCID");
+            if(!npcIds.contains(NPCID))
+                npcIds.add(NPCID);
 
-            // Get the quest item
-            ItemStack item = createItem(itemID, amount, name, lore, customModelId);
+            QuestInfo questInfo = null;
+            ConfigurationSection itemSection = config.getConfigurationSection("Quest."+(i+1)+".Item");
+            ConfigurationSection mobSection = config.getConfigurationSection("Quest."+(i+1)+".Mob");
+            if(itemSection!=null) {
+                String itemID = itemSection.getString("ID");
+                int customModelId = itemSection.getInt("Model", 0);
 
-            if(enchantID!=null && enchantLevel>0)
-                item.addUnsafeEnchantment(Enchantment.getByKey(NamespacedKey.minecraft(enchantID)), enchantLevel);
+                int amount = itemSection.getInt("Amount", 1);
+                String name = itemSection.getString("Name");
+                List<String> lore = itemSection.getStringList("Lore");
+                String enchantID = itemSection.getString("Enchantment.ID", "").toLowerCase();
+                int enchantLevel = itemSection.getInt("Enchantment.Level");
 
-            // Save data in Quest class
-            Quest quest;
-            if(mobID!=null && mobName==null)
-                quest = new Quest(type, mobID, mobAmount);
-            else if(mobID != null)
-                quest = new Quest(type, mobID, mobAmount, mobName);
-            else
-                quest = new Quest(type, item);
+                // Get the quest item
+                ItemStack item = Util.createItem(itemID, amount, name, lore, customModelId);
+
+                if(!enchantID.equalsIgnoreCase("") && enchantLevel>0)
+                    item.addUnsafeEnchantment(Enchantment.getByKey(NamespacedKey.minecraft(enchantID)), enchantLevel);
+
+                questInfo = new QuestInfo(type, item);
+            } else if(mobSection!=null) {
+                String mobID = mobSection.getString("ID");
+                int mobAmount = mobSection.getInt("Amount");
+                String mobName = mobSection.getString("CustomName");
+                if(mobName==null)
+                    questInfo = new QuestInfo(type, mobID, mobAmount);
+                else
+                    questInfo = new QuestInfo(type, mobID, mobAmount, mobName);
+            }
 
             // Save data in QuestInfo class
-            if(rewardMessage==null)
-                rewardMessage = "";
-            QuestInfo questInfo = new QuestInfo(quest, NPCID, money, describe, rewardMessage);
-            quests.add(questInfo);
+            if(questInfo!=null) {
+                Quest quest = new Quest(questInfo, NPCID, money, describe, rewardMessage);
+                QuestManager.quests.add(quest);
+            }
         }
-    }
-
-    public int random(int range) {
-        Random random = new Random(Calendar.getInstance().getTimeInMillis());
-        return random.nextInt(range);
-    }
-
-    public ItemStack createItem(String ID, int quantity, String displayName, List<String> lore, int customModelId)
-    {
-        ItemStack item = new ItemStack(Material.getMaterial(ID.toUpperCase()), quantity);
-        ItemMeta meta = item.getItemMeta();
-        assert meta != null;
-        if(displayName!=null) {
-            meta.setDisplayName(displayName);
-        }
-        if(customModelId>0) {
-            meta.setCustomModelData(customModelId);
-        }
-        meta.setLore(lore);
-        item.setItemMeta(meta);
-        return item;
     }
 
     public FileConfiguration load(File file)
     {
         if (!(file.exists()))
-        { //ÂÅáÂ¶ÇÊñá‰ª∂‰∏çÂ≠òÂú®
-            try   //ÊçïÊçâÂºÇÂ∏∏ÔºåÂõ†‰∏∫ÊúâÂèØËÉΩÂàõÂª∫‰∏çÊàêÂäü
+        { //ºŸ»ÁŒƒº˛≤ª¥Ê‘⁄
+            try   //≤∂◊Ω“Ï≥££¨“ÚŒ™”–ø…ƒ‹¥¥Ω®≤ª≥…π¶
             {
                 file.createNewFile();
             }

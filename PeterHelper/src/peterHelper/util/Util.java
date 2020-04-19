@@ -2,6 +2,7 @@ package peterHelper.util;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
@@ -10,6 +11,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -106,5 +108,21 @@ public class Util {
         return isBoots(itemStack) || isLeggings(itemStack) || isChest(itemStack) || isHelmet(itemStack);
     }
 
+    public static void setPersistentData(ItemStack item, NamespacedKey key, String value) {
+        ItemMeta itemMeta = item.getItemMeta();
+        itemMeta.getPersistentDataContainer().set(key, PersistentDataType.STRING, value);
+        item.setItemMeta(itemMeta);
+    }
 
+    public static String getPersistentData(ItemStack item, NamespacedKey key) {
+        if(item==null)
+            return null;
+        ItemMeta itemMeta = item.getItemMeta();
+        if(itemMeta==null)
+            return null;
+        if(itemMeta.getPersistentDataContainer().has(key, PersistentDataType.STRING)) {
+            return itemMeta.getPersistentDataContainer().get(key, PersistentDataType.STRING);
+        }
+        return null;
+    }
 }

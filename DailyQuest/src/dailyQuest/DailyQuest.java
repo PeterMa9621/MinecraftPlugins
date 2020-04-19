@@ -1,62 +1,50 @@
 package dailyQuest;
 
+import dailyQuest.api.DailyQuestAPI;
 import dailyQuest.config.ConfigManager;
+import dailyQuest.expansion.DailyQuestExpansion;
+import dailyQuest.gui.GuiManager;
+import dailyQuest.listener.DailyQuestListener;
+import dailyQuest.listener.FinishQuestListener;
+import dailyQuest.listener.GetQuestListener;
+import dailyQuest.listener.MobQuestListener;
+import dailyQuest.manager.QuestManager;
 import dailyQuest.manager.QuestPlayerManager;
-import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
-
+import dailyQuest.model.Quest;
+import dailyQuest.model.QuestPlayer;
+import dailyQuest.util.Util;
 import net.citizensnpcs.api.CitizensAPI;
+import net.luckperms.api.LuckPerms;
 import net.milkbowl.vault.economy.Economy;
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
-
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import peterUtil.database.Database;
-import peterUtil.database.DatabaseType;
-import peterUtil.database.StorageInterface;
+import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 public class DailyQuest extends JavaPlugin
 {
-	Random rand = new Random();
-	
-	//HashMap<Integer, String> npc = new HashMap<Integer, String>();
-
-
-	/**
-	 *  In the hash map, keys are players' names. The value means the status of players
-	 *  The first index means the current index of the quest		
-	 *  The second index means what the quest is
-	 *	The last index means how many quests totally this player has already finished
-	 */
-
-	ArrayList<String> cancelQuestPlayer = new ArrayList<String>();
-	HashMap<String, Integer> cancelTask = new HashMap<String, Integer>();
+	ArrayList<UUID> cancelQuestPlayer = new ArrayList<>();
+	HashMap<UUID, BukkitTask> cancelTask = new HashMap<>();
 
 	DailyQuestAPI api = new DailyQuestAPI(this);
+	public static LuckPerms luckPermsApi;
 
-	private ConfigManager configManager;
+	public ConfigManager configManager;
 	public QuestPlayerManager questPlayerManager;
-	
+	public GuiManager guiManager;
 	public Economy economy;
+
+	private String previousDate = null;
 	
-	private boolean setupEconomy()
-	{
+	private boolean setupEconomy() {
 		RegisteredServiceProvider<Economy> economyProvider = Bukkit.getServicesManager().getRegistration(Economy.class);
 		if (economyProvider != null)
 		{
@@ -64,7 +52,16 @@ public class DailyQuest extends JavaPlugin
 		}
 		return (economy!=null);
 	}
-	
+
+	private boolean hookLP() {
+		RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
+		if (provider != null) {
+			luckPermsApi = provider.getProvider();
+			return true;
+		}
+		return false;
+	}
+
 	public DailyQuestAPI getAPI()
 	{
 		return api;
@@ -76,16 +73,25 @@ public class DailyQuest extends JavaPlugin
 		{
 			new File(getDataFolder(),"Data").mkdirs();
 		}
-		if(setupEconomy()==false)
+		if(!setupEconomy())
 			Bukkit.getConsoleSender().sendMessage("§a[DailyQuest] §cVault插件未加载!");
+
+		if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null){
+			new DailyQuestExpansion(this).register();
+		}
+		if(!hookLP())
+			Bukkit.getConsoleSender().sendMessage("§a[DailyQuest] §cLuckPerms插件未加载!");
 
 		configManager = new ConfigManager(this);
 		questPlayerManager = new QuestPlayerManager(this);
+		guiManager = new GuiManager(this);
 
+		configManager.loadConfig();
 		configManager.loadItemConfig();
 		configManager.loadQuestConfig();
 		configManager.initDatabase();
 
+		previousDate = configManager.date.format(new Date());
 		task();
 		getServer().getPluginManager().registerEvents(new MobQuestListener(this), this);
 		getServer().getPluginManager().registerEvents(new FinishQuestListener(this), this);
@@ -99,10 +105,14 @@ public class DailyQuest extends JavaPlugin
 	public void onDisable() 
 	{
 		for(QuestPlayer questPlayer:questPlayerManager.getQuestPlayers().values()) {
-			configManager.savePlayerConfig(questPlayer);
+			try {
+				configManager.savePlayerConfig(questPlayer);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
-		saveConfig();
+		configManager.saveConfig();
 		Bukkit.getConsoleSender().sendMessage("§a[DailyQuest] §e日常任务系统卸载完毕");
 	}
 	
@@ -110,163 +120,40 @@ public class DailyQuest extends JavaPlugin
 	{
 		new BukkitRunnable()
 		{
-    		String previousDate = null;
+
 			public void run()
 			{
-				if(previousDate!=null && (!previousDate.equalsIgnoreCase(date.format(new Date()))))
+				if((!previousDate.equalsIgnoreCase(configManager.date.format(new Date()))))
 				{
 					for(Player p:Bukkit.getOnlinePlayers())
 					{
-						QuestPlayer pd = questPlayers.get(p.getName());
-						if(pd.getCurrentNumber()==0)
-						{
-							pd.setTotalQuest(0);
-							pd.setWhatTheQuestIs(0);
-							pd.setCurrentNumber(0);
-						}
-						else
-						{
-							pd.setTotalQuest(0);
-							pd.setCurrentNumber(1);
-						}
+						QuestPlayer questPlayer = questPlayerManager.getQuestPlayer(p);
+						questPlayer.clearQuestData();
 					}
+					previousDate = configManager.date.format(new Date());
 				}
-				previousDate = date.format(new Date());
 			}
 		}.runTaskTimer(this, 0L, 20L);
 	}
-	
 
-	
-	public Inventory getQuestGUI(Player p, String name, int NPCID)
-	{
-		Inventory inv = Bukkit.createInventory(p, 9, "§8日常任务");
-
-		ItemStack button1 = createItem(368, 1, 0, "§6我是来领取任务的");
-		ItemStack button4 = createItem(368, 1, 0, "§c我是来放弃任务的");
-		ItemStack button2 = createItem(331, 1, 0, "§6我点错了");
-		ItemStack button3 = createItem(368, 1, 0, "§a我想知道什么是每日任务的");
-		ItemStack describe = createItem(397, 1, 3, "§3"+name+"§a对你说:", "§5你找我有什么事吗?");
-		inv.setItem(0, describe);
-
-		inv.setItem(2, button1);
-		inv.setItem(3, button4);
-		inv.setItem(4, button3);
-		inv.setItem(5, button2);
-
-		return inv;
-	}
-	
-	public Inventory createGUI(Player p, String name, int NPCID)
-	{
-		Inventory inv = Bukkit.createInventory(p, 9, "§8NPC");
-		ItemStack describe = null;
-		ItemStack button1 = createItem(368, 1, 0, "§6我是来交任务的");
-		ItemStack button2 = createItem(331, 1, 0, "§6我点错了");
-		describe = createItem(397, 1, 3, "§3"+name+"§a对你说:", "§5你找我有什么事吗?");
-		inv.setItem(0, describe);
-		if(questPlayers.get(p.getName()).getCurrentNumber()!=0 &&
-				quests.get(questPlayers.get(p.getName()).getWhatTheQuestIs()).getNPCId()==NPCID)
-		{
-			inv.setItem(0, describe);
-			inv.setItem(3, button1);
-			inv.setItem(5, button2);
-		}
-		else
-		{
-			inv.setItem(4, button2);
-		}
-		return inv;
-	}
-	
-	public ArrayList<Inventory> questItemGUI(Player p)
-	{
-		Inventory inv = Bukkit.createInventory(p, 54, "所有任务物品-页数:1");
-		ItemStack next = createItem(351, 1, 13, "§3点击进入下一页");
-		ItemStack previous = createItem(351, 1, 8, "§3点击进入上一页");
-		inv.setItem(47, previous);
-		inv.setItem(51, next);
-		ArrayList<Inventory> list = new ArrayList<Inventory>();
-		for(int i=0; i<quests.size(); i++)
-		{
-			
-			if(quests.get(i).getQuest().getType().equalsIgnoreCase("item"))
-			{
-				inv.setItem(i%44, quests.get(i).getQuest().getQuestItem());
-			}
-			if(i>43 && i/44==0)
-			{
-				list.add(inv);
-				inv = Bukkit.createInventory(p, 54, "所有任务物品-页数:"+(((i+1)/44)+1));
-				inv.setItem(47, previous);
-				inv.setItem(51, next);
-			}
-		}
-		
-		list.add(inv);
-		
-		return list;
-	}
-	
-	public ArrayList<Inventory> rewardItemGUI(Player p)
-	{
-		Inventory inv = Bukkit.createInventory(p, 54, "所有奖励物品-页数:1");
-		ItemStack next = createItem(351, 1, 13, "§3点击进入下一页");
-		ItemStack previous = createItem(351, 1, 8, "§3点击进入上一页");
-		ItemStack interval = createItem(160, 1, 0, " ");
-		inv.setItem(47, previous);
-		inv.setItem(51, next);
-		ArrayList<Inventory> list = new ArrayList<Inventory>();
-		int index = 0;
-		for(int i=0; i<quests.size(); i++)
-		{
-			if(quests.get(i).getQuest().getType().equalsIgnoreCase("item"))
-			{
-				for(ItemStack item: rewards)
-				{
-					inv.setItem(index%44, item);
-					index++;
-					if(index>43 && index/44==0)
-					{
-						list.add(inv);
-						inv = Bukkit.createInventory(p, 54, "所有奖励物品-页数:"+(((index+1)/44)+1));
-						inv.setItem(47, previous);
-						inv.setItem(51, next);
-					}
-				}
-				inv.setItem(index%44, interval);
-				index ++;
-				
-			}
-			if(index>43 && index/44==0)
-			{
-				list.add(inv);
-				inv = Bukkit.createInventory(p, 54, "所有奖励物品-页数:"+(((index+1)/44)+1));
-				inv.setItem(47, previous);
-				inv.setItem(51, next);
-			}
-		}
-		
-		list.add(inv);
-		
-		return list;
-	}
-	
 	public boolean onCommand(CommandSender sender,Command cmd,String label,String[] args)  
 	{
 		if (cmd.getName().equalsIgnoreCase("rw"))
 		{
+
 			if (args.length==0)
 			{
 				if(sender instanceof Player)
 				{
 					Player p = (Player)sender;
-					if(questPlayers.get(p.getName()).getCurrentNumber()==0)
+					QuestPlayer questPlayer = configManager.loadPlayerConfig(p);
+					if(questPlayer.getCurrentNumber()==0)
 					{
 						p.sendMessage("§6[日常任务] §a你目前没有接受任务，输入/rw get获取任务!");
 						return true;
 					}
-					p.sendMessage("§6[第"+ questPlayers.get(p.getName()).getCurrentNumber()+"环] §a"+quests.get(questPlayers.get(p.getName()).getWhatTheQuestIs()).getQuestDescribe());
+					Quest quest = questPlayer.getCurrentQuest();
+					p.sendMessage("§6[第 "+ questPlayer.getCurrentNumber()+" 环] §a"+ quest.getQuestDescribe());
 				}
 				return true;
 			}
@@ -275,7 +162,7 @@ public class DailyQuest extends JavaPlugin
 			{
 				sender.sendMessage("§6=========[日常任务]=========");
 				sender.sendMessage("§6/rw §8- §e查看当前任务");
-				if(enableCommandGetQuest==true)
+				if(configManager.enableCommandGetQuest)
 					sender.sendMessage("§6/rw get §8- §e获取新任务");
 				sender.sendMessage("§6/rw quit §8- §e放弃当前任务");
 				sender.sendMessage("§6/rw info §8- §e查看今天的任务状态");
@@ -299,9 +186,9 @@ public class DailyQuest extends JavaPlugin
 					{
 						if(args[1].matches("[0-9]*"))
 						{
-							if(CitizensAPI.getNPCRegistry().getById(Integer.valueOf(args[1]))!=null)
+							if(CitizensAPI.getNPCRegistry().getById(Integer.parseInt(args[1]))!=null)
 							{
-								getQuestNPCId = Integer.valueOf(args[1]);
+								configManager.getQuestNPCId = Integer.parseInt(args[1]);
 								sender.sendMessage("§6[日常任务] §a设置完成");
 							}
 						}
@@ -315,25 +202,23 @@ public class DailyQuest extends JavaPlugin
 				{
 					if(args.length==2)
 					{
-						if(!this.questPlayers.containsKey(args[1]))
-						{
+						Player player = Bukkit.getServer().getPlayer(args[1]);
+						if(player==null) {
+							sender.sendMessage("§6[日常任务] §c该玩家不存在或不在线");
+							return true;
+						}
+
+						if(!questPlayerManager.containPlayer(player)) {
 							sender.sendMessage("§6[日常任务] §c没有该玩家的任务数据，无法重置");
 							return true;
 						}
-						if(Bukkit.getServer().getPlayer(args[1])!=null)
-						{
-							QuestPlayer player = questPlayers.get(args[1]);
-							player.setCurrentNumber(0);
-							player.setWhatTheQuestIs(0);
-							player.setTotalQuest(0);
-							questPlayers.put(args[1], player);
-							Bukkit.getServer().getPlayer(args[1]).sendMessage("§6[日常任务] §3你的任务数据已被重置");
-							sender.sendMessage("§6[日常任务] §e已重置玩家§d"+args[1]+"§e的任务数据");
-						}
-						else
-						{
-							sender.sendMessage("§6[日常任务] §c该玩家不存在或不在线");
-						}
+
+						QuestPlayer questPlayer = questPlayerManager.getQuestPlayer(player);
+						questPlayer.clearQuestData();
+
+						player.sendMessage("§6[日常任务] §3你的任务数据已被重置");
+						sender.sendMessage("§6[日常任务] §e已重置玩家§d"+args[1]+"§e的任务数据");
+
 					}
 					else
 					{
@@ -352,7 +237,7 @@ public class DailyQuest extends JavaPlugin
 				if(sender.isOp())
 				{
 					Player p = (Player)sender;
-					p.openInventory(rewardItemGUI(p).get(0));
+					p.openInventory(guiManager.rewardItemGUI(p).get(0));
 				}
 				else
 				{
@@ -366,7 +251,7 @@ public class DailyQuest extends JavaPlugin
 				if(sender.isOp())
 				{
 					Player p = (Player)sender;
-					p.openInventory(questItemGUI(p).get(0));
+					p.openInventory(guiManager.questItemGUI(p).get(0));
 				}
 				else
 				{
@@ -379,9 +264,9 @@ public class DailyQuest extends JavaPlugin
 			{
 				if(sender.isOp())
 				{
-					loadConfig();
-					loadItemConfig();
-					loadQuestConfig();
+					configManager.loadConfig();
+					configManager.loadItemConfig();
+					configManager.loadQuestConfig();
 					sender.sendMessage("§6[日常任务] §3配置重载成功!");
 				}
 				else
@@ -396,21 +281,15 @@ public class DailyQuest extends JavaPlugin
 				if(sender instanceof Player)
 				{
 					Player p = (Player)sender;
-					if(questPlayers.containsKey(p.getName()))
+					if(questPlayerManager.containPlayer(p))
 					{
-						int questLimit = defaultQuantity;
-						for(String permission:group.keySet())
-						{
-							if(p.hasPermission("dailyQuest.limit."+permission))
-							{
-								questLimit = group.get(permission);
-							}
-						}
-						String msg = "§e你的任务上限:§d"+questLimit+"§e,你已完成:§d"+ questPlayers.get(p.getName()).getTotalQuest()+"§e,";
-						if(questPlayers.get(p.getName()).getCurrentNumber()==0)
+						QuestPlayer questPlayer = questPlayerManager.getQuestPlayer(p);
+						int questLimit = questPlayer.getDailyLimit();
+						String msg = "§e你的任务上限:§d"+questLimit+"§e,你已完成:§d"+ questPlayer.getTotalQuest()+"§e,";
+						if(questPlayer.getCurrentNumber()==0)
 							msg += "你目前没有接受任务";
 						else
-							msg += "当前为第§d"+ questPlayers.get(p.getName()).getCurrentNumber()+"§e环任务";
+							msg += "当前为第§d"+ questPlayer.getCurrentNumber()+"§e环任务";
 						p.sendMessage(msg);
 					}
 				}
@@ -422,27 +301,20 @@ public class DailyQuest extends JavaPlugin
 				if(sender instanceof Player)
 				{
 					Player p = (Player)sender;
-					int index = random(quests.size());
-					if(enableCommandGetQuest==false)
-					{
-						p.sendMessage("§6[日常任务] §c无法使用指令获取任务，请在"+CitizensAPI.getNPCRegistry().getById(getQuestNPCId).getFullName()+"处领取");
+
+					int index = Util.random(QuestManager.quests.size());
+					if(!configManager.enableCommandGetQuest && !p.isOp()) {
+						String npcName = CitizensAPI.getNPCRegistry().getById(configManager.getQuestNPCId).getFullName();
+						p.sendMessage("§6[日常任务] §c无法使用指令获取任务，请在"+npcName+"处领取");
 						return true;
 					}
-					if(questPlayers.get(p.getName()).getCurrentNumber()!=0)
-					{
+					QuestPlayer questPlayer = questPlayerManager.getQuestPlayer(p);
+					if(questPlayer.getCurrentNumber()!=0) {
 						p.sendMessage("§6[日常任务] §a你目前正在做任务，请先取消任务再重新领取任务!");
 						return true;
 					}
-					int questLimit = defaultQuantity;
-					for(String permission:this.group.keySet())
-					{
-						if(p.hasPermission("dailyQuest.limit."+permission))
-						{
-							questLimit = this.group.get(permission);
-						}
-					}
-					if(questPlayers.get(p.getName()).getTotalQuest()>=questLimit)
-					{
+					int questLimit = questPlayer.getDailyLimit();
+					if(questPlayer.getTotalQuest()>=questLimit) {
 						p.sendMessage("§6[日常任务] §a你今天的任务已达上限，请明天再来!");
 						return true;
 					}
@@ -451,11 +323,9 @@ public class DailyQuest extends JavaPlugin
 					// the first index means the current index of the quest
 					// the second index means what the quest is
 					// the last index means how many quests totally this player has already finished
-					QuestPlayer player = questPlayers.get(p.getName());
-					player.setCurrentNumber(1);
-					player.setWhatTheQuestIs(index);
-					questPlayers.put(p.getName(), player);
-					p.sendMessage("§6[第 1 环] §a"+quests.get(index).getQuestDescribe());
+					questPlayer.getNextQuest();
+
+					p.sendMessage("§6[第 1 环] §a"+QuestManager.quests.get(index).getQuestDescribe());
 				}
 				return true;
 			}
@@ -465,45 +335,33 @@ public class DailyQuest extends JavaPlugin
 				if(sender instanceof Player)
 				{
 					Player p = (Player)sender;
-					if(questPlayers.get(p.getName()).getCurrentNumber()!=0)
+					UUID uniqueId = p.getUniqueId();
+					QuestPlayer questPlayer = questPlayerManager.getQuestPlayer(p);
+					if(questPlayer.getCurrentNumber()!=0)
 					{
-						if(cancelQuestPlayer.contains(p.getName()))
+						if(cancelQuestPlayer.contains(uniqueId))
 						{
-							QuestPlayer player = questPlayers.get(p.getName());
-							player.setCurrentNumber(0);
-							player.setWhatTheQuestIs(0);
+							questPlayer.giveUpCurrentQuest();
 
-							questPlayers.put(p.getName(), player);
-							cancelQuestPlayer.remove(p.getName());
-							getServer().getScheduler().cancelTask(cancelTask.get(p.getName()));
+							cancelQuestPlayer.remove(uniqueId);
+							cancelTask.get(uniqueId).cancel();
 							p.sendMessage("§6[日常任务] §c已放弃当前的任务!");
-							return true;
-						}
-						else
-						{
+						} else {
 							p.sendMessage("§6[日常任务] §d你确定要放弃该任务吗?请在10秒内再次输入一遍§c/rw quit§d来确认");
-							cancelQuestPlayer.add(p.getName());
-							cancelTask.put(p.getName(), getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable()
-							{
-								public void run()
-								{
-									if(cancelQuestPlayer.contains(p.getName()))
-									{
-										p.sendMessage("§6[日常任务] §7取消放弃任务");
-										cancelQuestPlayer.remove(p.getName());
-									}
-									getServer().getScheduler().cancelTask(cancelTask.get(p.getName()));
+							cancelQuestPlayer.add(uniqueId);
+							cancelTask.put(uniqueId, Bukkit.getScheduler().runTaskLater(this, () -> {
+								if(cancelQuestPlayer.contains(uniqueId)) {
+									p.sendMessage("§6[日常任务] §7取消放弃任务");
+									cancelQuestPlayer.remove(uniqueId);
 								}
-							} ,10*20,20));
-							return true;
+							}, 10*20));
 						}
+						return true;
 					}
-
 					p.sendMessage("§6[日常任务] §a你目前没有任何任务!");
 				}
 				return true;
 			}
-
 		}
 		return false;
 		

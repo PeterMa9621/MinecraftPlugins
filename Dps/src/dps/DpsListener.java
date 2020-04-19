@@ -41,7 +41,6 @@ public class DpsListener implements Listener
 	@EventHandler
 	public void onPlayerDamaged(EntityDamageByEntityEvent event)
     {
-
 		if(event.getEntity() instanceof Player)
 			return;
 		UUID currentWorldId = event.getDamager().getWorld().getUID();
@@ -59,7 +58,6 @@ public class DpsListener implements Listener
 					dpsPlayer.setDpsScore(dpsScore);
 				}
 			}
-
 		}
     }
 

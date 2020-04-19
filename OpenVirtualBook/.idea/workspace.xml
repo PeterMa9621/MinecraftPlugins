@@ -6,7 +6,67 @@
     </artifacts-to-build>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9aa0224e-0eb6-4d4c-b31c-946a1d8557d6" name="Default Changelist" comment="" />
+    <list default="true" id="9aa0224e-0eb6-4d4c-b31c-946a1d8557d6" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/../DailyQuest/.idea/artifacts/DailyQuest_jar.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/api/DailyQuestAPI.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/expansion/DailyQuestExpansion.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/gui/GuiManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/manager/QuestManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/model/Quest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/model/QuestInfo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/model/QuestPlayer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/util/IconType.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/util/QuestFinishType.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/util/Util.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../PeterHelper/src/peterHelper/command/CommandTabCompleter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../PeterHelper/src/peterHelper/config/ConfigManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../PeterHelper/src/peterHelper/manager/CustomItemManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../PeterHelper/src/peterHelper/model/CustomItemInfo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../PeterHelper/src/peterHelper/util/LevelUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../DailyQuest/.idea/encodings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/DailyQuest.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../DailyQuest/DailyQuest.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/bin/dailyQuest/DailyQuest$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/../DailyQuest/bin/dailyQuest/DailyQuest$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/bin/dailyQuest/DailyQuest$2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/bin/dailyQuest/DailyQuest.class" beforeDir="false" afterPath="$PROJECT_DIR$/../DailyQuest/bin/dailyQuest/DailyQuest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/bin/dailyQuest/DailyQuestAPI.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/bin/dailyQuest/DailyQuestListener.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/bin/dailyQuest/FinishQuestListener.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/bin/dailyQuest/GetQuestListener.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/bin/dailyQuest/MobQuest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/bin/dailyQuest/MobQuestListener.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/bin/dailyQuest/PlayerData.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/bin/dailyQuest/Quest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/bin/dailyQuest/QuestInfo.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/DailyQuest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/DailyQuest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/DailyQuestAPI.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/DailyQuestListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/listener/DailyQuestListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/FinishQuestListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/listener/FinishQuestListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/GetQuestListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/listener/GetQuestListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/MobQuest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/model/MobQuest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/MobQuestListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/listener/MobQuestListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/Quest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/QuestInfo.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/QuestPlayer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/config/ConfigManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/config/ConfigManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/manager/QuestPlayerManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/../DailyQuest/src/dailyQuest/manager/QuestPlayerManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DailyQuest/src/plugin.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../DailyQuest/src/plugin.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Dps/src/dps/DpsListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Dps/src/dps/DpsListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/openVirtualBook/OpenVirtualBook.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/openVirtualBook/OpenVirtualBook.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/openVirtualBook/OpenVirtualBookListener.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/openVirtualBook/OpenVirtualBookListener.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/openVirtualBook/OpenVirtualBook.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/openVirtualBook/OpenVirtualBook.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/openVirtualBook/OpenVirtualBookListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/openVirtualBook/OpenVirtualBookListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PeterHelper/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../PeterHelper/.idea/encodings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PeterHelper/PeterHelper.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../PeterHelper/PeterHelper.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PeterHelper/bin/peterHelper/PeterHelper.class" beforeDir="false" afterPath="$PROJECT_DIR$/../PeterHelper/bin/peterHelper/PeterHelper.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PeterHelper/bin/peterHelper/PeterHelperListener.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PeterHelper/bin/peterHelper/util/Util.class" beforeDir="false" afterPath="$PROJECT_DIR$/../PeterHelper/bin/peterHelper/util/Util.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PeterHelper/bin/plugin.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../PeterHelper/bin/plugin.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PeterHelper/src/peterHelper/PeterHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/../PeterHelper/src/peterHelper/PeterHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PeterHelper/src/peterHelper/PeterHelperListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/../PeterHelper/src/peterHelper/listener/LevelListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PeterHelper/src/peterHelper/util/Util.java" beforeDir="false" afterPath="$PROJECT_DIR$/../PeterHelper/src/peterHelper/util/Util.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PeterHelper/src/plugin.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../PeterHelper/src/plugin.yml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
