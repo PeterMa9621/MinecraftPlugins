@@ -3,6 +3,7 @@ package pvpSwitch;
 import java.util.HashMap;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -14,6 +15,7 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 import net.citizensnpcs.api.CitizensAPI;
+import org.bukkit.projectiles.ProjectileSource;
 import pvpSwitch.model.PvpPlayer;
 
 public class PVPSwitchListener implements Listener
@@ -65,7 +67,11 @@ public class PVPSwitchListener implements Listener
 			if(CitizensAPI.getNPCRegistry().isNPC(event.getEntity()))
 				return;
 
-			Player damager = (Player) ((Projectile) event.getDamager()).getShooter();
+			ProjectileSource source = ((Projectile) event.getDamager()).getShooter();
+			if(!(source instanceof Player))
+				return;
+
+			Player damager = (Player) source;
 			Player p = (Player)event.getEntity();
 
 			if(damager.hasPermission("pvpSwitch.bypass")) {

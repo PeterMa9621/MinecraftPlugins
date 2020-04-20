@@ -92,7 +92,7 @@ public class DpsListener implements Listener
 
     @EventHandler
 	public void onDungeonStart(GameWorldStartGameEvent event) {
-		Bukkit.getConsoleSender().sendMessage("GameWorldStartGame");
+		//Bukkit.getConsoleSender().sendMessage("GameWorldStartGame");
 		Game game = event.getGame();
 		final String dungeonName = game.getDungeon().getName();
 		final UUID worldId = game.getWorld().getWorld().getUID();

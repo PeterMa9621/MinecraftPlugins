@@ -7,6 +7,8 @@ import com.peter.dungeonManager.model.DungeonPlayer;
 import com.peter.dungeonManager.util.DataManager;
 import com.peter.dungeonManager.util.GuiType;
 import com.peter.dungeonManager.util.Util;
+import dps.rewardBox.Reward;
+import dps.rewardBox.RewardTable;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -17,6 +19,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 public class GuiManager {
     public static final String teamGuiTitle = "§2加入副本队伍";
@@ -134,7 +139,9 @@ public class GuiManager {
     public static void putDungeonInfoIntoInventory(int firstIndex, Inventory inventory, DungeonPlayer dungeonPlayer) {
         int count = 0;
         int i = 0;
-        for(DungeonSetting dungeonSetting:DataManager.dungeonGroupSetting.values()){
+        ArrayList<DungeonSetting> dungeonSettingList = new ArrayList<>(DataManager.dungeonGroupSetting.values());
+        Collections.sort(dungeonSettingList);
+        for(DungeonSetting dungeonSetting:dungeonSettingList){
             i++;
             if(i < firstIndex) {
                 continue;
@@ -146,6 +153,15 @@ public class GuiManager {
                 Player player = dungeonPlayer.getPlayer();
                 if(!dungeonSetting.isSatisfyLevelRequirement(player)) {
                     add(minLevelNotSatisfy);
+                }
+                // Useful info for ops
+                if(player.isOp()) {
+                    RewardTable rewardTable = DungeonManager.dpsAPI.getRewardTable(dungeonSetting.getDungeonName());
+                    int i = 1;
+                    for(Reward reward:rewardTable.getRewards()) {
+                        add(i + ". " + reward.getIcon().getItemMeta().getDisplayName() + ", " + reward.getChance());
+                        i ++;
+                    }
                 }
             }});
             Util.setPersistentData(icon,  new NamespacedKey(plugin, "dungeonName"), dungeonSetting.getDungeonName());

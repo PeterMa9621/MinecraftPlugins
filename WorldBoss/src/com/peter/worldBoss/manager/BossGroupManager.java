@@ -56,4 +56,9 @@ public class BossGroupManager {
         BossPlayer bossPlayer = bossPlayers.get(uniqueId);
         return bossPlayer.getGroup()!=null && bossPlayer.getGroup().equals(bossGroup);
     }
+
+    public static void removePlayer(Player player) {
+        UUID uniqueId = player.getUniqueId();
+        bossPlayers.remove(uniqueId);
+    }
 }

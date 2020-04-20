@@ -74,8 +74,12 @@ public class ConfigManager {
 
     public QuestPlayer loadPlayerConfig(Player player) {
         String playerName = player.getName();
-        if(plugin.questPlayerManager.containPlayer(player))
-            return plugin.questPlayerManager.getQuestPlayer(player);
+        if(plugin.questPlayerManager.containPlayer(player)) {
+            QuestPlayer questPlayer = plugin.questPlayerManager.getQuestPlayer(player);
+            questPlayer.setPlayer(player);
+            return questPlayer;
+        }
+
 
         int currentQuestNumber = 0;
         int currentQuestIndex = 0;

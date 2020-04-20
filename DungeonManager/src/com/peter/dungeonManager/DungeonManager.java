@@ -7,6 +7,8 @@ import com.peter.dungeonManager.gui.GuiManager;
 import com.peter.dungeonManager.listener.DungeonGroupListener;
 import com.peter.dungeonManager.listener.DungeonManagerListener;
 import com.peter.dungeonManager.util.GuiType;
+import dps.Dps;
+import dps.DpsAPI;
 import levelSystem.API;
 import levelSystem.LevelSystem;
 import org.bukkit.Bukkit;
@@ -18,6 +20,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class DungeonManager extends JavaPlugin
 {
 	public static API levelSystemAPI;
+	public static DpsAPI dpsAPI;
 	@Override
 	public void onEnable()
 	{
@@ -31,6 +34,10 @@ public class DungeonManager extends JavaPlugin
 
 		if(Bukkit.getPluginManager().getPlugin("LevelSystem") != null){
 			levelSystemAPI = ((LevelSystem) Bukkit.getPluginManager().getPlugin("LevelSystem")).getAPI();
+		}
+
+		if(Bukkit.getPluginManager().getPlugin("Dps") != null){
+			dpsAPI = ((Dps) Bukkit.getPluginManager().getPlugin("Dps")).getAPI();
 		}
 		// To do: add support for citizens
 		/*

@@ -31,7 +31,7 @@ public class GuiListener implements Listener
 	}
 
 	@EventHandler
-	public void onPlayerOpenInventory(InventoryClickEvent event) {
+	public void onPlayerClickInventory(InventoryClickEvent event) {
 		if(event.getView().getTitle().contains(GuiManager.teamGuiTitle)){
 			event.setCancelled(true);
 			Player player = (Player) event.getWhoClicked();

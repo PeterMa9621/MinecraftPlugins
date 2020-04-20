@@ -85,5 +85,6 @@ public class GuiListener implements Listener
 	public void onPlayerQuit(PlayerQuitEvent event) {
 		Player player = event.getPlayer();
 		BossGroupManager.leaveGroup(player);
+		BossGroupManager.removePlayer(player);
 	}
 }

@@ -93,6 +93,10 @@ public class QuestPlayer
 		return player;
 	}
 
+	public void setPlayer(Player player) {
+		this.player = player;
+	}
+
 	public Quest getCurrentQuest() {
 		return QuestManager.quests.get(whatTheQuestIs);
 	}

@@ -98,7 +98,9 @@ public class ConfigManager
 	public LevelPlayer loadPlayerConfig(Player player) {
 		UUID uniqueId = player.getUniqueId();
 		if(plugin.players.containsKey(uniqueId)) {
-			return plugin.players.get(uniqueId);
+			LevelPlayer levelPlayer = plugin.players.get(uniqueId);
+			levelPlayer.setPlayer(player);
+			return levelPlayer;
 		}
 		HashMap<String, Object> result = database.get(player.getUniqueId(), new String[] {"name", "current_exp", "level"});
 

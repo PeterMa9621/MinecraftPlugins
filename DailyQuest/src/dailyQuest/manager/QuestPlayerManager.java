@@ -31,4 +31,8 @@ public class QuestPlayerManager {
     public QuestPlayer getQuestPlayer(Player player) {
         return questPlayers.get(player.getUniqueId());
     }
+
+    public void removeQuestPlayer(Player player) {
+        questPlayers.remove(player.getUniqueId());
+    }
 }

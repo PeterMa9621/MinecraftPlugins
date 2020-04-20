@@ -49,7 +49,7 @@ public class Dps extends JavaPlugin
 	HashMap<String, HashMap<String, Integer>> groupRank = new HashMap<String, HashMap<String, Integer>>();
 
 
-	//DpsAPI api = new DpsAPI(this);
+	DpsAPI api = new DpsAPI(this);
 	
 	private boolean hookScoreBoard()
     {
@@ -81,13 +81,9 @@ public class Dps extends JavaPlugin
 		Bukkit.getConsoleSender().sendMessage("°Ïa[Dps] °ÏeDps“—–∂‘ÿ");
 	}
 
-	/*
-	public DpsAPI getAPI()
-	{
+	public DpsAPI getAPI() {
 		return api;
 	}
-
-	 */
 	
 	public boolean onCommand(CommandSender sender,Command cmd,String label,String[] args)  
 	{

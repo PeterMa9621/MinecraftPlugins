@@ -62,6 +62,7 @@ public class ConfigManager {
             if(loadMapConfig(mapDir))
                 numDungeon++;
         }
+
         Bukkit.getConsoleSender().sendMessage("§a[DungeonManager] §e已加载" + numDungeon + "个副本");
     }
 

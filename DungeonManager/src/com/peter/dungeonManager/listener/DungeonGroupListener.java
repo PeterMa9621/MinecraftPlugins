@@ -33,7 +33,7 @@ public class DungeonGroupListener implements Listener {
         if(dungeonPlayer!=null && dungeonPlayer.isInDungeonGroup()) {
             LeaveGroupEvent leaveGroupEvent = new LeaveGroupEvent(dungeonPlayer);
             Bukkit.getPluginManager().callEvent(leaveGroupEvent);
-            DataManager.removeDungeonPlayer(player.getUniqueId());
         }
+        DataManager.removeDungeonPlayer(player.getUniqueId());
     }
 }

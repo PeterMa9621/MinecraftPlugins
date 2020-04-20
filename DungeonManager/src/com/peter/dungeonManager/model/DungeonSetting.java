@@ -6,7 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class DungeonSetting {
+public class DungeonSetting implements Comparable<DungeonSetting> {
     private String dungeonName = "";
     private String displayName = "";
     private int minPlayers;
@@ -75,5 +75,10 @@ public class DungeonSetting {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public int compareTo(DungeonSetting dungeonSetting) {
+        return minLevel - dungeonSetting.getMinLevel();
     }
 }

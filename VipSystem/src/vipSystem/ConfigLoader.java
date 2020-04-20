@@ -38,6 +38,7 @@ public class ConfigLoader {
 
     public VipPlayer loadPlayerConfig(UUID uniqueId) throws SQLException {
         if(plugin.players.containsKey(uniqueId)){
+
             return plugin.players.get(uniqueId);
         }
 
