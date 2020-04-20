@@ -6,6 +6,7 @@ author: Jingyuan Ma
 depend:
   - ItemsAdder
   - ArmorEquipEvent
+  - LevelSystem
 softdepend:
   - PlaceholderAPI
 commands:

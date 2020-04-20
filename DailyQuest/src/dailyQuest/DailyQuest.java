@@ -41,6 +41,7 @@ public class DailyQuest extends JavaPlugin
 	public QuestPlayerManager questPlayerManager;
 	public GuiManager guiManager;
 	public Economy economy;
+	public CitizensAPI citizensAPI;
 
 	private String previousDate = null;
 	
@@ -73,22 +74,25 @@ public class DailyQuest extends JavaPlugin
 		{
 			new File(getDataFolder(),"Data").mkdirs();
 		}
-		if(!setupEconomy())
+		if(!setupEconomy()) {
 			Bukkit.getConsoleSender().sendMessage("§a[DailyQuest] §cVault插件未加载!");
+			return;
+		}
+
+		if(!hookLP()) {
+			Bukkit.getConsoleSender().sendMessage("§a[DailyQuest] §cLuckPerms插件未加载!");
+			return;
+		}
 
 		if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null){
 			new DailyQuestExpansion(this).register();
 		}
-		if(!hookLP())
-			Bukkit.getConsoleSender().sendMessage("§a[DailyQuest] §cLuckPerms插件未加载!");
 
 		configManager = new ConfigManager(this);
 		questPlayerManager = new QuestPlayerManager(this);
 		guiManager = new GuiManager(this);
 
 		configManager.loadConfig();
-		configManager.loadItemConfig();
-		configManager.loadQuestConfig();
 		configManager.initDatabase();
 
 		previousDate = configManager.date.format(new Date());
@@ -265,8 +269,6 @@ public class DailyQuest extends JavaPlugin
 				if(sender.isOp())
 				{
 					configManager.loadConfig();
-					configManager.loadItemConfig();
-					configManager.loadQuestConfig();
 					sender.sendMessage("§6[日常任务] §3配置重载成功!");
 				}
 				else
@@ -302,7 +304,6 @@ public class DailyQuest extends JavaPlugin
 				{
 					Player p = (Player)sender;
 
-					int index = Util.random(QuestManager.quests.size());
 					if(!configManager.enableCommandGetQuest && !p.isOp()) {
 						String npcName = CitizensAPI.getNPCRegistry().getById(configManager.getQuestNPCId).getFullName();
 						p.sendMessage("§6[日常任务] §c无法使用指令获取任务，请在"+npcName+"处领取");
@@ -325,7 +326,7 @@ public class DailyQuest extends JavaPlugin
 					// the last index means how many quests totally this player has already finished
 					questPlayer.getNextQuest();
 
-					p.sendMessage("§6[第 1 环] §a"+QuestManager.quests.get(index).getQuestDescribe());
+					p.sendMessage("§6[第 1 环] §a"+questPlayer.getCurrentQuest().getQuestDescribe());
 				}
 				return true;
 			}

@@ -15,15 +15,16 @@ public class Util {
     {
         ItemStack item = new ItemStack(Material.getMaterial(ID.toUpperCase()), quantity);
         ItemMeta meta = item.getItemMeta();
-        assert meta != null;
-        if(displayName!=null) {
-            meta.setDisplayName(displayName);
+        if(meta != null){
+            if(displayName!=null) {
+                meta.setDisplayName(displayName);
+            }
+            if(customModelId>0) {
+                meta.setCustomModelData(customModelId);
+            }
+
+            item.setItemMeta(meta);
         }
-        if(customModelId>0) {
-            meta.setCustomModelData(customModelId);
-        }
-        meta.setLore(lore);
-        item.setItemMeta(meta);
         return item;
     }
 
@@ -45,7 +46,7 @@ public class Util {
     }
 
     public static int random(int range) {
-        SplittableRandom random = new SplittableRandom(Calendar.getInstance().getTimeInMillis());
+        SplittableRandom random = new SplittableRandom();
         return random.nextInt(range);
     }
 

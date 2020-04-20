@@ -181,15 +181,19 @@ public class QuestPlayer
 		}
 
 		List<String> rewards = plugin.configManager.rewards;
+		boolean getNormalReward = false;
 		// Normal reward has a chance to get it
 		for(int i=0; i<maxQuantity; i++) {
 			if(Util.random(100) < (ConfigManager.chanceGetReward*100)) {
 				int itemIndex = Util.random(rewards.size());
 				String rewardCommand = rewards.get(itemIndex).replace("%player%", player.getName());
 				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), rewardCommand);
+				getNormalReward = true;
 			}
 		}
-
+		if(getNormalReward) {
+			player.sendMessage("§6[日常任务] §7你获得了§a物品§7奖励");
+		}
 		// Extra reward comes per 10 quests
 		if(extraRewardQuantity>0) {
 			for(int i=0; i<extraRewardQuantity; i++) {

@@ -6,6 +6,7 @@ author: Jingyuan Ma
 depend:
   - DungeonsXL
   - LevelSystem
+  - Dps
 softdepend:
   - PlaceholderAPI
 commands:

@@ -1,5 +1,6 @@
 package dailyQuest.config;
 
+import com.google.gson.JsonObject;
 import dailyQuest.DailyQuest;
 import dailyQuest.model.Quest;
 import dailyQuest.model.QuestInfo;
@@ -7,6 +8,9 @@ import dailyQuest.model.QuestPlayer;
 import dailyQuest.manager.QuestManager;
 import dailyQuest.util.IconType;
 import dailyQuest.util.Util;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -14,19 +18,23 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import peterUtil.database.Database;
 import peterUtil.database.DatabaseType;
 import peterUtil.database.StorageInterface;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class ConfigManager {
     private DailyQuest plugin;
@@ -52,6 +60,12 @@ public class ConfigManager {
     public int extraRewardItemQuantity = 1;
 
     public int getQuestNPCId = 0;
+    private List<Integer> availableNPC;
+
+    private List<Material> itemBlackList = new ArrayList<>();
+    private List<String> itemWildcardBlackList = new ArrayList<>();
+    private List<EntityType> mobBlackList = new ArrayList<>();
+    private List<String> mobWildcardBlackList = new ArrayList<>();
 
     public boolean enableCommandGetQuest = false;
 
@@ -82,7 +96,7 @@ public class ConfigManager {
 
 
         int currentQuestNumber = 0;
-        int currentQuestIndex = 0;
+        int currentQuestIndex = -1;
         int totalQuestNumber = 0;
         String lastLogout = "0000-00-00";
         if(databaseType.equals(DatabaseType.YML)) {
@@ -99,10 +113,12 @@ public class ConfigManager {
         } else {
             HashMap<String, Object> result = database.get(player.getUniqueId(), new String[] {"name", "current_quest_number", "current_quest_index", "total_quest_number", "last_logout"});
             if(result!=null){
-                currentQuestNumber = (int) result.get("current_quest_number");
-                currentQuestIndex = (int) result.get("current_quest_index");
-                totalQuestNumber = (int) result.get("total_quest_number");
                 lastLogout = (String) result.get("last_logout");
+                if(lastLogout!=null && lastLogout.equalsIgnoreCase(date.format(new Date()))){
+                    currentQuestNumber = (int) result.get("current_quest_number");
+                    currentQuestIndex = (int) result.get("current_quest_index");
+                    totalQuestNumber = (int) result.get("total_quest_number");
+                }
             }
         }
 
@@ -233,6 +249,21 @@ public class ConfigManager {
 
             config.set("GetQuestNPCId", 9);
 
+            config.set("AvailableNPC", new int[] {9,10,11,12,13,14});
+
+            config.set("ItemBlackList", new ArrayList<String>() {{
+                add("ARMOR_STAND");
+                add("BAT_SPAWN_EGG");
+            }}.toArray());
+
+            config.set("ItemWildcardBlackList", new ArrayList<String>() {{
+                add("SPAWN_EGG");
+                add("COMMAND_BLOCK");
+            }}.toArray());
+
+            config.set("MobWildcardBlackList", new ArrayList<String>() {{
+            }}.toArray());
+
             config.set("EnableCommandGetQuest", false);
 
             config.set("Database", "MYSQL");
@@ -282,6 +313,20 @@ public class ConfigManager {
 
         getQuestNPCId = config.getInt("GetQuestNPCId");
 
+        availableNPC = config.getIntegerList("AvailableNPC");
+
+        List<String> itemMaterialList = config.getStringList("ItemBlackList");
+        itemMaterialList.forEach(str -> {
+            itemBlackList.add(Material.getMaterial(str.toUpperCase()));
+        });
+        List<String> mobEntityTypeList = config.getStringList("MobBlackList");
+        mobEntityTypeList.forEach(str -> {
+            mobBlackList.add(EntityType.valueOf(str));
+        });
+
+        itemWildcardBlackList = config.getStringList("ItemWildcardBlackList");
+        mobWildcardBlackList = config.getStringList("MobWildcardBlackList");
+
         enableCommandGetQuest = config.getBoolean("EnableCommandGetQuest");
 
         databaseType = DatabaseType.valueOf(config.getString("Database", "YML").toUpperCase());
@@ -291,6 +336,8 @@ public class ConfigManager {
         for(String g:group) {
             ConfigManager.group.put(g.split(":")[0], Integer.valueOf(g.split(":")[1]));
         }
+        loadItemConfig();
+        loadQuestConfig();
     }
 
     public void saveConfig()
@@ -311,110 +358,220 @@ public class ConfigManager {
         }
     }
 
+    public JSONObject loadLanguageFile() {
+        InputStream inputStream = plugin.getResource("chinese");
+        InputStreamReader isReader = new InputStreamReader(inputStream);
+        //Creating a BufferedReader object
+        BufferedReader reader = new BufferedReader(isReader);
+        StringBuffer sb = new StringBuffer();
+        String str;
+        while(true){
+            try {
+                if ((str = reader.readLine()) == null)
+                    break;
+                sb.append(str);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        JSONParser parser = new JSONParser();
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = (JSONObject) parser.parse(sb.toString());
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        if(jsonObject!=null)
+            Bukkit.getConsoleSender().sendMessage("§6[日常任务] §a语言文件加载完毕");
+        return jsonObject;
+    }
+
+    private boolean canGenerateQuest(Material material, JSONObject language) {
+        if(!material.isItem())
+            return false;
+        String materialName = language.get("item.minecraft."+material.name().toLowerCase()) + "";
+        if(materialName.equalsIgnoreCase("null"))
+            return false;
+        if(itemBlackList.contains(material))
+            return false;
+
+        for(String wildcard:itemWildcardBlackList) {
+            if(material.name().toLowerCase().contains(wildcard.toLowerCase()))
+                return false;
+        }
+        return true;
+    }
+
+    private boolean canGenerateQuest(EntityType entityType, JSONObject language) {
+        if(!entityType.isAlive() || !entityType.isSpawnable())
+            return false;
+        String mobName = language.get("entity.minecraft."+entityType.name().toLowerCase()) + "";
+        if(mobName.equalsIgnoreCase("null"))
+            return false;
+        if(mobBlackList.contains(entityType))
+            return false;
+
+        for(String wildcard:mobWildcardBlackList) {
+            if(entityType.name().toLowerCase().contains(wildcard.toLowerCase()))
+                return false;
+        }
+        return true;
+    }
+
+    private NPC getNPC() {
+        int randomIndex = 0;
+        if(availableNPC.size()>0)
+            randomIndex = Util.random(availableNPC.size());
+        int npcId = availableNPC.get(randomIndex);
+        return CitizensAPI.getNPCRegistry().getById(npcId);
+    }
+
     public void loadQuestConfig()
     {
-        File file=new File(plugin.getDataFolder(),"quest.yml");
+        JSONObject language = loadLanguageFile();
+        File itemFile=new File(plugin.getDataFolder(),"quest_item.yml");
         FileConfiguration config;
-        if (!file.exists())
+        if (!itemFile.exists())
         {
-            config = load(file);
+            config = load(itemFile);
 
-            config.set("Quest.1.Type", "mob");
-            config.set("Quest.1.Describe", "§a请前往坐标(-344,100,256)附近上交石头10个");
-            config.set("Quest.1.RewardMessage", "§7你完成了任务");
-            config.set("Quest.1.NPCID", 9);
-            config.set("Quest.1.Item.ID", "STONE");
-            config.set("Quest.1.Item.Amount", 10);
-            config.set("Quest.1.Item.Name", "&2AAA");
-            config.set("Quest.1.Item.Lore", new ArrayList<String>() {{
-                add("&6AAA");
-                add("&5BBB");
-            }});
-            config.set("Quest.1.Item.Enchantment.ID", "fortune");
-            config.set("Quest.1.Item.Enchantment.Level", 1);
-            config.set("Quest.1.Mob.ID", "ZOMBIE");
-            config.set("Quest.1.Mob.Amount", 2);
-            config.set("Quest.1.Mob.CustomName", "§e§l狩猎者");
-            config.set("Quest.1.Reward.Money", "30:50");
+            Material[] materials = Material.values();
+            for(Material material:materials) {
+                if(!canGenerateQuest(material, language))
+                    continue;
+                NPC npc = getNPC();
+                String npcDisplayName = npc.getFullName();
+                String describe = "§a%s§f需要§e%d§f个§e%s§f，你快去帮帮他吧！";
+                String materialName = language.get("item.minecraft."+material.name().toLowerCase()) + "";
+                int numItem = Util.random(2) + 1;
+                config.set(material.name().toUpperCase() + ".Type", "item");
+                config.set(material.name().toUpperCase() + ".Describe", String.format(describe, npcDisplayName, numItem, materialName));
+                config.set(material.name().toUpperCase() + ".RewardMessage", "§7你完成了任务");
 
-            for(int i=1; i<10; i++) {
-                config.set("Quest."+(i+1)+".Type", "item");
-                config.set("Quest."+(i+1)+".Describe", "§a请前往坐标(-344,100,256)附近上交石头10个");
-                config.set("Quest."+(i+1)+".RewardMessage", "§7你完成了任务");
-                config.set("Quest."+(i+1)+".NPCID", 9);
-                config.set("Quest."+(i+1)+".Item.ID", "DIAMOND");
-                config.set("Quest."+(i+1)+".Item.Model", 1);
-                config.set("Quest."+(i+1)+".Item.Amount", 10);
-                config.set("Quest."+(i+1)+".Item.Enchantment.ID", "fortune");
-                config.set("Quest."+(i+1)+".Item.Enchantment.Level", 0);
-                config.set("Quest."+(i+1)+".Reward.Money", "50:100");
+                config.set(material.name().toUpperCase() + ".NPCID", npc.getId());
+                config.set(material.name().toUpperCase() + ".Item.ID", material.name().toUpperCase());
+                config.set(material.name().toUpperCase() + ".Item.Model", 0);
+                config.set(material.name().toUpperCase() + ".Item.Amount", 1);
+                //section.set("Item.Enchantment.ID", "fortune");
+                //section.set("Item.Enchantment.Level", 0);
+                config.set(material.name().toUpperCase() + ".Reward.Money", "30:100");
             }
 
             try
             {
-                config.save(file);
+                config.save(itemFile);
             }
             catch (IOException e)
             {
                 e.printStackTrace();
             }
-
-            loadQuestConfig();
         }
+
+        File mobFile=new File(plugin.getDataFolder(),"quest_mob.yml");
+        if (!mobFile.exists())
+        {
+            config = load(mobFile);
+
+            config.set("1.Mob.ID", "ZOMBIE");
+            config.set("1.Mob.Amount", 2);
+            config.set("1.Mob.CustomName", "§e§l狩猎者");
+            config.set("1.Reward.Money", "30:50");
+
+            EntityType[] entityTypes = EntityType.values();
+            for(EntityType entityType:entityTypes) {
+                if(!canGenerateQuest(entityType, language))
+                    continue;
+                NPC npc = getNPC();
+                String mobName = language.get("entity.minecraft."+entityType.name().toLowerCase()) + "";
+                String npcDisplayName = npc.getFullName();
+                String describe = "§a%s§f希望你能去帮他解决§e%d§f个§e%s§f！";
+                int numMob = Util.random(4) + 2;
+                config.set(entityType.name().toUpperCase() + ".Type", "mob");
+                config.set(entityType.name().toUpperCase() + ".NPCID", npc.getId());
+                config.set(entityType.name().toUpperCase() + ".Describe", String.format(describe, npcDisplayName, numMob, mobName));
+                config.set(entityType.name().toUpperCase() + ".RewardMessage", "§7你完成了任务");
+                config.set(entityType.name().toUpperCase() + ".Mob.ID", entityType.name().toUpperCase());
+
+                config.set(entityType.name().toUpperCase() + ".Mob.Amount", numMob);
+                //config.set(entityType.name().toUpperCase() + ".Mob.CustomName", "§e§l狩猎者");
+                config.set(entityType.name().toUpperCase() + ".Reward.Money", "30:100");
+            }
+
+            try
+            {
+                config.save(mobFile);
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+            loadQuestConfig();
+            return;
+        }
+
+
 
         npcIds.clear();
         QuestManager.quests.clear();
+        String[] types = new String[] {"物品任务", "怪物任务"};
+        int i = 0;
+        for(File file:new File[] {itemFile, mobFile}) {
+            config = load(file);
+            int numQuest = 0;
+            for(String key:config.getKeys(false))
+            {
+                String type = config.getString(key+".Type");
+                String describe = config.getString(key+".Describe");
+                String rewardMessage = config.getString(key+".RewardMessage", "");
+                String money = config.getString(key+".Reward.Money");
 
-        config = load(file);
+                // Get the npcID
+                int NPCID = config.getInt(key+".NPCID");
+                if(!npcIds.contains(NPCID))
+                    npcIds.add(NPCID);
 
-        for(int i=0; config.contains("Quest."+(i+1)); i++)
-        {
-            String type = config.getString("Quest."+(i+1)+".Type");
-            String describe = config.getString("Quest."+(i+1)+".Describe");
-            String rewardMessage = config.getString("Quest."+(i+1)+".RewardMessage", "");
-            String money = config.getString("Quest."+(i+1)+".Reward.Money");
+                QuestInfo questInfo = null;
+                ConfigurationSection itemSection = config.getConfigurationSection(key+".Item");
+                ConfigurationSection mobSection = config.getConfigurationSection(key+".Mob");
+                if(itemSection!=null) {
+                    String itemID = itemSection.getString("ID");
+                    int customModelId = itemSection.getInt("Model", 0);
 
-            // Get the npcID
-            int NPCID = config.getInt("Quest."+(i+1)+".NPCID");
-            if(!npcIds.contains(NPCID))
-                npcIds.add(NPCID);
+                    int amount = itemSection.getInt("Amount", 1);
+                    String name = itemSection.getString("Name");
+                    List<String> lore = itemSection.getStringList("Lore");
+                    String enchantID = itemSection.getString("Enchantment.ID", "").toLowerCase();
+                    int enchantLevel = itemSection.getInt("Enchantment.Level");
 
-            QuestInfo questInfo = null;
-            ConfigurationSection itemSection = config.getConfigurationSection("Quest."+(i+1)+".Item");
-            ConfigurationSection mobSection = config.getConfigurationSection("Quest."+(i+1)+".Mob");
-            if(itemSection!=null) {
-                String itemID = itemSection.getString("ID");
-                int customModelId = itemSection.getInt("Model", 0);
+                    // Get the quest item
+                    ItemStack item = Util.createItem(itemID, amount, name, lore, customModelId);
 
-                int amount = itemSection.getInt("Amount", 1);
-                String name = itemSection.getString("Name");
-                List<String> lore = itemSection.getStringList("Lore");
-                String enchantID = itemSection.getString("Enchantment.ID", "").toLowerCase();
-                int enchantLevel = itemSection.getInt("Enchantment.Level");
+                    if(!enchantID.equalsIgnoreCase("") && enchantLevel>0)
+                        item.addUnsafeEnchantment(Enchantment.getByKey(NamespacedKey.minecraft(enchantID)), enchantLevel);
 
-                // Get the quest item
-                ItemStack item = Util.createItem(itemID, amount, name, lore, customModelId);
+                    questInfo = new QuestInfo(type, item);
+                } else if(mobSection!=null) {
+                    String mobID = mobSection.getString("ID");
+                    int mobAmount = mobSection.getInt("Amount");
+                    String mobName = mobSection.getString("CustomName");
+                    if(mobName==null)
+                        questInfo = new QuestInfo(type, mobID, mobAmount);
+                    else
+                        questInfo = new QuestInfo(type, mobID, mobAmount, mobName);
+                }
 
-                if(!enchantID.equalsIgnoreCase("") && enchantLevel>0)
-                    item.addUnsafeEnchantment(Enchantment.getByKey(NamespacedKey.minecraft(enchantID)), enchantLevel);
-
-                questInfo = new QuestInfo(type, item);
-            } else if(mobSection!=null) {
-                String mobID = mobSection.getString("ID");
-                int mobAmount = mobSection.getInt("Amount");
-                String mobName = mobSection.getString("CustomName");
-                if(mobName==null)
-                    questInfo = new QuestInfo(type, mobID, mobAmount);
-                else
-                    questInfo = new QuestInfo(type, mobID, mobAmount, mobName);
+                // Save data in QuestInfo class
+                if(questInfo!=null) {
+                    Quest quest = new Quest(questInfo, NPCID, money, describe, rewardMessage);
+                    QuestManager.quests.add(quest);
+                    numQuest++;
+                }
             }
-
-            // Save data in QuestInfo class
-            if(questInfo!=null) {
-                Quest quest = new Quest(questInfo, NPCID, money, describe, rewardMessage);
-                QuestManager.quests.add(quest);
-            }
+            Bukkit.getConsoleSender().sendMessage("§6[日常任务] §a已加载§e" + numQuest + "§a个§e" + types[i]);
+            i++;
         }
+        Bukkit.getConsoleSender().sendMessage("§6[日常任务] §a一共加载§e" + QuestManager.quests.size() + "§a个任务");
     }
 
     public FileConfiguration load(File file)
