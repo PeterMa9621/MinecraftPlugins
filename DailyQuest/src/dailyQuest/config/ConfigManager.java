@@ -41,7 +41,7 @@ public class ConfigManager {
 
     public ArrayList<Integer> npcIds = new ArrayList<Integer>();
 
-    public List<String> rewards;
+    public List<String> rewards = new ArrayList<>();
     public static HashMap<String, Integer> group = new HashMap<String, Integer>();
 
     public SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
@@ -68,6 +68,8 @@ public class ConfigManager {
     private List<String> mobWildcardBlackList = new ArrayList<>();
 
     public boolean enableCommandGetQuest = false;
+
+    private JSONObject language;
 
     private String[] guiIconType = {"NPC", "GiveUp", "GoBack", "WhatIsDailyQuest", "Accept", "FinishQuest"};
 
@@ -163,24 +165,18 @@ public class ConfigManager {
     {
         File file=new File(plugin.getDataFolder(),"item.yml");
         FileConfiguration config;
-        if (!file.exists())
-        {
-            config = load(file);
-            config.set("rewards", new ArrayList<String>() {{
-                add("eco give %player% 100");
-                add("eco give %player% 200");
-            }}.toArray());
-
-            try {
-                config.save(file);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            loadItemConfig();
+        if (!file.exists()) {
+            generateItems();
+            return;
         }
         config = load(file);
 
-        rewards = config.getStringList("rewards");
+        rewards.clear();
+
+        for(String reward:config.getStringList("rewards")) {
+            rewards.add(reward.split("#")[0]);
+        }
+        Bukkit.getConsoleSender().sendMessage("§6[日常任务] §a已加载物品§e" + rewards.size() + "§a个");
     }
 
     public void loadConfig()
@@ -276,6 +272,9 @@ public class ConfigManager {
             return;
         }
 
+        itemBlackList.clear();
+        mobBlackList.clear();
+
         config = load(file);
         ConfigurationSection guiSection = config.getConfigurationSection("Gui");
         if(guiSection!=null) {
@@ -336,6 +335,7 @@ public class ConfigManager {
         for(String g:group) {
             ConfigManager.group.put(g.split(":")[0], Integer.valueOf(g.split(":")[1]));
         }
+        language = loadLanguageFile();
         loadItemConfig();
         loadQuestConfig();
     }
@@ -393,6 +393,7 @@ public class ConfigManager {
         String materialName = language.get("item.minecraft."+material.name().toLowerCase()) + "";
         if(materialName.equalsIgnoreCase("null"))
             return false;
+
         if(itemBlackList.contains(material))
             return false;
 
@@ -424,98 +425,20 @@ public class ConfigManager {
         if(availableNPC.size()>0)
             randomIndex = Util.random(availableNPC.size());
         int npcId = availableNPC.get(randomIndex);
+        //Bukkit.getConsoleSender().sendMessage(randomIndex +",  " + npcId);
         return CitizensAPI.getNPCRegistry().getById(npcId);
     }
 
     public void loadQuestConfig()
     {
-        JSONObject language = loadLanguageFile();
         File itemFile=new File(plugin.getDataFolder(),"quest_item.yml");
-        FileConfiguration config;
-        if (!itemFile.exists())
-        {
-            config = load(itemFile);
-
-            Material[] materials = Material.values();
-            for(Material material:materials) {
-                if(!canGenerateQuest(material, language))
-                    continue;
-                NPC npc = getNPC();
-                String npcDisplayName = npc.getFullName();
-                String describe = "§a%s§f需要§e%d§f个§e%s§f，你快去帮帮他吧！";
-                String materialName = language.get("item.minecraft."+material.name().toLowerCase()) + "";
-                int numItem = Util.random(2) + 1;
-                config.set(material.name().toUpperCase() + ".Type", "item");
-                config.set(material.name().toUpperCase() + ".Describe", String.format(describe, npcDisplayName, numItem, materialName));
-                config.set(material.name().toUpperCase() + ".RewardMessage", "§7你完成了任务");
-
-                config.set(material.name().toUpperCase() + ".NPCID", npc.getId());
-                config.set(material.name().toUpperCase() + ".Item.ID", material.name().toUpperCase());
-                config.set(material.name().toUpperCase() + ".Item.Model", 0);
-                config.set(material.name().toUpperCase() + ".Item.Amount", 1);
-                //section.set("Item.Enchantment.ID", "fortune");
-                //section.set("Item.Enchantment.Level", 0);
-                config.set(material.name().toUpperCase() + ".Reward.Money", "30:100");
-            }
-
-            try
-            {
-                config.save(itemFile);
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-
         File mobFile=new File(plugin.getDataFolder(),"quest_mob.yml");
-        if (!mobFile.exists())
-        {
-            config = load(mobFile);
-
-            config.set("1.Mob.ID", "ZOMBIE");
-            config.set("1.Mob.Amount", 2);
-            config.set("1.Mob.CustomName", "§e§l狩猎者");
-            config.set("1.Reward.Money", "30:50");
-
-            EntityType[] entityTypes = EntityType.values();
-            for(EntityType entityType:entityTypes) {
-                if(!canGenerateQuest(entityType, language))
-                    continue;
-                NPC npc = getNPC();
-                String mobName = language.get("entity.minecraft."+entityType.name().toLowerCase()) + "";
-                String npcDisplayName = npc.getFullName();
-                String describe = "§a%s§f希望你能去帮他解决§e%d§f个§e%s§f！";
-                int numMob = Util.random(4) + 2;
-                config.set(entityType.name().toUpperCase() + ".Type", "mob");
-                config.set(entityType.name().toUpperCase() + ".NPCID", npc.getId());
-                config.set(entityType.name().toUpperCase() + ".Describe", String.format(describe, npcDisplayName, numMob, mobName));
-                config.set(entityType.name().toUpperCase() + ".RewardMessage", "§7你完成了任务");
-                config.set(entityType.name().toUpperCase() + ".Mob.ID", entityType.name().toUpperCase());
-
-                config.set(entityType.name().toUpperCase() + ".Mob.Amount", numMob);
-                //config.set(entityType.name().toUpperCase() + ".Mob.CustomName", "§e§l狩猎者");
-                config.set(entityType.name().toUpperCase() + ".Reward.Money", "30:100");
-            }
-
-            try
-            {
-                config.save(mobFile);
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-            loadQuestConfig();
-            return;
-        }
-
-
 
         npcIds.clear();
         QuestManager.quests.clear();
         String[] types = new String[] {"物品任务", "怪物任务"};
         int i = 0;
+        FileConfiguration config;
         for(File file:new File[] {itemFile, mobFile}) {
             config = load(file);
             int numQuest = 0;
@@ -572,6 +495,116 @@ public class ConfigManager {
             i++;
         }
         Bukkit.getConsoleSender().sendMessage("§6[日常任务] §a一共加载§e" + QuestManager.quests.size() + "§a个任务");
+    }
+
+    public void generateQuests() {
+        File itemFile=new File(plugin.getDataFolder(),"quest_item.yml");
+        FileConfiguration config;
+
+        config = load(itemFile);
+
+        Material[] materials = Material.values();
+        for(Material material:materials) {
+            if(!canGenerateQuest(material, language))
+                continue;
+            NPC npc = getNPC();
+            String npcDisplayName = npc.getFullName();
+            String describe = "§a%s§f需要§e%d§f个§e%s§f，你快去帮帮他吧！";
+            String materialName = language.get("item.minecraft."+material.name().toLowerCase()) + "";
+            int numItem = Util.random(2) + 1;
+            if(!Util.canItemStack(material))
+                numItem = 1;
+            config.set(material.name().toUpperCase() + ".Type", "item");
+            config.set(material.name().toUpperCase() + ".Describe", String.format(describe, npcDisplayName, numItem, materialName));
+            config.set(material.name().toUpperCase() + ".RewardMessage", "§7你完成了任务");
+
+            config.set(material.name().toUpperCase() + ".NPCID", npc.getId());
+            config.set(material.name().toUpperCase() + ".Item.ID", material.name().toUpperCase());
+            config.set(material.name().toUpperCase() + ".Item.Model", 0);
+            config.set(material.name().toUpperCase() + ".Item.Amount", numItem);
+            //section.set("Item.Enchantment.ID", "fortune");
+            //section.set("Item.Enchantment.Level", 0);
+            config.set(material.name().toUpperCase() + ".Reward.Money", "30:100");
+        }
+
+        try
+        {
+            config.save(itemFile);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        Bukkit.getConsoleSender().sendMessage("§6[日常任务] §a已生成物品任务");
+
+        File mobFile=new File(plugin.getDataFolder(),"quest_mob.yml");
+
+        config = load(mobFile);
+
+        config.set("1.Mob.ID", "ZOMBIE");
+        config.set("1.Mob.Amount", 2);
+        config.set("1.Mob.CustomName", "§e§l狩猎者");
+        config.set("1.Reward.Money", "30:50");
+
+        EntityType[] entityTypes = EntityType.values();
+        for(EntityType entityType:entityTypes) {
+            if(!canGenerateQuest(entityType, language))
+                continue;
+            NPC npc = getNPC();
+            String mobName = language.get("entity.minecraft."+entityType.name().toLowerCase()) + "";
+            String npcDisplayName = npc.getFullName();
+            String describe = "§a%s§f希望你能去帮他解决§e%d§f个§e%s§f！";
+            int numMob = Util.random(4) + 2;
+            config.set(entityType.name().toUpperCase() + ".Type", "mob");
+            config.set(entityType.name().toUpperCase() + ".NPCID", npc.getId());
+            config.set(entityType.name().toUpperCase() + ".Describe", String.format(describe, npcDisplayName, numMob, mobName));
+            config.set(entityType.name().toUpperCase() + ".RewardMessage", "§7你完成了任务");
+            config.set(entityType.name().toUpperCase() + ".Mob.ID", entityType.name().toUpperCase());
+
+            config.set(entityType.name().toUpperCase() + ".Mob.Amount", numMob);
+            //config.set(entityType.name().toUpperCase() + ".Mob.CustomName", "§e§l狩猎者");
+            config.set(entityType.name().toUpperCase() + ".Reward.Money", "30:100");
+        }
+
+        try
+        {
+            config.save(mobFile);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        Bukkit.getConsoleSender().sendMessage("§6[日常任务] §a已生成怪物任务");
+        loadQuestConfig();
+    }
+
+    public void generateItems() {
+        File file = new File(plugin.getDataFolder(),"item.yml");
+        FileConfiguration config = load(file);
+        Material[] materials = Material.values();
+        ArrayList<String> cmds = new ArrayList<>();
+        int count = 0;
+        for(Material material:materials) {
+            if(!canGenerateQuest(material, language))
+                continue;
+            int numItem = Util.random(5) + 1;
+            if(!Util.canItemStack(material))
+                numItem = 1;
+            String itemName = "# " + language.get("item.minecraft."+material.name().toLowerCase());
+            String format = "%-45s %s";
+            String cmd = "ph give %player% " + material.toString() + " " + numItem;
+            cmds.add(String.format(format, cmd, itemName));
+            count++;
+        }
+        config.set("rewards", cmds.toArray());
+        Bukkit.getConsoleSender().sendMessage("§6[日常任务] §a已生成物品§e" + count + "§a个");
+
+        try {
+            config.save(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        loadItemConfig();
     }
 
     public FileConfiguration load(File file)

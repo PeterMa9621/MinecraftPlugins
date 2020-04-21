@@ -177,6 +177,7 @@ public class DailyQuest extends JavaPlugin
 					sender.sendMessage("§6/rw clear [玩家名] §8- §e重置该玩家的任务数据");
 					sender.sendMessage("§6/rw quest §8- §e显示所有任务物品");
 					sender.sendMessage("§6/rw reward §8- §e显示所有奖励物品");
+					sender.sendMessage("§6/rw generate [quest|item] §8- §e生成任务");
 					sender.sendMessage("§6/rw reload §8- §e重载配置");
 				}
 				return true;
@@ -263,7 +264,29 @@ public class DailyQuest extends JavaPlugin
 				}
 				return true;
 			}
-			
+
+			if(args[0].equalsIgnoreCase("generate"))
+			{
+				if(sender.isOp())
+				{
+					if(args.length==2) {
+						if(args[1].equalsIgnoreCase("quest"))
+							configManager.generateQuests();
+						else if(args[1].equalsIgnoreCase("item"))
+							configManager.generateItems();
+						else
+							sender.sendMessage("§6[日常任务] §c用法错误!");
+					} else {
+						sender.sendMessage("§6[日常任务] §c用法错误!");
+					}
+				}
+				else
+				{
+					sender.sendMessage("§6[日常任务] §c你没有权限!");
+				}
+				return true;
+			}
+
 			if(args[0].equalsIgnoreCase("reload"))
 			{
 				if(sender.isOp())

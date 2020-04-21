@@ -55,4 +55,10 @@ public class Util {
         itemMeta.setLore(lore);
         itemStack.setItemMeta(itemMeta);
     }
+
+    public static boolean canItemStack(Material material) {
+        ItemStack itemStack = new ItemStack(material);
+        //Bukkit.getConsoleSender().sendMessage("MaxStack " + (itemStack.getMaxStackSize()>1));
+        return itemStack.getMaxStackSize()>1;
+    }
 }
