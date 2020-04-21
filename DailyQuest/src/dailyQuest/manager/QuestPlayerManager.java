@@ -29,7 +29,10 @@ public class QuestPlayerManager {
     }
 
     public QuestPlayer getQuestPlayer(Player player) {
-        return questPlayers.get(player.getUniqueId());
+        QuestPlayer questPlayer = questPlayers.get(player.getUniqueId());
+        if(questPlayer==null)
+            return plugin.configManager.loadPlayerConfig(player);
+        return questPlayer;
     }
 
     public void removeQuestPlayer(Player player) {

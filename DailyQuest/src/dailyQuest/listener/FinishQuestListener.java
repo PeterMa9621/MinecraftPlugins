@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import dailyQuest.DailyQuest;
+import dailyQuest.gui.GuiManager;
 import dailyQuest.model.Quest;
 import dailyQuest.model.QuestPlayer;
 import dailyQuest.manager.QuestManager;
@@ -69,7 +70,7 @@ public class FinishQuestListener implements Listener
 	@EventHandler
 	private void onPlayerClickInventory(InventoryClickEvent event)
 	{
-		if(event.getView().getTitle().equalsIgnoreCase("¡ì8NPC"))
+		if(event.getView().getTitle().equalsIgnoreCase(GuiManager.npcTitle))
 		{
 			event.setCancelled(true);
 			Player p = (Player)event.getWhoClicked();

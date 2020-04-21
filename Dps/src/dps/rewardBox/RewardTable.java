@@ -3,6 +3,7 @@ package dps.rewardBox;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Random;
+import java.util.SplittableRandom;
 
 public class RewardTable {
     private String dungeonName;
@@ -66,20 +67,30 @@ public class RewardTable {
     }
 
     public Reward getRandomReward() {
-        Random random = new Random(Calendar.getInstance().getTimeInMillis());
-        final double randomNum = random.nextDouble();
-        // Here I use the size of rewards because probs has 0 in the list as default, thus probs will have one more element
-        // than rewards which is not what I want
-        for(int i=0; i<rewards.size(); i++){
-            if(randomNum >= probs.get(i) && randomNum < probs.get(i+1)){
-                return rewards.get(i);
+        SplittableRandom random = new SplittableRandom();
+        double randomNum = random.nextDouble();
+        Reward reward = null;
+        if(randomNum < RewardBoxManager.normalRewardProb) {
+            ArrayList<Reward> normalRewards = RewardBoxManager.normalRewards;
+            int randomIndex = random.nextInt(normalRewards.size());
+            reward = normalRewards.get(randomIndex);
+        } else {
+            // Here I use the size of rewards because probs has 0 in the list as default, thus probs will have one more element
+            // than rewards which is not what I want
+            int i;
+            for(i=0; i<rewards.size(); i++){
+                if(randomNum >= probs.get(i) && randomNum < probs.get(i+1)){
+                    reward = rewards.get(i);
+                }
             }
+            if(reward==null)
+                reward = rewards.get(i-1);
         }
-        return rewards.get(0);
+        return reward;
     }
 
     public int getRandomExp() {
-        Random random = new Random(Calendar.getInstance().getTimeInMillis());
+        SplittableRandom random = new SplittableRandom();
         return random.nextInt(maxExp - minExp) + minExp;
     }
 }

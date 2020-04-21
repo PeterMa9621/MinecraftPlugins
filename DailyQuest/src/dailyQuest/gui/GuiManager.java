@@ -17,6 +17,7 @@ import java.util.List;
 
 public class GuiManager {
     DailyQuest plugin;
+    public static String npcTitle = "¡ì8NPC";
 
     public GuiManager(DailyQuest plugin) {
         this.plugin = plugin;
@@ -44,7 +45,7 @@ public class GuiManager {
 
     public Inventory createGUI(Player p, String name, int NPCID)
     {
-        Inventory inv = Bukkit.createInventory(p, 9, "¡ì8NPC");
+        Inventory inv = Bukkit.createInventory(p, 9, npcTitle);
         ItemStack finishQuest = plugin.configManager.guiIcons.get(IconType.FinishQuest);
         ItemStack goBack = plugin.configManager.guiIcons.get(IconType.GoBack);
 

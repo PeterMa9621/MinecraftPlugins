@@ -11,6 +11,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -24,6 +26,13 @@ public class RewardBoxManager {
      *  Key is dungeon's name, value is the RewardTable class
      */
     public static HashMap<String, RewardTable> rewards = new HashMap<>();
+
+    /**
+     *  This is the array that stores all normal rewards
+     */
+    public static ArrayList<Reward> normalRewards = new ArrayList<>();
+    public static double normalRewardProb = 0.3;
+
     /**
      *  The maximum number of rewards that a player can get
      */
@@ -87,7 +96,7 @@ public class RewardBoxManager {
         if(groupSize == 1){
             dpsPlayer.setNumRewards(numRewards);
         } else {
-            numRewards = (int) (groupSize / rank / 1.5);
+            numRewards = (int) Math.round(groupSize / ((double)rank) / 1.2);
             if(numRewards <= 0){
                 numRewards = 1;
             }

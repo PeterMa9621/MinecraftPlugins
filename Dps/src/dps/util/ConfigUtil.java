@@ -24,7 +24,7 @@ public class ConfigUtil {
         FileConfiguration config;
         if(!file.exists()){
             config = load(file);
-            config.set("sample", "wait for update");
+            config.set("normalRewardProb", 0.3);
 
             try {
                 config.save(file);
@@ -34,6 +34,9 @@ public class ConfigUtil {
             loadConfig(plugin);
             return;
         }
+
+        config = load(file);
+        RewardBoxManager.normalRewardProb = config.getDouble("normalRewardProb", 0.3);
 
         File dungeonsXLMapDir = new File(plugin.getDataFolder().getParentFile().getAbsolutePath() + "/DungeonsXL/maps");
         int numDungeon = 0;
@@ -48,6 +51,7 @@ public class ConfigUtil {
             }
         }
         Bukkit.getConsoleSender().sendMessage("§a[Dps] §e已加载" + numDungeon + "个副本,共" + numReward + "个奖励");
+        loadNormalRewardConfig(plugin);
     }
 
     private static int loadMapConfig(File file) {
@@ -90,6 +94,43 @@ public class ConfigUtil {
         return numReward;
     }
 
+    public static void loadNormalRewardConfig(Dps plugin)
+    {
+        File file=new File(plugin.getDataFolder(),"item.yml");
+        FileConfiguration config;
+        if (!file.exists()) {
+            Bukkit.getConsoleSender().sendMessage("§6[Dps] §c没有item文件存在，推荐使用DailyQuest生成item文件!");
+            config = load(file);
+            config.set("rewards", new ArrayList<String>() {{
+                add("eco give %player% 100 #DIAMOND");
+            }}.toArray());
+
+            try {
+                config.save(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            loadNormalRewardConfig(plugin);
+            return;
+        }
+
+        RewardBoxManager.normalRewards.clear();
+        config = load(file);
+
+        for(String rewardCmd:config.getStringList("rewards")) {
+            if(!rewardCmd.contains("#")) {
+                Bukkit.getConsoleSender().sendMessage("§6[Dps] §cNormal Rewards Format Error!");
+                continue;
+            }
+            String cmd = rewardCmd.split("#")[0];
+            String material = rewardCmd.split("#")[1].toUpperCase();
+
+            Reward reward = new Reward(1, new ItemStack(Material.getMaterial(material)), cmd);
+            RewardBoxManager.normalRewards.add(reward);
+        }
+        Bukkit.getConsoleSender().sendMessage("§6[Dps] §a已加载普通奖励物品§e" + RewardBoxManager.normalRewards.size() + "§a个");
+    }
+
     public static FileConfiguration load(File file)
     {
         if (!(file.exists()))
@@ -104,21 +145,5 @@ public class ConfigUtil {
             }
         }
         return YamlConfiguration.loadConfiguration(file);
-    }
-    public static FileConfiguration load(String path)
-    {
-        File file=new File(path);
-        if(!file.exists())
-        {
-            try
-            {
-                file.createNewFile();
-            }
-            catch(IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-        return YamlConfiguration.loadConfiguration(new File(path));
     }
 }

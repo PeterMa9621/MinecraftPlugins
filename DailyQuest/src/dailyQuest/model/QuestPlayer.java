@@ -5,6 +5,11 @@ import dailyQuest.config.ConfigManager;
 import dailyQuest.manager.QuestManager;
 import dailyQuest.util.Util;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarFlag;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -19,6 +24,7 @@ public class QuestPlayer
 	int totalQuest = 0;
 	String lastLogout = null;
 	Player player;
+	BossBar bossBar;
 
 	public QuestPlayer(Player player, int currentNumber, int whatTheQuestIs, int totalQuest, String lastLogout)
 	{
@@ -28,6 +34,7 @@ public class QuestPlayer
 		this.totalQuest = totalQuest;
 		this.lastLogout = lastLogout;
 		restoreMobQuest();
+		setUpBossBar();
 	}
 
 	public QuestPlayer(Player player, int currentNumber, int whatTheQuestIs, int totalQuest)
@@ -37,6 +44,7 @@ public class QuestPlayer
 		this.whatTheQuestIs = whatTheQuestIs;
 		this.totalQuest = totalQuest;
 		restoreMobQuest();
+		setUpBossBar();
 	}
 
 	private void restoreMobQuest() {
@@ -101,6 +109,20 @@ public class QuestPlayer
 		return QuestManager.quests.get(whatTheQuestIs);
 	}
 
+	public void setUpBossBar() {
+		removeBossBar();
+		if(isDoingQuest()) {
+			Quest quest = getCurrentQuest();
+			bossBar = Bukkit.createBossBar(ChatColor.GRAY + quest.getQuestDescribe(), BarColor.BLUE, BarStyle.SOLID);
+			bossBar.addPlayer(player);
+		}
+	}
+
+	public void removeBossBar() {
+		if(bossBar!=null)
+			bossBar.removeAll();
+	}
+
 	/**
 	 * Finish a quest.
 	 * Return True means can continue with the next quest.
@@ -121,6 +143,7 @@ public class QuestPlayer
 		if(totalQuest>= getDailyLimit()) {
 			currentNumber = 0;
 			whatTheQuestIs = -1;
+			removeBossBar();
 			return false;
 		}
 		currentNumber ++;
@@ -130,6 +153,7 @@ public class QuestPlayer
 		if(nextQuest.getQuestInfo().getType().equalsIgnoreCase("mob")) {
 			initMobQuest(nextQuest);
 		}
+		setUpBossBar();
 		return true;
 	}
 
@@ -235,10 +259,12 @@ public class QuestPlayer
 			currentNumber = 1;
 		whatTheQuestIs = -1;
 		totalQuest = 0;
+		removeBossBar();
 	}
 
 	public void giveUpCurrentQuest() {
 		currentNumber = 0;
 		whatTheQuestIs = -1;
+		removeBossBar();
 	}
 }

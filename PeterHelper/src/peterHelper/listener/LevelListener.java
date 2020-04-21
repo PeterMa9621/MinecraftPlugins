@@ -43,13 +43,12 @@ public class LevelListener implements Listener
 
 	@EventHandler
 	public void onPlayerAttack(EntityDamageByEntityEvent event) {
-		if(event.getEntity() instanceof Player)
-			return;
 		if(event.getDamager() instanceof Player) {
 			Player player = (Player) event.getDamager();
 			ItemStack itemStack = player.getInventory().getItemInMainHand();
 			if (!LevelUtil.canUseItem(itemStack, player, plugin)) {
 				player.sendMessage("§c你等级不满足该物品的要求,无法使用!");
+				event.setCancelled(true);
 			}
 		}
 	}

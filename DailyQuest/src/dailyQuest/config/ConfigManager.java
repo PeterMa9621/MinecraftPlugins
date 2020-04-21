@@ -93,9 +93,9 @@ public class ConfigManager {
         if(plugin.questPlayerManager.containPlayer(player)) {
             QuestPlayer questPlayer = plugin.questPlayerManager.getQuestPlayer(player);
             questPlayer.setPlayer(player);
+            questPlayer.setUpBossBar();
             return questPlayer;
         }
-
 
         int currentQuestNumber = 0;
         int currentQuestIndex = -1;
@@ -116,10 +116,17 @@ public class ConfigManager {
             HashMap<String, Object> result = database.get(player.getUniqueId(), new String[] {"name", "current_quest_number", "current_quest_index", "total_quest_number", "last_logout"});
             if(result!=null){
                 lastLogout = (String) result.get("last_logout");
+                currentQuestIndex = (int) result.get("current_quest_index");
                 if(lastLogout!=null && lastLogout.equalsIgnoreCase(date.format(new Date()))){
                     currentQuestNumber = (int) result.get("current_quest_number");
-                    currentQuestIndex = (int) result.get("current_quest_index");
                     totalQuestNumber = (int) result.get("total_quest_number");
+                } else {
+                    // If the player's last logout date is not today, and if the player is still doing a quest,
+                    // then reset the current number of player's quest to 1
+                    // Otherwise, set to 0
+                    if(currentQuestIndex!=-1) {
+                        currentQuestNumber = 1;
+                    }
                 }
             }
         }
@@ -590,7 +597,7 @@ public class ConfigManager {
             int numItem = Util.random(5) + 1;
             if(!Util.canItemStack(material))
                 numItem = 1;
-            String itemName = "# " + language.get("item.minecraft."+material.name().toLowerCase());
+            String itemName = "#" + material.name().toUpperCase() + "#" + language.get("item.minecraft."+material.name().toLowerCase());
             String format = "%-45s %s";
             String cmd = "ph give %player% " + material.toString() + " " + numItem;
             cmds.add(String.format(format, cmd, itemName));

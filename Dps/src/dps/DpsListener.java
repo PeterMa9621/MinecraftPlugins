@@ -175,7 +175,7 @@ public class DpsListener implements Listener
 		if(DpsPlayerManager.dpsPlayers.containsKey(playerId)){
 			DpsPlayer dpsPlayer = DpsPlayerManager.dpsPlayers.get(playerId);
 			if(dpsPlayer.isInDungeon()) {
-				Random random = new Random(Calendar.getInstance().getTimeInMillis());
+				SplittableRandom random = new SplittableRandom();
 				double randomNumber = random.nextDouble();
 				RewardTable rewardTable = RewardBoxManager.getRewardTable(dpsPlayer.getDungeonName());
 				if(randomNumber < rewardTable.getBonusRewardProb() &&
