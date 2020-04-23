@@ -13,6 +13,10 @@ public class DungeonSetting implements Comparable<DungeonSetting> {
     private int maxPlayers;
     private int minLevel;
     private ItemStack icon = null;
+    /**
+     *  When a player has finished this dungeon, how many hours after he/she can play this dungeon again
+     */
+    private int playInterval = 2;
 
     public DungeonSetting(String dungeonName, String displayName, int minPlayers, int maxPlayers, int minLevel) {
         this.dungeonName = dungeonName;
@@ -66,7 +70,7 @@ public class DungeonSetting implements Comparable<DungeonSetting> {
         if(icon==null){
             icon = Util.createItem(Material.getMaterial("DIAMOND_SWORD"), "§f创建" + displayName + "§f的队伍");
         }
-        return icon;
+        return icon.clone();
     }
 
     public Boolean isSatisfyLevelRequirement(Player player) {
@@ -80,5 +84,13 @@ public class DungeonSetting implements Comparable<DungeonSetting> {
     @Override
     public int compareTo(DungeonSetting dungeonSetting) {
         return minLevel - dungeonSetting.getMinLevel();
+    }
+
+    public int getPlayInterval() {
+        return playInterval;
+    }
+
+    public void setPlayInterval(int playInterval) {
+        this.playInterval = playInterval;
     }
 }

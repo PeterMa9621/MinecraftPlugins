@@ -1,10 +1,11 @@
 package com.peter.dungeonManager.gui;
 
 import com.peter.dungeonManager.DungeonManager;
+import com.peter.dungeonManager.manager.DungeonGroupManager;
 import com.peter.dungeonManager.model.DungeonGroup;
-import com.peter.dungeonManager.model.DungeonSetting;
 import com.peter.dungeonManager.model.DungeonPlayer;
-import com.peter.dungeonManager.util.DataManager;
+import com.peter.dungeonManager.model.DungeonSetting;
+import com.peter.dungeonManager.model.GroupResponse;
 import com.peter.dungeonManager.util.GuiType;
 import com.peter.dungeonManager.util.Util;
 import dps.rewardBox.Reward;
@@ -19,9 +20,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 public class GuiManager {
     public static final String teamGuiTitle = "§2加入副本队伍";
@@ -41,7 +40,6 @@ public class GuiManager {
     public static final String groupFullNotification = ChatColor.RED + "人数已满";
     public static final String minLevelNotification = "§7最小等级要求:§6%d";
     public static final String minLevelNotSatisfy = "§c你的等级不满足副本要求";
-    public static DungeonManager plugin;
     public static final int inventorySize = 54;
     public static final int maxDungeonGroupPerPage = 45;
     public static final int refreshIndex = 49;
@@ -50,20 +48,21 @@ public class GuiManager {
     public static final int previousPageIndex = 52;
     public static final int createTeamIndex = 45;
 
-    public static Inventory createGui(Player player, GuiType guiType) {
+    private DungeonManager plugin;
+    public GuiManager(DungeonManager plugin) {
+        this.plugin = plugin;
+    }
+
+    public Inventory createGui(Player player, GuiType guiType) {
         Inventory inventory;
-        if(guiType.equals(GuiType.Team))
+        if(guiType.equals(GuiType.Group))
             inventory = Bukkit.createInventory(null, inventorySize, teamGuiTitle);
         else if(guiType.equals(GuiType.Dungeon))
             inventory = Bukkit.createInventory(null, inventorySize, dungeonGuiTitle);
         else
             inventory = null;
 
-        DungeonPlayer dungeonPlayer = DataManager.dungeonPlayers.get(player.getUniqueId());
-        if(dungeonPlayer==null){
-            dungeonPlayer = new DungeonPlayer(player);
-            DataManager.dungeonPlayers.put(player.getUniqueId(), dungeonPlayer);
-        }
+        DungeonPlayer dungeonPlayer = plugin.dataManager.getDungeonPlayer(player);
 
         generateItems(inventory, dungeonPlayer, guiType);
 
@@ -75,25 +74,25 @@ public class GuiManager {
      * @param inventory Inventory
      * @param dungeonPlayer DungeonPlayer
      */
-    public static void generateItems(Inventory inventory, DungeonPlayer dungeonPlayer, GuiType guiType) {
+    public void generateItems(Inventory inventory, DungeonPlayer dungeonPlayer, GuiType guiType) {
 
         int currentViewPage = 0;
         int totalLength = 0;
         int restLength = 0;
         int firstIndex = 0;
-        if(guiType.equals(GuiType.Team)) {
+        if(guiType.equals(GuiType.Group)) {
             currentViewPage = dungeonPlayer.getCurrentJoinTeamViewPage();
             firstIndex = maxDungeonGroupPerPage*currentViewPage;
-            totalLength = DataManager.getDungeonGroups().size();
+            totalLength = plugin.dataManager.getDungeonGroups().size();
         } else if(guiType.equals(GuiType.Dungeon)) {
             currentViewPage = dungeonPlayer.getCurrentCreateTeamViewPage();
             firstIndex = maxDungeonGroupPerPage*currentViewPage;
-            totalLength = DataManager.dungeonGroupSetting.size();
+            totalLength = plugin.dataManager.dungeonGroupSetting.size();
         }
         restLength = Math.min(totalLength - firstIndex, maxDungeonGroupPerPage);
 
-        if(guiType.equals(GuiType.Team)) {
-            putTeamInfoIntoInventory(restLength, firstIndex, dungeonPlayer, inventory);
+        if(guiType.equals(GuiType.Group)) {
+            putGroupInfoIntoInventory(restLength, firstIndex, dungeonPlayer, inventory);
         } else if(guiType.equals(GuiType.Dungeon)) {
             putDungeonInfoIntoInventory(firstIndex, inventory, dungeonPlayer);
         }
@@ -115,9 +114,9 @@ public class GuiManager {
         }
     }
 
-    public static void putTeamInfoIntoInventory(int restNumGroups, int firstIndex, DungeonPlayer dungeonPlayer, Inventory inventory) {
+    public void putGroupInfoIntoInventory(int restNumGroups, int firstIndex, DungeonPlayer dungeonPlayer, Inventory inventory) {
         int count = 0;
-        ArrayList<DungeonGroup> dungeonGroups = DataManager.getDungeonGroups();
+        ArrayList<DungeonGroup> dungeonGroups = plugin.dataManager.getDungeonGroups();
         for(int i=0; i<restNumGroups; i++){
             DungeonGroup dungeonGroup = dungeonGroups.get(firstIndex + i);
 
@@ -136,35 +135,40 @@ public class GuiManager {
         inventory.setItem(createTeamIndex, createTeam);
     }
 
-    public static void putDungeonInfoIntoInventory(int firstIndex, Inventory inventory, DungeonPlayer dungeonPlayer) {
+    public void putDungeonInfoIntoInventory(int firstIndex, Inventory inventory, DungeonPlayer dungeonPlayer) {
+        Player player = dungeonPlayer.getPlayer();
         int count = 0;
         int i = 0;
-        ArrayList<DungeonSetting> dungeonSettingList = new ArrayList<>(DataManager.dungeonGroupSetting.values());
+        ArrayList<DungeonSetting> dungeonSettingList = new ArrayList<>(plugin.dataManager.dungeonGroupSetting.values());
         Collections.sort(dungeonSettingList);
         for(DungeonSetting dungeonSetting:dungeonSettingList){
             i++;
             if(i < firstIndex) {
                 continue;
             }
+            String dungeonName = dungeonSetting.getDungeonName();
+            int minLevel = dungeonSetting.getMinLevel();
             ItemStack icon = dungeonSetting.getIcon();
-            Util.setLoreForItem(icon, new ArrayList<String>() {{
-                int minLevel = dungeonSetting.getMinLevel();
+            GroupResponse groupResponse = DungeonGroupManager.canCreateGroup(dungeonSetting, dungeonPlayer);
+            ArrayList<String> lore = new ArrayList<String>() {{
                 add(String.format(minLevelNotification, minLevel));
-                Player player = dungeonPlayer.getPlayer();
-                if(!dungeonSetting.isSatisfyLevelRequirement(player)) {
-                    add(minLevelNotSatisfy);
-                }
-                // Useful info for ops
+            }};
+            if(!groupResponse.canCreateOrJoinGroup()) {
+                icon = plugin.configManager.getLockIcon(dungeonSetting.getDisplayName());
+                lore.addAll(groupResponse.getReason());
+                Util.setPersistentData(icon, new NamespacedKey(plugin, "lock"), "lock");
+            } else {
                 if(player.isOp()) {
-                    RewardTable rewardTable = DungeonManager.dpsAPI.getRewardTable(dungeonSetting.getDungeonName());
-                    int i = 1;
+                    RewardTable rewardTable = DungeonManager.dpsAPI.getRewardTable(dungeonName);
+                    int numReward = 1;
                     for(Reward reward:rewardTable.getRewards()) {
-                        add(i + ". " + reward.getIcon().getItemMeta().getDisplayName() + ", " + reward.getChance());
-                        i ++;
+                        lore.add("§f" + numReward + ". " + reward.getIcon().getItemMeta().getDisplayName() + ", " + reward.getChance());
+                        numReward ++;
                     }
                 }
-            }});
-            Util.setPersistentData(icon,  new NamespacedKey(plugin, "dungeonName"), dungeonSetting.getDungeonName());
+            }
+            Util.setLoreForItem(icon, lore);
+            Util.setPersistentData(icon,  new NamespacedKey(plugin, "dungeonName"), dungeonName);
             inventory.setItem(count, icon);
             count++;
         }
@@ -173,14 +177,24 @@ public class GuiManager {
         inventory.setItem(createTeamIndex, createTeam);
     }
 
-    public static void openDungeonGui(Player player, GuiType guiType) {
+    public void openDungeonGui(Player player, GuiType guiType) {
         player.openInventory(createGui(player, guiType));
     }
 
-    public static ItemStack createGroupIcon(DungeonGroup dungeonGroup, DungeonPlayer dungeonPlayer, Boolean isJoinIcon) {
+    public ItemStack createGroupIcon(DungeonGroup dungeonGroup, DungeonPlayer dungeonPlayer, Boolean isJoinIcon) {
         DungeonSetting dungeonSetting = dungeonGroup.getDungeonSetting();
+        GroupResponse groupResponse = DungeonGroupManager.canJoinGroup(dungeonGroup, dungeonPlayer);
+        ItemStack icon;
         String groupDisplayName = dungeonSetting.getDisplayName();
-        ItemStack icon = dungeonSetting.getIcon();
+        ArrayList<String> lore = new ArrayList<>();
+        if(!groupResponse.canCreateOrJoinGroup()) {
+            icon = plugin.configManager.getLockIcon(groupDisplayName);
+            lore.addAll(groupResponse.getReason());
+            Util.setPersistentData(icon, new NamespacedKey(plugin, "lock"), "lock");
+        } else {
+            icon = dungeonSetting.getIcon();
+        }
+
         ItemMeta itemMeta = icon.getItemMeta();
         if(isJoinIcon) {
             itemMeta.setDisplayName(joinPrefix + groupDisplayName);
@@ -188,12 +202,12 @@ public class GuiManager {
         } else {
             icon = Util.createItem(Material.PAPER, leavePrefix + groupDisplayName, 40);
         }
-
+        Util.setLoreForItem(icon, lore);
         setDataForJoinLeaveIcon(dungeonGroup, icon, dungeonPlayer);
         return icon;
     }
 
-    public static ItemStack createStartDungeonIcon(DungeonPlayer dungeonPlayer) {
+    public ItemStack createStartDungeonIcon(DungeonPlayer dungeonPlayer) {
         DungeonGroup dungeonGroup = dungeonPlayer.getDungeonGroup();
         if(dungeonGroup!=null && dungeonGroup.isLeader(dungeonPlayer) && !dungeonPlayer.isWaitingForStart()){
             String groupDisplayName = dungeonGroup.getDungeonSetting().getDisplayName();
@@ -202,7 +216,7 @@ public class GuiManager {
         return null;
     }
 
-    public static void setDataForJoinLeaveIcon(DungeonGroup dungeonGroup, ItemStack icon, DungeonPlayer dungeonPlayer) {
+    public void setDataForJoinLeaveIcon(DungeonGroup dungeonGroup, ItemStack icon, DungeonPlayer dungeonPlayer) {
         ArrayList<String> lore = new ArrayList<String>() {{
             DungeonSetting dungeonSetting = dungeonGroup.getDungeonSetting();
             add(ChatColor.RESET + "队伍: " + dungeonGroup.getGroupName());
@@ -210,21 +224,23 @@ public class GuiManager {
             for(DungeonPlayer dungeonPlayer:dungeonGroup.getPlayers()) {
                 add(ChatColor.RESET + "成员: " + dungeonPlayer.getPlayer().getDisplayName());
             }
+            // Check if this player can join the team
             if(dungeonGroup.isFull())
                 add(groupFullNotification);
             if(!dungeonSetting.isSatisfyLevelRequirement(dungeonPlayer.getPlayer())){
                 add(minLevelNotSatisfy);
             }
         }};
-        Util.setLoreForItem(icon, lore);
+
+        Util.addLoreForItem(icon, lore);
         Util.setPersistentData(icon,  new NamespacedKey(plugin, "groupName"), dungeonGroup.getGroupName());
     }
 
-    public static ItemStack createNextPageIcon() {
+    public ItemStack createNextPageIcon() {
         return Util.createItem(Material.PAPER, nextPageTitle, 4);
     }
 
-    public static ItemStack createPreviousPageIcon() {
+    public ItemStack createPreviousPageIcon() {
         return Util.createItem(Material.PAPER, previousPageTitle, 2);
     }
 }

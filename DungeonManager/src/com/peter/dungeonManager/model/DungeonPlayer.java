@@ -1,6 +1,15 @@
 package com.peter.dungeonManager.model;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 
 public class DungeonPlayer {
     private Player player;
@@ -9,6 +18,7 @@ public class DungeonPlayer {
     private Boolean waitForStart = false;
     private int currentJoinTeamViewPage = 0;
     private int currentCreateTeamViewPage = 0;
+    private HashMap<String, Long> dungeonTimestamps;
 
     public DungeonPlayer(Player player) {
         this.player = player;
@@ -58,5 +68,31 @@ public class DungeonPlayer {
 
     public Boolean isWaitingForStart() {
         return this.waitForStart;
+    }
+
+    public HashMap<String, Long> getDungeonTimestamps() {
+        return dungeonTimestamps;
+    }
+
+    public void setDungeonTimestamps(HashMap<String, Long> dungeonTimestamps) {
+        this.dungeonTimestamps = dungeonTimestamps;
+    }
+
+    public Date getDungeonLastPlayedTime(String dungeonName) {
+        if(dungeonTimestamps.containsKey(dungeonName)) {
+            Timestamp timestamp = new Timestamp(dungeonTimestamps.get(dungeonName));
+            return new Date(timestamp.getTime());
+        }
+        return null;
+    }
+
+    public String getDungeonLastPlayedTimeString(String dungeonName) {
+        Date date = getDungeonLastPlayedTime(dungeonName);
+        if(date==null)
+            return ChatColor.GRAY + "您没有完成过该副本";
+        else {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            return ChatColor.GRAY + "上次通关: " + dateFormat.format(date);
+        }
     }
 }

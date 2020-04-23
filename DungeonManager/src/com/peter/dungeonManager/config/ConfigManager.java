@@ -1,5 +1,6 @@
 package com.peter.dungeonManager.config;
 
+import com.mysql.fabric.xmlrpc.base.Array;
 import com.peter.dungeonManager.DungeonManager;
 import com.peter.dungeonManager.model.DungeonSetting;
 import com.peter.dungeonManager.util.DataManager;
@@ -9,19 +10,30 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 public class ConfigManager {
     public static int maxInstancePerDungeon;
     public static int startGameDelay = 30;
     public static ArrayList<Material> itemForbid = new ArrayList<>();
+    private static String lockIconId;
+    private static int lockIconCustomModelId;
 
-    public static void loadConfig(DungeonManager plugin) {
+    private DungeonManager plugin;
+    public ConfigManager(DungeonManager plugin) {
+        this.plugin = plugin;
+    }
+
+    public void loadConfig() {
         File file = new File(plugin.getDataFolder(), "/config.yml");
         FileConfiguration config;
         if(!file.exists()){
@@ -29,6 +41,9 @@ public class ConfigManager {
 
             config.set("maxInstancePerDungeon", 2);
             config.set("startGameDelay", 30);
+
+            config.set("lockDungeonIcon.id", "STICK");
+            config.set("lockDungeonIcon.model", 71);
 
             config.set("itemForbid", new ArrayList<String >() {{
                 add("ender_pearl".toUpperCase());
@@ -39,15 +54,19 @@ public class ConfigManager {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            loadConfig(plugin);
+            loadConfig();
             return;
         }
 
-        DataManager.dungeonGroupSetting.clear();
-        DataManager.getDungeonGroups().clear();
+        plugin.dataManager.dungeonGroupSetting.clear();
+        plugin.dataManager.getDungeonGroups().clear();
         config = load(file);
         maxInstancePerDungeon = config.getInt("maxInstancePerDungeon", 2);
         startGameDelay = config.getInt("startGameDelay", 30);
+
+        lockIconId = config.getString("lockDungeonIcon.id", "STICK").toUpperCase();
+        lockIconCustomModelId = config.getInt("lockDungeonIcon.model", 71);
+
 
         List<String> itemIds = config.getStringList("itemForbid");
         for(String itemId:itemIds) {
@@ -66,7 +85,7 @@ public class ConfigManager {
         Bukkit.getConsoleSender().sendMessage("§a[DungeonManager] §e已加载" + numDungeon + "个副本");
     }
 
-    private static Boolean loadMapConfig(File file) {
+    private Boolean loadMapConfig(File file) {
         File configFile = new File(file, "/config.yml");
 
         if(!configFile.exists())
@@ -74,6 +93,9 @@ public class ConfigManager {
         FileConfiguration config = load(configFile);
         String dungeonName = file.getName();
         String displayName = config.getString("title.title", "§6副本").replace("&", "§");
+
+        int playInterval = config.getInt("timeToNextPlayAfterFinish", 2);
+
         ConfigurationSection dungeonConfig = config.getConfigurationSection("dungeonManager");
         if(dungeonConfig!=null){
             int minPlayers = dungeonConfig.getInt("minPlayers", 1);
@@ -81,7 +103,7 @@ public class ConfigManager {
             int minLevel = dungeonConfig.getInt("minLevel", 1);
 
             DungeonSetting dungeonSetting = new DungeonSetting(dungeonName, displayName, minPlayers, maxPlayers, minLevel);
-
+            dungeonSetting.setPlayInterval(playInterval);
             if(dungeonConfig.contains("icon")) {
                 String itemId = dungeonConfig.getString("icon.id");
                 int customModelId = dungeonConfig.getInt("icon.model", 0);
@@ -89,13 +111,29 @@ public class ConfigManager {
                 dungeonSetting.setIcon(icon);
             }
 
-            DataManager.dungeonGroupSetting.put(dungeonName, dungeonSetting);
+            plugin.dataManager.dungeonGroupSetting.put(dungeonName, dungeonSetting);
             return true;
         }
         return false;
     }
 
-    public static FileConfiguration load(File file)
+    public HashMap<String, Long> loadPlayerDungeonTime(Player player) {
+        UUID uniqueId = player.getUniqueId();
+        File dungeonsXLPlayerData = new File(plugin.getDataFolder().getParentFile().getAbsolutePath() + "/DungeonsXL/players/" + uniqueId.toString() + ".yml");
+        HashMap<String, Long> timestamps = new HashMap<>();
+        if(dungeonsXLPlayerData.exists()) {
+            FileConfiguration config = load(dungeonsXLPlayerData);
+            ConfigurationSection section = config.getConfigurationSection("stats.timeLastFinished");
+            if(section!=null) {
+                for(String dungeonName:section.getKeys(false)) {
+                    timestamps.put(dungeonName, section.getLong(dungeonName));
+                }
+            }
+        }
+        return timestamps;
+    }
+
+    public FileConfiguration load(File file)
     {
         if (!(file.exists()))
         { //假如文件不存在
@@ -110,20 +148,8 @@ public class ConfigManager {
         }
         return YamlConfiguration.loadConfiguration(file);
     }
-    public static FileConfiguration load(String path)
-    {
-        File file=new File(path);
-        if(!file.exists())
-        {
-            try
-            {
-                file.createNewFile();
-            }
-            catch(IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-        return YamlConfiguration.loadConfiguration(new File(path));
+
+    public ItemStack getLockIcon(String dungeonName) {
+        return Util.createItem(Material.getMaterial(lockIconId), dungeonName, lockIconCustomModelId);
     }
 }

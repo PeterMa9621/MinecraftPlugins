@@ -1,10 +1,12 @@
 package com.peter.dungeonManager.listener;
 
+import com.peter.dungeonManager.DungeonManager;
 import com.peter.dungeonManager.event.LeaveGroupEvent;
 import com.peter.dungeonManager.gui.GuiManager;
 import com.peter.dungeonManager.model.DungeonGroup;
 import com.peter.dungeonManager.model.DungeonPlayer;
 import com.peter.dungeonManager.util.DataManager;
+import de.erethon.dungeonsxl.event.dplayer.instance.game.DGamePlayerFinishEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,7 +14,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Calendar;
+import java.util.HashMap;
+
 public class DungeonGroupListener implements Listener {
+    private DungeonManager plugin;
+    public DungeonGroupListener(DungeonManager plugin) {
+        this.plugin = plugin;
+    }
+
     @EventHandler
     public void onPlayerLeaveDungeonGroup(LeaveGroupEvent event) {
         DungeonPlayer dungeonPlayer = event.getDungeonPlayer();
@@ -20,7 +30,7 @@ public class DungeonGroupListener implements Listener {
 
         if(dungeonGroup.isLeader(dungeonPlayer)) {
             dungeonGroup.disband(true );
-            DataManager.removeDungeonGroup(dungeonGroup);
+            plugin.dataManager.removeDungeonGroup(dungeonGroup);
         } else {
             dungeonGroup.removePlayer(dungeonPlayer);
         }
@@ -29,11 +39,20 @@ public class DungeonGroupListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        DungeonPlayer dungeonPlayer = DataManager.getDungeonPlayer(player.getUniqueId());
+        DungeonPlayer dungeonPlayer = plugin.dataManager.getDungeonPlayer(player);
         if(dungeonPlayer!=null && dungeonPlayer.isInDungeonGroup()) {
             LeaveGroupEvent leaveGroupEvent = new LeaveGroupEvent(dungeonPlayer);
             Bukkit.getPluginManager().callEvent(leaveGroupEvent);
         }
-        DataManager.removeDungeonPlayer(player.getUniqueId());
+        plugin.dataManager.removeDungeonPlayer(player.getUniqueId());
+    }
+
+    @EventHandler
+    public void onPlayerFinishDungeon(DGamePlayerFinishEvent event) {
+        Player player = event.getDPlayer().getPlayer();
+        HashMap<String, Long> timestamps = plugin.dataManager.getDungeonPlayer(player).getDungeonTimestamps();
+        String dungeonName = event.getDPlayer().getDGroup().getDungeonName();
+        long timestamp = Calendar.getInstance().getTimeInMillis();
+        timestamps.put(dungeonName, timestamp);
     }
 }

@@ -43,23 +43,16 @@ public class DungeonGroup {
 
     public Boolean addPlayer(DungeonPlayer player) {
         if(!this.players.contains(player)) {
-            if(dungeonSetting.isSatisfyLevelRequirement(player.getPlayer())) {
-                this.players.add(player);
-                DataManager.getDungeonPlayer(player.getPlayer().getUniqueId()).joinDungeonGroup(this);
-                return true;
-            }
+            this.players.add(player);
+            player.joinDungeonGroup(this);
+            return true;
         }
         return false;
     }
 
     public void removePlayer(DungeonPlayer player) {
         this.players.remove(player);
-        DataManager.getDungeonPlayer(player.getPlayer().getUniqueId()).leaveDungeonGroup();
-    }
-
-    public void removePlayer(Player player) {
-        players.removeIf(dungeonPlayer -> dungeonPlayer.getPlayer().equals(player));
-        DataManager.getDungeonPlayer(player.getUniqueId()).leaveDungeonGroup();
+        player.leaveDungeonGroup();
     }
 
     public void disband(Boolean notifyPlayer) {

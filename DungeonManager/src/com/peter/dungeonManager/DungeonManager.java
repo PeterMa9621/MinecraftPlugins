@@ -6,6 +6,7 @@ import com.peter.dungeonManager.gui.GuiListener;
 import com.peter.dungeonManager.gui.GuiManager;
 import com.peter.dungeonManager.listener.DungeonGroupListener;
 import com.peter.dungeonManager.listener.DungeonManagerListener;
+import com.peter.dungeonManager.util.DataManager;
 import com.peter.dungeonManager.util.GuiType;
 import dps.Dps;
 import dps.DpsAPI;
@@ -21,6 +22,10 @@ public class DungeonManager extends JavaPlugin
 {
 	public static API levelSystemAPI;
 	public static DpsAPI dpsAPI;
+
+	public ConfigManager configManager;
+	public DataManager dataManager;
+	public GuiManager guiManager;
 	@Override
 	public void onEnable()
 	{
@@ -48,13 +53,14 @@ public class DungeonManager extends JavaPlugin
 		}
 
 		 */
-
-		ConfigManager.loadConfig(this);
+		configManager = new ConfigManager(this);
+		dataManager = new DataManager(this);
+		guiManager = new GuiManager(this);
+		configManager.loadConfig();
 		getServer().getPluginManager().registerEvents(new DungeonManagerListener(this), this);
 		getServer().getPluginManager().registerEvents(new GuiListener(this), this);
-		getServer().getPluginManager().registerEvents(new DungeonGroupListener(), this);
+		getServer().getPluginManager().registerEvents(new DungeonGroupListener(this), this);
 
-		GuiManager.plugin = this;
 		Bukkit.getConsoleSender().sendMessage("°Ïa[DungeonManager] °ÏeDungeonManager loaded");
 	}
 
@@ -70,11 +76,11 @@ public class DungeonManager extends JavaPlugin
 			if (args.length==0 && sender instanceof Player) {
 				Player player = (Player) sender;
 
-				GuiManager.openDungeonGui(player, GuiType.Team);
+				guiManager.openDungeonGui(player, GuiType.Group);
 				return true;
 			} else {
 				if(args[0].equalsIgnoreCase("reload")){
-					ConfigManager.loadConfig(this);
+					configManager.loadConfig();
 
 					sender.sendMessage("°Ï6[DungeonManager] °Ï3÷ÿ‘ÿ≈‰÷√≥…π¶!");
 					return true;
