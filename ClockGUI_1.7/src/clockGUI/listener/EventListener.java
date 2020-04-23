@@ -1,9 +1,8 @@
-package clockGUI;
+package clockGUI.listener;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-
+import clockGUI.ClockGUI;
+import clockGUI.model.ClockGuiItem;
+import clockGUI.model.PlayerData;
 import clockGUI.Util.InventoryUtil;
 import clockGUI.manager.ConfigManager;
 import clockGUI.manager.DataManager;
@@ -13,30 +12,32 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.inventory.Inventory;
-import clockGUI.ClockGUI;
-
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.ArrayList;
 
-public class EventListen implements Listener 
+
+public class EventListener implements Listener
 {
 	private ClockGUI plugin;
-	public EventListen(ClockGUI plugin)
-	{
-		this.plugin=plugin;
-	}
 	private ConfigManager configManager;
 	private DataManager dataManager;
-	public void getItem(Player player)
+	public EventListener(ClockGUI plugin)
 	{
+		this.plugin=plugin;
 		configManager = plugin.configManager;
 		dataManager = plugin.dataManager;
+	}
+
+	public void getItem(Player player)
+	{
+
 		if (!player.getInventory().contains(configManager.clock))
 		{
 			player.getInventory().addItem(configManager.clock);
@@ -212,7 +213,7 @@ public class EventListen implements Listener
 			// ========================================
 			if(clockGuiItem.getFunction().getType().equalsIgnoreCase("command"))
 			{
-				if(clockGuiItem.getFunction().shouldCloseGui)
+				if(clockGuiItem.getFunction().shouldCloseGui())
 					p.closeInventory();
 
 				for(String i:clockGuiItem.getFunction().getCommand())

@@ -1,4 +1,4 @@
-package clockGUI;
+package clockGUI.model;
 
 public class Money 
 {

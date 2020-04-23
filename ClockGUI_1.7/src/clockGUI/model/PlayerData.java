@@ -1,4 +1,4 @@
-package clockGUI;
+package clockGUI.model;
 
 import java.util.HashMap;
 
