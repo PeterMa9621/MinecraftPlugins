@@ -1,6 +1,6 @@
 name: ClockGUI
 main: clockGUI.ClockGUI
-version: '1.8'
+version: '1.8.1'
 api-version: '1.15'
 author: Jingyuan Ma
 softdepend:

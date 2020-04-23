@@ -1,0 +1,17 @@
+name: PixelPayGUI
+main: pixelPayGUI.PixelPayGUI
+version: "1.0"
+api-version: "1.15"
+author: Jingyuan Ma
+commands:
+  paygui:
+    description: used to open gui
+    usage: /paygui
+    permission-message: §c无权执行！
+permissions:
+  PixelPayGUI.op:
+    default: op
+  PixelPayGUI.player:
+    default: true
+depend:
+  - PixelPay

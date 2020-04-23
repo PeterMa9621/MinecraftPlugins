@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
+import clockGUI.Util.InventoryUtil;
+import clockGUI.manager.ConfigManager;
+import clockGUI.manager.DataManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -28,12 +31,15 @@ public class EventListen implements Listener
 	{
 		this.plugin=plugin;
 	}
-
+	private ConfigManager configManager;
+	private DataManager dataManager;
 	public void getItem(Player player)
 	{
-		if (!player.getInventory().contains(plugin.clock))
+		configManager = plugin.configManager;
+		dataManager = plugin.dataManager;
+		if (!player.getInventory().contains(configManager.clock))
 		{
-			player.getInventory().addItem(plugin.clock);
+			player.getInventory().addItem(configManager.clock);
 		}
 		
 	}
@@ -42,7 +48,7 @@ public class EventListen implements Listener
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event)
     {
-		if(plugin.autoGetClock)
+		if(configManager.autoGetClock)
 			getItem(event.getPlayer());
     }
 
@@ -54,7 +60,7 @@ public class EventListen implements Listener
 		{
 			Player player = event.getPlayer();
 			World world = player.getWorld();
-			if(!plugin.enableWorlds.contains(world.getName()))
+			if(!configManager.enableWorlds.contains(world.getName()))
 				return;
 
 			ItemStack itemStack = event.getPlayer().getInventory().getItemInMainHand();
@@ -66,12 +72,13 @@ public class EventListen implements Listener
 			if(!itemMeta.hasDisplayName())
 				return;
 			if(itemMeta.getDisplayName().
-					equals(plugin.clock.getItemMeta().getDisplayName()))
+					equals(configManager.clock.getItemMeta().getDisplayName()))
 			{
-				if(itemMeta.getLore().equals(plugin.clock.getItemMeta().getLore()))
+				if(itemMeta.getLore().equals(configManager.clock.getItemMeta().getLore()))
 				{
 					int guiNumber = 0;
-					Inventory inv = plugin.initInventory(player, plugin.guiNameList.get(guiNumber), plugin.list.get(guiNumber), guiNumber);
+					Inventory inv = InventoryUtil.initInventory(player, configManager.guiNameList.get(guiNumber),
+							configManager.list.get(guiNumber), guiNumber, dataManager.getPlayerData());
 					player.openInventory(inv);
 				}
 			}
@@ -82,7 +89,7 @@ public class EventListen implements Listener
 	@EventHandler
 	public void onPlayerClickInventory(InventoryClickEvent event)
 	{
-		if(plugin.guiNameList.containsValue(event.getView().getTitle()))
+		if(configManager.guiNameList.containsValue(event.getView().getTitle()))
 		{
 			Player p = (Player) event.getWhoClicked();
 			event.setCancelled(true);
@@ -94,16 +101,16 @@ public class EventListen implements Listener
 			// "plugin.guiNameList".
 			// ==================================================================================
 			int index = 0;
-			for(int i:plugin.guiNameList.keySet())
+			for(int i:configManager.guiNameList.keySet())
 			{
-				if(plugin.guiNameList.get(i).equalsIgnoreCase(event.getView().getTitle()))
+				if(configManager.guiNameList.get(i).equalsIgnoreCase(event.getView().getTitle()))
 				{
 					index = i;
 					break;
 				}
 			}
 			
-			if(!plugin.list.get(index).keySet().contains(event.getRawSlot()))
+			if(!configManager.list.get(index).keySet().contains(event.getRawSlot()))
 			{
 				return;
 			}
@@ -115,7 +122,7 @@ public class EventListen implements Listener
 				return;
 
 
-			ClockGuiItem clockGuiItem = plugin.list.get(index).get(event.getRawSlot());
+			ClockGuiItem clockGuiItem = configManager.list.get(index).get(event.getRawSlot());
 			// ====================================
 			// Check if the player has enough money
 			// ====================================
@@ -175,9 +182,9 @@ public class EventListen implements Listener
 			{
 				int usedNumber = 0;
 				PlayerData playerData = null;
-				if((!plugin.playerData.isEmpty()) && plugin.playerData.containsKey(p.getName()))
+				if((!dataManager.getPlayerData().isEmpty()) && dataManager.getPlayerData().containsKey(p.getName()))
 				{
-					playerData = plugin.playerData.get(p.getName());
+					playerData = dataManager.getPlayerData().get(p.getName());
 				}
 				else
 				{
@@ -187,7 +194,7 @@ public class EventListen implements Listener
 				
 				usedNumber = playerData.getNumber(index, event.getRawSlot());
 				playerData.setNumber(index, event.getRawSlot(), usedNumber+1);
-				plugin.playerData.put(p.getName(), playerData);
+				dataManager.getPlayerData().put(p.getName(), playerData);
 				if(clockGuiItem.getFrequency()<=usedNumber+1)
 				{
 					event.getInventory().setItem(event.getRawSlot(), null);
@@ -205,7 +212,9 @@ public class EventListen implements Listener
 			// ========================================
 			if(clockGuiItem.getFunction().getType().equalsIgnoreCase("command"))
 			{
-				
+				if(clockGuiItem.getFunction().shouldCloseGui)
+					p.closeInventory();
+
 				for(String i:clockGuiItem.getFunction().getCommand())
 				{
 					if(i.contains("{ignoreOP}"))
@@ -234,8 +243,8 @@ public class EventListen implements Listener
 
 				int OpenGUINumber = clockGuiItem.getFunction().getGuiNumber();
 
-				Inventory inv = plugin.initInventory(p, plugin.guiNameList.get(OpenGUINumber),
-						plugin.list.get(OpenGUINumber), OpenGUINumber);
+				Inventory inv = InventoryUtil.initInventory(p, configManager.guiNameList.get(OpenGUINumber),
+						configManager.list.get(OpenGUINumber), OpenGUINumber, dataManager.getPlayerData());
 
 				p.openInventory(inv);
 			}
@@ -265,8 +274,8 @@ public class EventListen implements Listener
 				
 				int OpenGUINumber = clockGuiItem.getFunction().getGuiNumber();
 
-				Inventory inv = plugin.initInventory(p, plugin.guiNameList.get(OpenGUINumber),
-						plugin.list.get(OpenGUINumber), OpenGUINumber);
+				Inventory inv = InventoryUtil.initInventory(p, configManager.guiNameList.get(OpenGUINumber),
+						configManager.list.get(OpenGUINumber), OpenGUINumber, dataManager.getPlayerData());
 
 				p.openInventory(inv);
 			}
