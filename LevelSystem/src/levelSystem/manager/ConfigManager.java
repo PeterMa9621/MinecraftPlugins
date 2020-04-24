@@ -9,6 +9,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import peterUtil.database.Database;
+import peterUtil.database.DatabaseType;
 import peterUtil.database.StorageInterface;
 
 import java.io.File;
@@ -23,14 +25,22 @@ public class ConfigManager
 	private LevelSystem plugin;
 	public static int maxLevel;
 	public static boolean useChatPrefix;
-	private HashMap<Integer, Integer> expFormat = new HashMap<>();
+
 	private StorageInterface database;
+	private String databaseName;
+
+	public DatabaseType databaseType = DatabaseType.MYSQL;
 	
-	public ConfigManager(LevelSystem plugin, StorageInterface database) {
+	public ConfigManager(LevelSystem plugin) {
 		this.plugin=plugin;
-		this.database = database;
 	}
-	
+
+	private void initDatabase() {
+		database = Database.getInstance(databaseType, plugin);
+		String createTableQuery = "create table if not exists level_system(id varchar(100), name varchar(100), current_exp int, level int, primary key(id));";
+		database.connect(databaseName, "level_system" , "root", "mjy159357", createTableQuery);
+	}
+
 	public void loadConfig()
 	{
 		File file=new File(plugin.getDataFolder(),"config.yml");
@@ -38,6 +48,8 @@ public class ConfigManager
 		if (!file.exists())
 		{
 			config = load(file);
+
+			config.set("databaseName", "minecraft");
 
 			config.set("maxLevel", 30);
 			config.set("chatPrefix", true);
@@ -70,6 +82,8 @@ public class ConfigManager
 		}
 		config = load(file);
 
+		databaseName = config.getString("databaseName", "minecraft");
+
 		maxLevel = config.getInt("maxLevel", 1);
 		useChatPrefix = config.getBoolean("chatPrefix", true);
 
@@ -89,6 +103,8 @@ public class ConfigManager
 				plugin.rewardManager.addReward(level, levelReward);
 			}
 		}
+
+		initDatabase();
 	}
 
 	public int getMaxLevel() {

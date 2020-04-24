@@ -15,8 +15,11 @@ public class MYSQLStorage implements StorageInterface{
     private Connection connection;
     private Statement statement;
 
-    private String tableName = "";
-
+    private String databaseName;
+    private String tableName;
+    private String userName;
+    private String password;
+    private String createTableQuery;
 
     public MYSQLStorage(JavaPlugin plugin){
         this.plugin = plugin;
@@ -24,6 +27,10 @@ public class MYSQLStorage implements StorageInterface{
 
     public void connect(String databaseName, String tableName, String userName, String password, String createTableQuery) {
         this.tableName = tableName;
+        this.databaseName = databaseName;
+        this.userName = userName;
+        this.password = password;
+        this.createTableQuery = createTableQuery;
 
         try{
             Class.forName("com.mysql.jdbc.Driver");
@@ -42,9 +49,16 @@ public class MYSQLStorage implements StorageInterface{
     }
 
     @Override
-    public void store(UUID uniqueId, HashMap<String, Object> data) throws IOException {
-        data.put("id", uniqueId.toString());
+    public void store(UUID uniqueId, HashMap<String, Object> data) {
+        try {
+            if(connection.isClosed())
+                connect(this.databaseName, this.tableName, this.userName, this.password, this.createTableQuery);
 
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        data.put("id", uniqueId.toString());
         String[] keys = data.keySet().toArray(new String[0]);
         Object[] values = new Object[keys.length];
         for(int i=0; i<keys.length; i++){
@@ -92,6 +106,14 @@ public class MYSQLStorage implements StorageInterface{
 
     @Override
     public HashMap<String, Object> get(UUID uniqueId, String[] keys) {
+        try {
+            if(connection.isClosed())
+                connect(this.databaseName, this.tableName, this.userName, this.password, this.createTableQuery);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         QueryBuilderInterface selectQueryBuilder = QueryBuilderFactory.getSelectQueryBuilder();
         selectQueryBuilder = selectQueryBuilder.from(tableName).where(new String[] {"id"});
 

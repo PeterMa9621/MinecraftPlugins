@@ -165,6 +165,7 @@ public class ConfigLoader {
             tempVipGroups.add("vip4");
             config.set("VipSystem.DefaultGroup", "default");
             config.set("VipSystem.DatabaseType", "yml");
+            config.set("VipSystem.DatabaseName", "minecraft");
             config.set("VipSystem.VIPGroups", tempVipGroups);
             ArrayList<String> vipGroupsName = new ArrayList<String>();
             vipGroupsName.add("初级会员");
@@ -190,7 +191,7 @@ public class ConfigLoader {
             index++;
         }
         String type = config.getString("VipSystem.DatabaseType").toUpperCase();
-
+        Database.databaseName = config.getString("VipSystem.DatabaseName", "minecraft");
         databaseType = DatabaseType.valueOf(type);
         return config.getString("VipSystem.DefaultGroup");
     }

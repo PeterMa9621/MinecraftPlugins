@@ -24,6 +24,7 @@ public class PVPSwitch extends JavaPlugin
 
 	DatabaseType databaseType;
 	StorageInterface database;
+	private String databaseName;
 
 	private PVPSwitchAPI api = new PVPSwitchAPI(this);
 	
@@ -41,7 +42,7 @@ public class PVPSwitch extends JavaPlugin
 		loadConfig();
 		String createTableQuery = "create table if not exists pvp_switch(id varchar(100), can_pvp tinyint, is_banned tinyint, primary key(id));";
 		database = Database.getInstance(databaseType, this);
-		database.connect("minecraft", "pvp_switch", "root", "mjy159357", createTableQuery);
+		database.connect(databaseName, "pvp_switch", "root", "mjy159357", createTableQuery);
 		getServer().getPluginManager().registerEvents(new PVPSwitchListener(this), this);
 		Bukkit.getConsoleSender().sendMessage("§a[PVPSwitch] §ePVP系统加载完毕");
 	}
@@ -75,6 +76,7 @@ public class PVPSwitch extends JavaPlugin
 		if(!file.exists()){
 			config = load(file);
 			config.set("Database", "YML");
+			config.set("DatabaseName", "minecraft");
 
 			try {
 				config.save(file);
@@ -87,6 +89,7 @@ public class PVPSwitch extends JavaPlugin
 		}
 		config = load(file);
 		databaseType = DatabaseType.valueOf(config.getString("Database", "YML"));
+		databaseName = config.getString("DatabaseName", "minecraft");
 	}
 
 	public PvpPlayer loadPlayerConfig(UUID uniqueId) {

@@ -36,6 +36,7 @@ public class AntiXray extends JavaPlugin
 
 	DatabaseType databaseType;
 	StorageInterface database;
+	private String databaseName;
 	public HashMap<UUID, Integer> playerData = new HashMap<UUID, Integer>();
 	HashMap<UUID, String> lastLogin = new HashMap<UUID, String>();
 	HashMap<String, String> message = new HashMap<String, String>();
@@ -62,7 +63,7 @@ public class AntiXray extends JavaPlugin
 
 		database = Database.getInstance(databaseType, this);
 		String createTableQuery = "create table if not exists anti_xray(id varchar(100), points varchar(10), last_login varchar(10), primary key(id));";
-		database.connect("minecraft", "anti_xray", "root", "mjy159357", createTableQuery);
+		database.connect(databaseName, "anti_xray", "root", "mjy159357", createTableQuery);
 
 		loadMessageConfig();
 		recoverPointTask();
@@ -256,6 +257,8 @@ public class AntiXray extends JavaPlugin
 		{
 			config = load(file);
 			config.set("Database", "YML");
+			config.set("DatabaseName", "minecraft");
+
 			config.set("RecoverPointPerMinute", 30);
 			config.set("Points", 600);
 			
@@ -300,6 +303,8 @@ public class AntiXray extends JavaPlugin
 		config = load(file);
 
 		databaseType = DatabaseType.valueOf(config.getString("Database", "YML"));
+		databaseName = config.getString("DatabaseName", "minecraft");
+
 		recoverPointPerMinute = config.getInt("RecoverPointPerMinute", 30);
 
 		// Get the total points

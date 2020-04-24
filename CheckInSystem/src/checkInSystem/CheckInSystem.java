@@ -43,7 +43,7 @@ public class CheckInSystem extends JavaPlugin
 
 	public DatabaseType databaseType = DatabaseType.YML;
 	private StorageInterface database;
-
+	private String databaseName;
 	private CheckInSystemAPI api = new CheckInSystemAPI(this);
 
 	public CheckInSystemAPI getAPI()
@@ -80,7 +80,7 @@ public class CheckInSystem extends JavaPlugin
 
 		database = Database.getInstance(databaseType, this);
 		String createTableQuery = "create table if not exists check_in_system(id varchar(100), days varchar(10), last_date varchar(10), today_date varchar(10), primary key(id));";
-		database.connect("minecraft", "check_in_system" , "root", "mjy159357", createTableQuery);
+		database.connect(databaseName, "check_in_system" , "root", "mjy159357", createTableQuery);
 
 		task();
 		getServer().getPluginManager().registerEvents(new CheckInSystemListener(this), this);
@@ -214,6 +214,7 @@ public class CheckInSystem extends JavaPlugin
 			config = load(file);
 			HashMap<String, Object> data = new HashMap<>();
 			config.set("CheckIn.Database", "YML");
+			config.set("CheckIn.DatabaseName", "minecraft");
 			for(int i=0; i<31; i++)
 			{
 				config.set("CheckIn.Days."+(i+1)+".Describe", "§7奖品为绿宝石一个");
@@ -256,7 +257,7 @@ public class CheckInSystem extends JavaPlugin
 		commandList.clear();
 
 		databaseType = DatabaseType.valueOf(config.getString("CheckIn.Database").toUpperCase());
-
+		databaseName = config.getString("CheckIn.DatabaseName", "minecraft");
 		for(int i=0; i<31; i++)
 		{
 			describe = config.getString("CheckIn.Days."+(i+1)+".Describe").replaceAll("&", "§");

@@ -28,9 +28,6 @@ public class LevelSystem extends JavaPlugin
 
 	public API api;
 
-	public DatabaseType databaseType = DatabaseType.MYSQL;
-	private StorageInterface database;
-
 	public ConfigManager configManager;
 	public RewardManager rewardManager;
 
@@ -42,8 +39,7 @@ public class LevelSystem extends JavaPlugin
 		if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null){
 			new LevelSystemExpansion(this).register();
 		}
-		initDatabase();
-		configManager = new ConfigManager(this, database);
+		configManager = new ConfigManager(this);
 		rewardManager = new RewardManager(this);
 
 		configManager.loadConfig();
@@ -51,12 +47,6 @@ public class LevelSystem extends JavaPlugin
 		getServer().getPluginManager().registerEvents(new LevelSystemListener(this), this);
 		api = new API(this);
 		Bukkit.getConsoleSender().sendMessage("§a[LevelSystem] §e等级系统加载完毕");
-	}
-
-	private void initDatabase() {
-		database = Database.getInstance(databaseType, this);
-		String createTableQuery = "create table if not exists level_system(id varchar(100), name varchar(100), current_exp int, level int, primary key(id));";
-		database.connect("minecraft", "level_system" , "root", "mjy159357", createTableQuery);
 	}
 
 	public void onDisable() {

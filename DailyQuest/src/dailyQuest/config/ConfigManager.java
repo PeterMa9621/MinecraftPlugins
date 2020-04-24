@@ -48,6 +48,7 @@ public class ConfigManager {
 
     private static DatabaseType databaseType = DatabaseType.YML;
     private static StorageInterface database;
+    private String databaseName;
 
     public static int defaultDailyLimit = 0;
 
@@ -85,7 +86,7 @@ public class ConfigManager {
         database = Database.getInstance(databaseType, plugin);
         String createTableQuery = "create table if not exists daily_quest(id varchar(100), name varchar(100), current_quest_number int, current_quest_index int," +
                 "total_quest_number int, last_logout varchar(100), primary key(id));";
-        database.connect("minecraft", "daily_quest" , "root", "mjy159357", createTableQuery);
+        database.connect(databaseName, "daily_quest" , "root", "mjy159357", createTableQuery);
     }
 
     public QuestPlayer loadPlayerConfig(Player player) {
@@ -270,6 +271,7 @@ public class ConfigManager {
             config.set("EnableCommandGetQuest", false);
 
             config.set("Database", "MYSQL");
+            config.set("DatabaseName", "minecraft");
             try {
                 config.save(file);
             } catch (IOException e) {
@@ -336,6 +338,7 @@ public class ConfigManager {
         enableCommandGetQuest = config.getBoolean("EnableCommandGetQuest");
 
         databaseType = DatabaseType.valueOf(config.getString("Database", "YML").toUpperCase());
+        databaseName = config.getString("DatabaseName", "minecraft");
 
         List<String> group = config.getStringList("Group");
 

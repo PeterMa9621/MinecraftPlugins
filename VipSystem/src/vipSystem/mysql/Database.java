@@ -1,15 +1,12 @@
 package vipSystem.mysql;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 
 public class Database {
 
     private static Database instance = null;
     private Connection connection;
-    private static String databaseName = "minecraft";
+    public static String databaseName = "minecraft";
     private static String userName = "root";
     private static String password = "mjy159357";
 
@@ -22,6 +19,16 @@ public class Database {
             String createTableQuery = "create table if not exists vip_system(id varchar(100), player_name varchar(100), register_date datetime, deadline_date datetime , vip_group varchar(30), is_expired tinyint, primary key (id));";
             Statement stmt = connection.createStatement();
             stmt.executeUpdate(createTableQuery);
+        } catch(Exception e){
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void connect() {
+        try{
+            Class.forName("com.mysql.jdbc.Driver");
+            connection= DriverManager.getConnection(
+                    "jdbc:mysql://localhost:3306/" + Database.databaseName + "?useSSL=false", Database.userName, Database.password);
         } catch(Exception e){
             System.out.println(e.getMessage());
         }
@@ -41,6 +48,12 @@ public class Database {
     }
 
     public Connection getConnection(){
+        try {
+            if(this.connection.isClosed())
+                connect();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return this.connection;
     }
 }
