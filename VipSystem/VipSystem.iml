@@ -31,15 +31,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../mysql-connector-java-8.0.19.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$MODULE_DIR$/../LuckPerms-Bukkit-5.0.72.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -50,6 +41,15 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/../PlaceholderAPI-2.10.4.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../Project0/server/plugins/PeterUtil.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

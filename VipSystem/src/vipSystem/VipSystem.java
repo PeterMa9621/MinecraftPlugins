@@ -1,12 +1,5 @@
 package vipSystem;
 
-import me.lucko.luckperms.common.util.Uuids;
-import net.luckperms.api.model.user.User;
-import net.luckperms.api.model.user.UserManager;
-import net.luckperms.api.node.Node;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.enchantments.EnchantmentWrapper;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -14,27 +7,16 @@ import net.milkbowl.vault.economy.Economy;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import net.luckperms.api.*;
+import vipSystem.config.ConfigLoader;
 import vipSystem.util.Util;
 
 import static vipSystem.util.Util.getNewDate;
@@ -44,13 +26,11 @@ public class VipSystem extends JavaPlugin
 	public static HashMap<String, String> vipGroups = new HashMap<String, String>();
 	public static String defaultGroup = "";
 	
-	SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd-HH");
+	public VipSystemAPI api = new VipSystemAPI(this);
 	
-	VipSystemAPI api = new VipSystemAPI(this);
-	
-	HashMap<String, VipReward> reward = new HashMap<String, VipReward>();
+	public HashMap<String, VipReward> reward = new HashMap<String, VipReward>();
 
-	HashMap<UUID, VipPlayer> players = new HashMap<>();
+	public HashMap<UUID, VipPlayer> players = new HashMap<>();
 
 	ConfigLoader configLoader = new ConfigLoader(this);
 
@@ -107,7 +87,7 @@ public class VipSystem extends JavaPlugin
 		for (VipPlayer vipPlayer:players.values()) {
 			try {
 				configLoader.savePlayerConfig(vipPlayer);
-			} catch (SQLException e) {
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
@@ -140,27 +120,6 @@ public class VipSystem extends JavaPlugin
 				}
 				return true;
 			}
-
-			/*
-			if(args[0].equalsIgnoreCase("list"))
-			{
-				if(!sender.isOp())
-				{
-					sender.sendMessage("§6[会员系统] §4你没有权限");
-					return true;
-				}
-				sender.sendMessage("§6======================================");
-				for(String vipName:vipData.keySet())
-				{
-					sender.sendMessage("§6玩家:§e"+vipData.get(vipName).playerName+"§6,会员类型:§c"
-				+vipGroups.get(vipData.get(vipName).getVipGroup())+"§6,剩余时长:§2"+vipData.get(vipName).getLeftTime());
-				}
-				sender.sendMessage("§6======================================");
-				return true;
-			}
-
-			 */
-
 
 			if(args[0].equalsIgnoreCase("reloadp"))
 			{
@@ -204,13 +163,8 @@ public class VipSystem extends JavaPlugin
 
 				UUID uniqueId = Util.getPlayerUUID(args[1]);
 
-				VipPlayer vipPlayer = null;
-				try {
-					vipPlayer = configLoader.loadPlayerConfig(uniqueId);
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-				if(vipPlayer==null || vipPlayer.isDeadline())
+				VipPlayer vipPlayer = configLoader.loadPlayerConfig(uniqueId);
+				if(vipPlayer==null || vipPlayer.checkDeadline())
 				{
 					sender.sendMessage("§6[会员系统] §c该玩家不是会员或会员已到期");
 					return true;
@@ -238,13 +192,8 @@ public class VipSystem extends JavaPlugin
 
 				UUID uniqueId = Util.getPlayerUUID(args[1]);
 
-				VipPlayer vipPlayer = null;
-				try {
-					vipPlayer = configLoader.loadPlayerConfig(uniqueId);
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-				if(vipPlayer==null || vipPlayer.isDeadline())
+				VipPlayer vipPlayer = configLoader.loadPlayerConfig(uniqueId);
+				if(vipPlayer==null || vipPlayer.checkDeadline())
 				{
 					sender.sendMessage("§6[会员系统] §c该玩家不是会员或会员已到期");
 					return true;
@@ -261,7 +210,7 @@ public class VipSystem extends JavaPlugin
 
 				try {
 					Util.addVip(vipPlayer, configLoader, players);
-				} catch (SQLException e) {
+				} catch (IOException e) {
 					e.printStackTrace();
 				}
 
@@ -289,21 +238,16 @@ public class VipSystem extends JavaPlugin
 
 				UUID uniqueId = Util.getPlayerUUID(args[1]);
 
-				VipPlayer vipPlayer = null;
-				try {
-					vipPlayer = configLoader.loadPlayerConfig(uniqueId);
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-				if(vipPlayer==null || vipPlayer.isDeadline())
+				VipPlayer vipPlayer = configLoader.loadPlayerConfig(uniqueId);
+				if(vipPlayer==null || vipPlayer.checkDeadline())
 				{
 					sender.sendMessage("§6[会员系统] §c该玩家不是会员或会员已到期");
 					return true;
 				}
 
 				try {
-					Util.removeVip(vipPlayer, configLoader, players);
-				} catch (SQLException e) {
+					Util.removeVip(vipPlayer, configLoader);
+				} catch (IOException e) {
 					e.printStackTrace();
 				}
 
@@ -321,22 +265,14 @@ public class VipSystem extends JavaPlugin
 				if(sender instanceof Player)
 				{
 					Player p = (Player)sender;
-					try {
-						VipPlayer vipPlayer = configLoader.loadPlayerConfig(p.getUniqueId());
-						if(vipPlayer==null || vipPlayer.isDeadline()) {
-							sender.sendMessage("§6[会员系统] §c你还不是会员");
-							return true;
-						}
-					} catch (SQLException e) {
-						e.printStackTrace();
+					VipPlayer vipPlayer = configLoader.loadPlayerConfig(p.getUniqueId());
+					if(vipPlayer==null || vipPlayer.checkDeadline()) {
+						sender.sendMessage("§6[会员系统] §c你还不是会员");
+						return true;
 					}
-					VipPlayer vip = null;
-					try {
-						vip = configLoader.loadPlayerConfig(p.getUniqueId());
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
-					String msg = String.format("§6[会员系统] §e会员类型:§c%s§e,剩余会员时间:§a%d天,%d小时,%d分钟", vipGroups.get(vip.getVipGroup()), vip.getLeftDays(), vip.getLeftHours()%24, vip.getLeftMinutes()%60);
+
+					String msg = String.format("§6[会员系统] §e会员类型:§c%s§e,剩余会员时间:§a%d天,%d小时,%d分钟",
+							vipGroups.get(vipPlayer.getVipGroup()), vipPlayer.getLeftDays(), vipPlayer.getLeftHours()%24, vipPlayer.getLeftMinutes()%60);
 					p.sendMessage(msg);
 				}
 				return true;
@@ -366,22 +302,17 @@ public class VipSystem extends JavaPlugin
 					sender.sendMessage("§6[会员系统] §c不存在的会员组");
 					return true;
 				}
-				if(!args[3].matches("[0-9]*") || Integer.valueOf(args[3])<=0)
+				if(!args[3].matches("[0-9]*") || Integer.parseInt(args[3])<=0)
 				{
 					sender.sendMessage("§6[会员系统] §c无效的会员时长(单位为§3天§c)");
 					return true;
 				}
-				int days = Integer.valueOf(args[3]);
+				int days = Integer.parseInt(args[3]);
 				String playerName = args[1];
 				String group = args[2];
 				Player p = Bukkit.getPlayer(playerName);
 
-				VipPlayer vipPlayer = null;
-				try {
-					vipPlayer = configLoader.loadPlayerConfig(p.getUniqueId());
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
+				VipPlayer vipPlayer = configLoader.loadPlayerConfig(p.getUniqueId());
 
 				if(vipPlayer!=null && vipPlayer.getVipGroup().equalsIgnoreCase(args[2]))
 				{
@@ -405,7 +336,7 @@ public class VipSystem extends JavaPlugin
 
 				try {
 					Util.addVip(vipPlayer, configLoader, players);
-				} catch (SQLException e) {
+				} catch (IOException e) {
 					e.printStackTrace();
 				}
 

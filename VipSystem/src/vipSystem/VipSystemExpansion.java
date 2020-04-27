@@ -3,7 +3,9 @@ package vipSystem;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import vipSystem.util.Util;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 /**
@@ -65,7 +67,7 @@ public class VipSystemExpansion extends PlaceholderExpansion {
      */
     @Override
     public String getVersion(){
-        return "1.0.0";
+        return "1.0.1";
     }
 
     /**
@@ -86,30 +88,28 @@ public class VipSystemExpansion extends PlaceholderExpansion {
 
         // %example_placeholder1%
         if(identifier.equals("vipGroup")){
-            try {
-                VipPlayer vipPlayer = plugin.configLoader.loadPlayerConfig(player.getUniqueId());
-                if(vipPlayer!=null)
-                    return vipPlayer.getVipGroup();
-                else
-                    return "公民";
-            } catch (SQLException e) {
-                e.printStackTrace();
+            VipPlayer vipPlayer = plugin.configLoader.loadPlayerConfig(player.getUniqueId());
+            if(vipPlayer!=null) {
+                if(!vipPlayer.isExpired && vipPlayer.checkDeadline()) {
+                    try {
+                        Util.removeVip(vipPlayer, plugin.configLoader);
+                        player.sendMessage("§6[会员系统] §e你的会员已到期");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                return vipPlayer.getVipGroupDisplayName();
+            } else
                 return "公民";
-            }
         }
 
         // %example_placeholder2%
         if(identifier.equals("leftTime")){
-            try {
-                VipPlayer vipPlayer = plugin.configLoader.loadPlayerConfig(player.getUniqueId());
-                if(vipPlayer!=null)
-                    return vipPlayer.getLeftTime();
-                else
-                    return "";
-            } catch (SQLException e) {
-                e.printStackTrace();
+            VipPlayer vipPlayer = plugin.configLoader.loadPlayerConfig(player.getUniqueId());
+            if(vipPlayer!=null)
+                return vipPlayer.getLeftTime();
+            else
                 return "";
-            }
         }
 
         // We return null if an invalid placeholder (f.e. %example_placeholder3%)

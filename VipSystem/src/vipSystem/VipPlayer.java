@@ -1,13 +1,8 @@
 package vipSystem;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Period;
-import java.time.temporal.TemporalUnit;
-import java.util.Date;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 public class VipPlayer 
@@ -17,8 +12,9 @@ public class VipPlayer
 	LocalDateTime regDate;
 	LocalDateTime deadline;
 	String vipGroup="";
+	boolean isExpired = false;
 
-	SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+	DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	public VipPlayer(UUID uniqueId, String playerName, LocalDateTime regDate, LocalDateTime deadline, String vipGroup) {
 		this.uniqueId = uniqueId;
 		this.playerName = playerName;
@@ -46,11 +42,14 @@ public class VipPlayer
 		return regDate;
 	}
 	
-	public String getVipGroup()
-	{
-		if(vipGroup==null || vipGroup.equalsIgnoreCase(""))
-			return "公民";
+	public String getVipGroup() {
 		return vipGroup;
+	}
+
+	public String getVipGroupDisplayName() {
+		if(checkDeadline())
+			return "公民";
+		return VipSystem.vipGroups.get(vipGroup);
 	}
 	
 	public int getLeftHours()
@@ -73,11 +72,13 @@ public class VipPlayer
 		return Math.max(minutes, 0);
 	}
 
-	public boolean isDeadline()
+	public boolean checkDeadline()
 	{
-		if(getLeftMinutes()>0)
-			return false;
-		return true;
+		if(isExpired)
+			return true;
+		isExpired = getLeftMinutes() <= 0;
+
+		return isExpired;
 	}
 	
 	public void setDeadline(LocalDateTime newDeadline)
@@ -87,9 +88,23 @@ public class VipPlayer
 	
 	public String getLeftTime()
 	{
+		if(checkDeadline())
+			return "";
 		if(getLeftDays()<=0)
 			return String.format("%d天%d小时%d分钟", getLeftDays(), getLeftHours()%24, getLeftMinutes()%60);
 		else
 			return String.format("%d天%d小时", getLeftDays(), getLeftHours()%24);
+	}
+
+	public void clearData() {
+		this.isExpired = true;
+	}
+
+	public void setIsExpired(boolean isExpired) {
+		this.isExpired = isExpired;
+	}
+
+	public boolean isExpired() {
+		return isExpired;
 	}
 }

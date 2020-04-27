@@ -1,9 +1,10 @@
 name: VipSystem
 main: vipSystem.VipSystem
-version: '1.2'
-api-version: '1.14'
+version: '1.2.1'
+api-version: '1.15'
 depend:
   - LuckPerms
+  - PeterUtil
 softdepend:
   - PlaceholderAPI
   - Vault

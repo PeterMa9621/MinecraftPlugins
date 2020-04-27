@@ -6,13 +6,12 @@ import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.Node;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import vipSystem.ConfigLoader;
+import vipSystem.config.ConfigLoader;
 import vipSystem.VipPlayer;
 import vipSystem.VipSystem;
 
@@ -89,7 +88,7 @@ public class Util {
         return item;
     }
 
-    public static void removeVip(VipPlayer vipPlayer, ConfigLoader configLoader, HashMap<UUID, VipPlayer> players) throws SQLException {
+    public static void removeVip(VipPlayer vipPlayer, ConfigLoader configLoader) throws IOException {
         LuckPerms lp = LuckPermsProvider.get();
         User lpUser = lp.getUserManager().loadUser(vipPlayer.getUniqueId()).join();
 
@@ -102,11 +101,11 @@ public class Util {
         });
         lpUser.data().add(Node.builder("group." + VipSystem.defaultGroup).build());
         lp.getUserManager().saveUser(lpUser);
-        players.remove(vipPlayer.getUniqueId());
+        vipPlayer.clearData();
         configLoader.deletePlayerConfig(vipPlayer.getUniqueId());
     }
 
-    public static void addVip(VipPlayer vipPlayer, ConfigLoader configLoader, HashMap<UUID, VipPlayer> players) throws SQLException {
+    public static void addVip(VipPlayer vipPlayer, ConfigLoader configLoader, HashMap<UUID, VipPlayer> players) throws IOException {
         LuckPerms lp = LuckPermsProvider.get();
         User lpUser = lp.getUserManager().loadUser(vipPlayer.getUniqueId()).join();
 
