@@ -159,7 +159,9 @@ public class AntiXray extends JavaPlugin
 				e.printStackTrace();
 			}
 		}
-		
+
+		database.close();
+
 		File file = new File(getDataFolder(), "config.yml");
 		FileConfiguration config;
 		config = load(file);

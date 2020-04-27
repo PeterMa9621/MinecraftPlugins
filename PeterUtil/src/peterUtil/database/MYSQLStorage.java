@@ -1,5 +1,8 @@
 package peterUtil.database;
 
+import org.bukkit.ChatColor;
+import org.bukkit.scheduler.BukkitTask;
+import peterUtil.PeterUtil;
 import peterUtil.database.queryBuilder.QueryBuilderFactory;
 import peterUtil.database.queryBuilder.QueryBuilderInterface;
 import org.bukkit.Bukkit;
@@ -21,6 +24,10 @@ public class MYSQLStorage implements StorageInterface{
     private String password;
     private String createTableQuery;
 
+    private String prefix = "[" + ChatColor.YELLOW + "PeterUtil" + ChatColor.RESET + "] " + " - ";
+    private boolean hasInitDatabase = false;
+    private BukkitTask closeConnectionTask;
+
     public MYSQLStorage(JavaPlugin plugin){
         this.plugin = plugin;
     }
@@ -37,11 +44,23 @@ public class MYSQLStorage implements StorageInterface{
             connection = DriverManager.getConnection(
                     "jdbc:mysql://localhost:3306/" + databaseName + "?allowPublicKeyRetrieval=true&useSSL=false", userName, password);
 
-            statement = connection.createStatement();
-            statement.executeUpdate(createTableQuery);
+            if(PeterUtil.configManager.enableNotification)
+                Bukkit.getConsoleSender().sendMessage(prefix + plugin.getName() + " Database connected!");
+            if(!hasInitDatabase) {
+                initDatabase();
+                hasInitDatabase = true;
+            }
         } catch(Exception e){
             System.out.println(e.getMessage());
         }
+    }
+
+    public void initDatabase() throws SQLException {
+        statement = connection.createStatement();
+        statement.executeUpdate(createTableQuery);
+        connection.close();
+        if(PeterUtil.configManager.enableNotification)
+            Bukkit.getConsoleSender().sendMessage(prefix + "Database connection closed!");
     }
 
     public Connection getConnection(){
@@ -51,9 +70,8 @@ public class MYSQLStorage implements StorageInterface{
     @Override
     public void store(UUID uniqueId, HashMap<String, Object> data) {
         try {
-            if(connection.isClosed())
+            if(connection==null || connection.isClosed())
                 connect(this.databaseName, this.tableName, this.userName, this.password, this.createTableQuery);
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -102,14 +120,15 @@ public class MYSQLStorage implements StorageInterface{
                 ex.printStackTrace();
             }
         }
+
+        closeConnection();
     }
 
     @Override
     public HashMap<String, Object> get(UUID uniqueId, String[] keys) {
         try {
-            if(connection.isClosed())
+            if(connection==null || connection.isClosed())
                 connect(this.databaseName, this.tableName, this.userName, this.password, this.createTableQuery);
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -129,11 +148,91 @@ public class MYSQLStorage implements StorageInterface{
                 for(int i=0; i<keys.length; i++){
                     result.put(keys[i], resultSet.getObject(i+2));
                 }
+                closeConnection();
                 return result;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        closeConnection();
+
         return null;
+    }
+
+    @Override
+    public HashMap<UUID, HashMap<String, Object>> getAll() {
+        try {
+            if(connection==null || connection.isClosed())
+                connect(this.databaseName, this.tableName, this.userName, this.password, this.createTableQuery);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        QueryBuilderInterface selectQueryBuilder = QueryBuilderFactory.getSelectQueryBuilder();
+        selectQueryBuilder = selectQueryBuilder.from(tableName);
+
+        String query = selectQueryBuilder.getQuery();
+        HashMap<UUID, HashMap<String, Object>> result = new HashMap<>();
+        try {
+            PreparedStatement statement = connection.prepareStatement(query);
+
+            ResultSet resultSet = statement.executeQuery();
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            int numColumn = metaData.getColumnCount();
+
+            while(resultSet.next()){
+                UUID uuid = null;
+                HashMap<String, Object> obj = new HashMap<>();
+                for(int i=0; i<numColumn; i++) {
+                    String columnName = metaData.getColumnName(i+1);
+
+                    //Bukkit.getConsoleSender().sendMessage("Column Name " + columnName);
+                    Object data = resultSet.getObject(i+1);
+                    //Bukkit.getConsoleSender().sendMessage("Data " + data);
+                    if(columnName.equalsIgnoreCase("id")) {
+                        uuid = UUID.fromString((String) data);
+                        //Bukkit.getConsoleSender().sendMessage("UUID is " + uuid.toString());
+                    }
+                    obj.put(columnName, data);
+                }
+                if(uuid!=null)
+                    result.put(uuid, obj);
+            }
+
+            closeConnection();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    private void closeConnection() {
+        if(plugin.isEnabled()) {
+            if(closeConnectionTask!=null)
+                closeConnectionTask.cancel();
+            closeConnectionTask = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                try {
+                    connection.close();
+                    if(PeterUtil.configManager.enableNotification)
+                        Bukkit.getConsoleSender().sendMessage(prefix + plugin.getName() + "Database connection closed!");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }, 20*15);
+        }
+    }
+
+    @Override
+    public void close() {
+        try {
+            if(closeConnectionTask!=null)
+                closeConnectionTask.cancel();
+            connection.close();
+            if(PeterUtil.configManager.enableNotification)
+                Bukkit.getConsoleSender().sendMessage(prefix + plugin.getName() + "Database connection closed!");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

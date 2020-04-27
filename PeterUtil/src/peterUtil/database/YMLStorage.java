@@ -24,6 +24,11 @@ public class YMLStorage implements StorageInterface{
 
     }
 
+    @Override
+    public void close() {
+
+    }
+
     public void store(UUID uniqueId, HashMap<String, Object> data) throws IOException {
         File file = new File(this.dataFolderPath, "/data/"+uniqueId.toString()+".yml");
 
@@ -50,6 +55,11 @@ public class YMLStorage implements StorageInterface{
         }
 
         return result;
+    }
+
+    @Override
+    public HashMap<UUID, HashMap<String, Object>> getAll() {
+        return null;
     }
 
     private FileConfiguration load(File file)

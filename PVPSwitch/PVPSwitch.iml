@@ -48,7 +48,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../PeterUtil.jar!/" />
+          <root url="jar://$MODULE_DIR$/../PlaceholderAPI-2.10.4.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -57,7 +57,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../PlaceholderAPI-2.10.4.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../Project0/server/plugins/PeterUtil.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

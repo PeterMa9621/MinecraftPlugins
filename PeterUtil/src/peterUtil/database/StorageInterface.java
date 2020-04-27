@@ -9,5 +9,9 @@ public interface StorageInterface {
 
     public HashMap<String, Object> get(UUID uniqueId, String[] keys);
 
+    public HashMap<UUID, HashMap<String, Object>> getAll();
+
     public void connect(String databaseName, String tableName, String userName, String password, String createTableQuery);
+
+    public void close();
 }

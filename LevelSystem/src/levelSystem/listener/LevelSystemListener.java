@@ -80,8 +80,8 @@ public class LevelSystemListener implements Listener
 
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent event) throws IOException {
-		Player player = event.getPlayer();
-		plugin.configManager.savePlayerConfig(player);
+		//Player player = event.getPlayer();
+		//plugin.configManager.savePlayerConfig(player);
 	}
 
 }

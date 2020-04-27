@@ -57,6 +57,7 @@ public class LevelSystem extends JavaPlugin
 				e.printStackTrace();
 			}
 		}
+		configManager.closeDatabase();
 		Bukkit.getConsoleSender().sendMessage("§a[LevelSystem] §e等级系统卸载完毕");
 	}
 

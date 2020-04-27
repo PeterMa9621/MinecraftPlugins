@@ -178,6 +178,7 @@ public class DpsListener implements Listener
 				SplittableRandom random = new SplittableRandom();
 				double randomNumber = random.nextDouble();
 				RewardTable rewardTable = RewardBoxManager.getRewardTable(dpsPlayer.getDungeonName());
+				// To Do: check if the map contains reward
 				if(randomNumber < rewardTable.getBonusRewardProb() &&
 						dpsPlayer.getNumBonusReward() < RewardBoxManager.maxBonusRewards) {
 					dpsPlayer.addBonusReward();

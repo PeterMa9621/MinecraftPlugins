@@ -143,6 +143,10 @@ public class ConfigManager
 		database.store(player.getUniqueId(), data);
 	}
 
+	public void closeDatabase() {
+		database.close();
+	}
+
 	private FileConfiguration load(File file)
 	{
         if (!(file.exists())) 

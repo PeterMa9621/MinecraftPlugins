@@ -1,5 +1,7 @@
 package vipSystem.mysql;
 
+import org.bukkit.Bukkit;
+
 import java.sql.*;
 
 public class Database {
@@ -19,6 +21,7 @@ public class Database {
             String createTableQuery = "create table if not exists vip_system(id varchar(100), player_name varchar(100), register_date datetime, deadline_date datetime , vip_group varchar(30), is_expired tinyint, primary key (id));";
             Statement stmt = connection.createStatement();
             stmt.executeUpdate(createTableQuery);
+            connection.close();
         } catch(Exception e){
             System.out.println(e.getMessage());
         }
@@ -29,6 +32,7 @@ public class Database {
             Class.forName("com.mysql.jdbc.Driver");
             connection= DriverManager.getConnection(
                     "jdbc:mysql://localhost:3306/" + Database.databaseName + "?useSSL=false", Database.userName, Database.password);
+            Bukkit.getConsoleSender().sendMessage("[VipSystem] VipSystem Database connected!");
         } catch(Exception e){
             System.out.println(e.getMessage());
         }

@@ -48,6 +48,8 @@ public class VipPlayer
 	
 	public String getVipGroup()
 	{
+		if(vipGroup==null || vipGroup.equalsIgnoreCase(""))
+			return "¹«Ãñ";
 		return vipGroup;
 	}
 	

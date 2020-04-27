@@ -89,7 +89,7 @@ public class VipSystemExpansion extends PlaceholderExpansion {
             try {
                 VipPlayer vipPlayer = plugin.configLoader.loadPlayerConfig(player.getUniqueId());
                 if(vipPlayer!=null)
-                    return plugin.vipGroups.get(vipPlayer.getVipGroup());
+                    return vipPlayer.getVipGroup();
                 else
                     return "¹«Ãñ";
             } catch (SQLException e) {

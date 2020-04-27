@@ -111,6 +111,7 @@ public class VipSystem extends JavaPlugin
 				e.printStackTrace();
 			}
 		}
+		configLoader.closeDatabase();
 		Bukkit.getConsoleSender().sendMessage("§a[vipSystem] §e会员系统卸载完毕");
 	}
 	
@@ -321,8 +322,8 @@ public class VipSystem extends JavaPlugin
 				{
 					Player p = (Player)sender;
 					try {
-						if(configLoader.loadPlayerConfig(p.getUniqueId())==null)
-						{
+						VipPlayer vipPlayer = configLoader.loadPlayerConfig(p.getUniqueId());
+						if(vipPlayer==null || vipPlayer.isDeadline()) {
 							sender.sendMessage("§6[会员系统] §c你还不是会员");
 							return true;
 						}

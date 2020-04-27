@@ -617,6 +617,10 @@ public class ConfigManager {
         loadItemConfig();
     }
 
+    public void closeDatabase() {
+        database.close();
+    }
+
     public FileConfiguration load(File file)
     {
         if (!(file.exists()))

@@ -27,15 +27,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../PeterUtil.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$MODULE_DIR$/../PlaceholderAPI-2.10.4.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -46,6 +37,15 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/../Vault.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../Project0/server/plugins/PeterUtil.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

@@ -1,14 +1,17 @@
 package vipSystem;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.EnchantmentWrapper;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitTask;
 import vipSystem.mysql.Database;
 import vipSystem.util.Util;
 
@@ -30,6 +33,8 @@ public class ConfigLoader {
 
     private VipSystem plugin;
     private DatabaseType databaseType = DatabaseType.YML;
+    private BukkitTask closeConnectionTask;
+    private String prefix = "[" + ChatColor.YELLOW + "VipSystem" + ChatColor.RESET + "] " + " - ";
 
     public ConfigLoader(VipSystem plugin)
     {
@@ -37,25 +42,31 @@ public class ConfigLoader {
     }
 
     public VipPlayer loadPlayerConfig(UUID uniqueId) throws SQLException {
+        Bukkit.getConsoleSender().sendMessage("" + plugin.players.containsKey(uniqueId));
         if(plugin.players.containsKey(uniqueId)){
 
             return plugin.players.get(uniqueId);
         }
 
+        VipPlayer vipPlayer;
+        Player player = Bukkit.getPlayer(uniqueId);
+        String playerName = player.getName();
+        String registerDate = "1900-01-01 00:00:00";
+        String deadlineDate = "1900-01-01 00:00:00";
+        String vipGroup = "";
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         if(databaseType.equals(DatabaseType.YML)){
             File file = new File(plugin.getDataFolder(),"/Data/" + uniqueId.toString() + ".yml");
             FileConfiguration config;
-            if (file.exists())
-            {
+            if (file.exists()) {
                 config = Util.load(file);
 
-                String playerName = config.getString("PlayerName");
-                String regDate = config.getString( "RegisterDate");
-                String deadline = config.getString("DeadlineDate");
-                String vipGroup = config.getString("VIPGroup");
-
-                return new VipPlayer(uniqueId, playerName, LocalDateTime.parse(regDate), LocalDateTime.parse(deadline), vipGroup);
+                playerName = config.getString("PlayerName");
+                registerDate = config.getString( "RegisterDate");
+                deadlineDate = config.getString("DeadlineDate");
+                vipGroup = config.getString("VIPGroup");
             }
+            vipPlayer = new VipPlayer(uniqueId, playerName, LocalDateTime.parse(registerDate), LocalDateTime.parse(deadlineDate), vipGroup);
         } else {
             Database MySQL = Database.getInstance();
             String selectQuery = "SELECT id, player_name, DATE_FORMAT(register_date, '%Y-%m-%d %H:%i:%s') as register_date, " +
@@ -63,18 +74,18 @@ public class ConfigLoader {
             PreparedStatement stmt = MySQL.getConnection().prepareStatement(selectQuery);
             stmt.setString(1, uniqueId.toString());
             ResultSet resultSet = stmt.executeQuery();
+            Bukkit.getConsoleSender().sendMessage("AAAAA");
             if(resultSet.next()){
-                String playerName = resultSet.getString(2);
-                String registerDate = resultSet.getString(3);
-                String deadlineDate = resultSet.getString(4);
-                String vipGroup = resultSet.getString(5);
-                DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                VipPlayer vipPlayer = new VipPlayer(uniqueId, playerName, LocalDateTime.parse(registerDate, format), LocalDateTime.parse(deadlineDate, format), vipGroup);
-                plugin.players.put(uniqueId, vipPlayer);
-                return vipPlayer;
+                playerName = resultSet.getString(2);
+                registerDate = resultSet.getString(3);
+                deadlineDate = resultSet.getString(4);
+                vipGroup = resultSet.getString(5);
             }
+            vipPlayer = new VipPlayer(uniqueId, playerName, LocalDateTime.parse(registerDate, format), LocalDateTime.parse(deadlineDate, format), vipGroup);
         }
-        return null;
+        plugin.players.put(uniqueId, vipPlayer);
+        closeConnection();
+        return vipPlayer;
     }
 
     public void savePlayerConfig(VipPlayer vipPlayer) throws SQLException {
@@ -132,6 +143,40 @@ public class ConfigLoader {
                 stmt.setBoolean(6, false);
                 stmt.execute();
             }
+            closeConnection();
+        }
+    }
+
+    private void closeConnection() {
+        Bukkit.getConsoleSender().sendMessage("BBBBB");
+        if(plugin.isEnabled() && databaseType.equals(DatabaseType.MYSQL)) {
+            if(closeConnectionTask!=null)
+                closeConnectionTask.cancel();
+            closeConnectionTask = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                try {
+                    Bukkit.getConsoleSender().sendMessage("CCCCC");
+                    Database MySQL = Database.getInstance();
+                    MySQL.getConnection().close();
+                    Bukkit.getConsoleSender().sendMessage(prefix + plugin.getName() + "Database connection closed!");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }, 20*15);
+        }
+    }
+
+    public void closeDatabase() {
+        if(!databaseType.equals(DatabaseType.MYSQL))
+            return;
+        if(closeConnectionTask!=null)
+            closeConnectionTask.cancel();
+
+        try {
+            Database MySQL = Database.getInstance();
+            MySQL.getConnection().close();
+            Bukkit.getConsoleSender().sendMessage(prefix + plugin.getName() + "Database connection closed!");
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -146,6 +191,7 @@ public class ConfigLoader {
             PreparedStatement stmt = MySQL.getConnection().prepareStatement(deleteQuery);
             stmt.setString(1, uniqueId.toString());
             stmt.executeUpdate();
+            closeConnection();
         }
     }
 

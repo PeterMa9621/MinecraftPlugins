@@ -67,6 +67,7 @@ public class PVPSwitch extends JavaPlugin
 				e.printStackTrace();
 			}
 		}
+		database.close();
 	}
 	
 	public void loadConfig() {

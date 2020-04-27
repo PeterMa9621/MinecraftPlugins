@@ -104,8 +104,6 @@ public class DailyQuest extends JavaPlugin
 		Bukkit.getConsoleSender().sendMessage("§a[DailyQuest] §e日常任务系统加载完毕");
 	}
 
-
-
 	public void onDisable() 
 	{
 		for(QuestPlayer questPlayer:questPlayerManager.getQuestPlayers().values()) {
@@ -117,6 +115,7 @@ public class DailyQuest extends JavaPlugin
 		}
 
 		configManager.saveConfig();
+		configManager.closeDatabase();
 		Bukkit.getConsoleSender().sendMessage("§a[DailyQuest] §e日常任务系统卸载完毕");
 	}
 	
