@@ -6,6 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Util {
     public static ItemStack setItem(ItemStack item, String name, ArrayList<String> lore, String itemID)
@@ -29,20 +30,17 @@ public class Util {
         return item;
     }
 
-    public static ItemStack createItem(String ID, int quantity, int customModelId, String displayName, String lore)
+    public static ItemStack createItem(String ID, int quantity, int customModelId, String displayName, List<String> lore, boolean hideEnchant, boolean hideAttribute)
     {
         ItemStack item = new ItemStack(Material.getMaterial(ID.toUpperCase()), quantity);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(displayName);
         meta.setCustomModelData(customModelId);
-        ArrayList<String> loreList = new ArrayList<String>();
-        for(String l:lore.split("%"))
-        {
-            loreList.add(l);
-        }
-        meta.setLore(loreList);
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        meta.setLore(lore);
+        if(hideAttribute)
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        if(hideEnchant)
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         item.setItemMeta(meta);
 
         return item;

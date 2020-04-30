@@ -8,6 +8,8 @@ import clockGUI.model.Money;
 import clockGUI.model.PlayerData;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -28,15 +30,14 @@ public class ConfigManager {
 
     public ItemStack clock = new ItemStack(Material.CLOCK);
 
-    public HashMap<Integer, String> guiNameList = new HashMap<Integer, String>();
+    public HashMap<String, String> guiNameList = new HashMap<>();
 
-    public HashMap<Integer, HashMap<Integer, ClockGuiItem>> list = new HashMap<Integer, HashMap<Integer, ClockGuiItem>>();
-
+    public HashMap<String, HashMap<Integer, ClockGuiItem>> list = new HashMap<>();
 
     public List<String> enableWorlds;
 
     public boolean autoGetClock = false;
-    public int dungeonOpenGui = -1;
+    public String mainGuiId;
 
     public ConfigManager(ClockGUI plugin) {
         this.plugin = plugin;
@@ -62,7 +63,7 @@ public class ConfigManager {
                 for(String position:config.getConfigurationSection(playerName+"."+guiNumber).getKeys(false))
                 {
                     int usedNumber = config.getInt(playerName+"."+guiNumber+"."+position);
-                    playerData.setNumber(Integer.parseInt(guiNumber), Integer.parseInt(position), usedNumber);
+                    playerData.setNumber(guiNumber, Integer.parseInt(position), usedNumber);
                 }
             }
             dataManager.getPlayerData().put(playerName, playerData);
@@ -78,7 +79,7 @@ public class ConfigManager {
         HashMap<String, PlayerData> playerData = dataManager.getPlayerData();
         for(String playerName:playerData.keySet())
         {
-            for(int guiNumber:playerData.get(playerName).getGuiInfo().keySet())
+            for(String guiNumber:playerData.get(playerName).getGuiInfo().keySet())
             {
                 for(int position:playerData.get(playerName).getGuiInfo().get(guiNumber).keySet())
                 {
@@ -104,12 +105,12 @@ public class ConfigManager {
 
             // Clock Settings
             config.set("Clock.AutoGetClock", true);
+            config.set("Clock.MainGuiId", 0);
             config.set("Clock.Name", "§a钟表菜单");
             config.set("Clock.Lore", "§1我的世界钟表菜单%§2右键我打开菜单");
             config.set("Clock.World", new ArrayList<String>() {{
                 add("world");
             }}.toArray());
-            config.set("Clock.DungeonOpen", 4);
 
             config.set("GUI.0.Name", "§1我的世界钟表菜单");
             config.set("GUI.0.Item.1.Position", 1);
@@ -117,46 +118,71 @@ public class ConfigManager {
             config.set("GUI.0.Item.1.Model", 0);
             config.set("GUI.0.Item.1.Name", "示例1");
             config.set("GUI.0.Item.1.HideItem", false);
-            config.set("GUI.0.Item.1.Lore", "这是第一行%这是第二行%这是第三行");
+            config.set("GUI.0.Item.1.Lore", new ArrayList<String>() {{
+                add("第一行");
+                add("第二行");
+            }});
             config.set("GUI.0.Item.1.Enchantment.ID", "fortune");
             config.set("GUI.0.Item.1.Enchantment.Level", 1);
-            //config.set("GUI.0.Item.1.HideEnchant", true);
+            config.set("GUI.0.Item.1.HideEnchant", true);
+            config.set("GUI.0.Item.1.HideAttribute", true);
             config.set("GUI.0.Item.1.Cost.Type", "Money");
             config.set("GUI.0.Item.1.Cost.Price", 1000);
-            config.set("GUI.0.Item.1.BanInDungeon", true);
-            config.set("GUI.0.Item.1.Message", "§a你已按下这个按钮%§c测试");
+            config.set("GUI.0.Item.1.Message", new ArrayList<String>() {{
+                add("&a你已按下这个按钮");
+                add("&c测试");
+            }});
             config.set("GUI.0.Item.1.Frequency", 1);
             config.set("GUI.0.Item.1.Function.OpenAnotherGUI.Use", true);
-            config.set("GUI.0.Item.1.Function.OpenAnotherGUI.Number", 1);
+            config.set("GUI.0.Item.1.Function.OpenAnotherGUI.Id", 1);
             config.set("GUI.0.Item.1.Function.Command.Use", false);
-            config.set("GUI.0.Item.1.Function.Command.Content", "/say 钟表菜单");
+            config.set("GUI.0.Item.1.Function.Command.Content", new ArrayList<String>() {{
+                add("say 钟表菜单");
+            }});
             config.set("GUI.0.Item.2.Position", 10);
             config.set("GUI.0.Item.2.ItemID", "CLOCK");
             config.set("GUI.0.Item.2.Name", "示例2");
-            config.set("GUI.0.Item.2.Lore", "这是第一行%这是第二行%这是第三行");
+            config.set("GUI.0.Item.2.Lore", new ArrayList<String>() {{
+                add("第一行");
+                add("第二行");
+            }});
             config.set("GUI.0.Item.2.Cost.Type", "PlayerPoints");
             config.set("GUI.0.Item.2.Cost.Price", 500);
             config.set("GUI.0.Item.2.Function.Command.Use", true);
             config.set("GUI.0.Item.2.Function.Command.CloseGui", true);
-            config.set("GUI.0.Item.2.Function.Command.Content", "/say 钟表菜单%/eco set {player} 10000{ignoreOP}");
+            config.set("GUI.0.Item.2.Function.Command.Content", new ArrayList<String>() {{
+                add("say 钟表菜单");
+                add("eco set {player} 10000");
+            }});
+            config.set("GUI.0.Item.2.Function.Command.RunAsOp", true);
             config.set("GUI.0.Item.2.Function.OpenAnotherGUI.Use", false);
-            config.set("GUI.0.Item.2.Function.OpenAnotherGUI.Number", 2);
-            config.set("GUI.0.Item.2.Function.OpenAnotherGUI.Number", 2);
+            config.set("GUI.0.Item.2.Function.OpenAnotherGUI.Id", 2);
 
             // GUI Settings
             config.set("GUI.1.Name", "第一个GUI");
             config.set("GUI.1.Item.1.Position", 3);
             config.set("GUI.1.Item.1.ItemID", "diamond");
             config.set("GUI.1.Item.1.Name", "示例3");
-            config.set("GUI.1.Item.1.Lore", "这是第一行%这是第二行%这是第三行");
+            config.set("GUI.1.Item.1.Lore", new ArrayList<String>() {{
+                add("第一行");
+                add("第二行");
+            }});
             config.set("GUI.1.Item.1.Function.Command.Use", true);
-            config.set("GUI.1.Item.1.Function.Command.Content", "/say 另一个GUI");
+            config.set("GUI.1.Item.1.Function.Command.Content", new ArrayList<String>() {{
+                add("say 钟表菜单2");
+                add("eco set {player} 10000");
+            }});
             config.set("GUI.1.Item.2.Position", 16);
             config.set("GUI.1.Item.2.ItemID", "iron_pickaxe");
             config.set("GUI.1.Item.2.Name", "示例4");
-            config.set("GUI.1.Item.2.Lore", "这是第一行%这是第二行%这是第三行");
+            config.set("GUI.1.Item.2.Lore", new ArrayList<String>() {{
+                add("第一行");
+                add("第二行");
+            }});
             config.set("GUI.1.Item.2.Function.Command.Use", true);
-            config.set("GUI.1.Item.2.Function.Command.Content", "/say 钟表菜单");
+            config.set("GUI.1.Item.2.Function.Command.Content", new ArrayList<String>() {{
+                add("say 钟表菜单");
+            }});
 
 
             try
@@ -175,7 +201,7 @@ public class ConfigManager {
         config = load(file);
 
         autoGetClock = config.getBoolean("Clock.AutoGetClock");
-
+        mainGuiId = config.getString("Clock.MainGuiId");
         String clockName = config.getString("Clock.Name");
         ArrayList<String> clockLore = new ArrayList<String>();
         for(String i:config.getString("Clock.Lore").split("%"))
@@ -183,43 +209,50 @@ public class ConfigManager {
             clockLore.add(i);
         }
         Util.setItem(clock, clockName, clockLore, "CLOCK");
-        dungeonOpenGui = config.getInt("Clock.DungeonOpen", -1);
+
         enableWorlds = config.getStringList("Clock.World");
 
-        for(int i=0; config.contains("GUI."+i); i++)
-        {
-            String GUIName = config.getString("GUI."+i+".Name");
+        ConfigurationSection section = config.getConfigurationSection("GUI");
+        if(section==null)
+            return;
+        for(String guiKey:section.getKeys(false)) {
+            ConfigurationSection guiSection = section.getConfigurationSection(guiKey);
+            String guiName = guiSection.getString("Name");
+            if(guiName==null)
+                continue;
+            HashMap<Integer, ClockGuiItem> guiList = new HashMap<>();
+            ConfigurationSection itemSection = guiSection.getConfigurationSection("Item");
+            if(itemSection==null)
+                continue;
+            for(String itemKey:itemSection.getKeys(false)) {
+                ConfigurationSection eachItemSection = itemSection.getConfigurationSection(itemKey);
+                String itemID = eachItemSection.getString("ItemID");
+                int customModelId = eachItemSection.getInt("Model", 0);
+                String itemName = eachItemSection.getString("Name");
+                List<String> itemLore = eachItemSection.getStringList("Lore");
+                if(itemID==null)
+                    continue;
+                String enchantID = eachItemSection.getString("Enchantment.ID");
+                int enchantLevel = eachItemSection.getInt("Enchantment.Level");
+                boolean hideEnchant = eachItemSection.getBoolean("HideEnchant", true);
+                boolean hideAttribute = eachItemSection.getBoolean("HideAttribute", true);
+                int position = eachItemSection.getInt("Position", 0);
 
-            HashMap<Integer, ClockGuiItem> guiList = new HashMap<Integer, ClockGuiItem>();
+                boolean hideItem = eachItemSection.getBoolean("HideItem", false);
 
-            for(int x=0; config.contains("GUI."+i+".Item."+(x+1)); x++)
-            {
-                String enchantID = config.getString("GUI."+i+".Item."+(x+1)+".Enchantment.ID");
-                int enchantLevel = config.getInt("GUI."+i+".Item."+(x+1)+".Enchantment.Level");
-                boolean hide = config.getBoolean("GUI."+i+".Item."+(x+1)+".HideEnchant");
+                boolean openGUI = eachItemSection.getBoolean("Function.OpenAnotherGUI.Use", false);
+                String guiId = eachItemSection.getString("Function.OpenAnotherGUI.Id", "0");
+                boolean command = eachItemSection.getBoolean("Function.Command.Use", false);
+                boolean shouldCloseGui = eachItemSection.getBoolean("Function.Command.CloseGui", false);
+                List<String> commandList = eachItemSection.getStringList("Function.Command.Content");
+                String costType = eachItemSection.getString("Cost.Type");
+                int price = eachItemSection.getInt("Cost.Price");
+                String message = eachItemSection.getString("Message");
+                int frequency = eachItemSection.getInt("Frequency");
 
-                int position = config.getInt("GUI."+i+".Item."+(x+1)+".Position");
-                String itemID = config.getString("GUI."+i+".Item."+(x+1)+".ItemID");
-                int customModelId = config.getInt("GUI."+i+".Item."+(x+1)+".Model", 0);
-                boolean hideItem = config.getBoolean("GUI."+i+".Item."+(x+1)+".HideItem", false);
-                String itemName = config.getString("GUI."+i+".Item."+(x+1)+".Name");
-                String itemLore = config.getString("GUI."+i+".Item."+(x+1)+".Lore", "");
-                boolean openGUI = config.getBoolean("GUI."+i+".Item."+(x+1)+".Function.OpenAnotherGUI.Use");
-                int guiNumber = config.getInt("GUI."+i+".Item."+(x+1)+".Function.OpenAnotherGUI.Number");
-                boolean command = config.getBoolean("GUI."+i+".Item."+(x+1)+".Function.Command.Use");
-                boolean shouldCloseGui = config.getBoolean("GUI."+i+".Item."+(x+1)+".Function.Command.CloseGui", false);
-                String commandContent = config.getString("GUI."+i+".Item."+(x+1)+".Function.Command.Content");
-                String costType = config.getString("GUI."+i+".Item."+(x+1)+".Cost.Type");
-                int price = config.getInt("GUI."+i+".Item."+(x+1)+".Cost.Price");
-                String message = config.getString("GUI."+i+".Item."+(x+1)+".Message");
-                int frequency = config.getInt("GUI."+i+".Item."+(x+1)+".Frequency");
-                boolean banInDungeon = config.getBoolean("GUI."+i+".Item."+(x+1)+".BanInDungeon", false);
+                ItemStack item;
 
-                ArrayList<String> commandList = new ArrayList<String>();
-                ItemStack item = null;
-
-                item = Util.createItem(itemID, 1, customModelId, itemName, itemLore);
-
+                item = Util.createItem(itemID, 1, customModelId, itemName, itemLore, hideEnchant, hideAttribute);
 
                 if(enchantID!=null && enchantLevel>0)
                     item.addUnsafeEnchantment(Enchantment.getByKey(NamespacedKey.minecraft(enchantID)), enchantLevel);
@@ -236,27 +269,20 @@ public class ConfigManager {
 
 
                 Function function = null;
-                if(commandContent==null)
-                    commandContent="say 空命令";
-                for(String everyCommand:commandContent.split("%"))
-                {
-                    commandList.add(everyCommand);
-                }
 
-                if(command==true && openGUI==false)
+                if(command && !openGUI)
                 {
                     function = new Function("command", commandList, shouldCloseGui);
                 }
-                else if(command==false && openGUI==true)
+                else if(!command && openGUI)
                 {
-                    function = new Function("gui", guiNumber);
+                    function = new Function("gui", guiId);
                 }
-                else if(command==true && openGUI==true)
+                else if(command)
                 {
-                    function = new Function("guiAndCommand", guiNumber, commandList);
+                    function = new Function("guiAndCommand", guiId, commandList);
                 }
-                else if(command==false && openGUI==false)
-                {
+                else {
                     function = new Function("none", null, shouldCloseGui);
                 }
 
@@ -265,27 +291,27 @@ public class ConfigManager {
                 guiList.put(position, guiItem);
 
             }
-            guiNameList.put(i, GUIName);
-            list.put(i, guiList);
+            guiNameList.put(guiKey, guiName);
+            list.put(guiKey, guiList);
         }
 
         loadPlayerConfig();
     }
 
-    public void deletePlayerData(int guiNumber, int position) {
+    public void deletePlayerData(String guiId, int position) {
         File file=new File(dataFolder,"/Data/player.yml");
         FileConfiguration config;
         config = load(file);
 
         for(String playerName:config.getKeys(false))
         {
-            config.set(playerName+"."+guiNumber+"."+position, null);
+            config.set(playerName+"."+guiId+"."+position, null);
         }
 
         HashMap<String, PlayerData> playerData = dataManager.getPlayerData();
         for(String playerName:playerData.keySet())
         {
-            playerData.get(playerName).setNumber(guiNumber, position, 0);
+            playerData.get(playerName).setNumber(guiId, position, 0);
         }
 
         try {

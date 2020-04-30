@@ -10,7 +10,7 @@ import java.util.HashMap;
 
 public class InventoryUtil {
     public static Inventory initInventory(Player player, String inventoryName,
-                                   HashMap<Integer, ClockGuiItem> guiItems, int guiNumber, HashMap<String, PlayerData> playerData)
+                                   HashMap<Integer, ClockGuiItem> guiItems, String guiId, HashMap<String, PlayerData> playerData)
     {
         int largest = 0;
         int time = 1;
@@ -41,11 +41,11 @@ public class InventoryUtil {
             {
                 if(playerData.containsKey(player.getName()))
                 {
-                    if(playerData.get(player.getName()).getGuiInfo().containsKey(guiNumber))
+                    if(playerData.get(player.getName()).getGuiInfo().containsKey(guiId))
                     {
-                        if(playerData.get(player.getName()).getButtonInfo(guiNumber).containsKey(i))
+                        if(playerData.get(player.getName()).getButtonInfo(guiId).containsKey(i))
                         {
-                            int playerUsedNumber = playerData.get(player.getName()).getNumber(guiNumber, i);
+                            int playerUsedNumber = playerData.get(player.getName()).getNumber(guiId, i);
 
                             int frequency = guiItems.get(i).getFrequency();
                             if(playerUsedNumber<frequency)

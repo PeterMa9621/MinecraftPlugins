@@ -1,0 +1,17 @@
+name: FestivalReward
+main: com.peter.FestivalReward
+version: "1.0"
+api-version: "1.15"
+author: Jingyuan Ma
+commands:
+  reward:
+    description: used to control FestivalReward
+    usage: /reward
+    permission-message: §c无权执行！
+permissions:
+  FestivalReward.op:
+    default: op
+  FestivalReward.player:
+    default: true
+depend:
+  - PeterUtil

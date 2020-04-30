@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="PixelPayGUI:jar">
+    <output-path>$PROJECT_DIR$/../../Project0/server/plugins</output-path>
+    <root id="archive" name="PixelPayGUI.jar">
+      <element id="module-output" name="FestivalReward" />
+    </root>
+  </artifact>
+</component>

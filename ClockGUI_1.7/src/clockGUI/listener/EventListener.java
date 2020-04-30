@@ -101,17 +101,17 @@ public class EventListener implements Listener
 			// To get the index of "plugin.list" depends on the index of the inventory's title in
 			// "plugin.guiNameList".
 			// ==================================================================================
-			int index = 0;
-			for(int i:configManager.guiNameList.keySet())
+			String key = null;
+			for(String guiId:configManager.guiNameList.keySet())
 			{
-				if(configManager.guiNameList.get(i).equalsIgnoreCase(event.getView().getTitle()))
+				if(configManager.guiNameList.get(guiId).equalsIgnoreCase(event.getView().getTitle()))
 				{
-					index = i;
+					key = guiId;
 					break;
 				}
 			}
 			
-			if(!configManager.list.get(index).keySet().contains(event.getRawSlot()))
+			if(key==null || !configManager.list.get(key).containsKey(event.getRawSlot()))
 			{
 				return;
 			}
@@ -123,7 +123,7 @@ public class EventListener implements Listener
 				return;
 
 
-			ClockGuiItem clockGuiItem = configManager.list.get(index).get(event.getRawSlot());
+			ClockGuiItem clockGuiItem = configManager.list.get(key).get(event.getRawSlot());
 			// ====================================
 			// Check if the player has enough money
 			// ====================================
@@ -190,11 +190,11 @@ public class EventListener implements Listener
 				else
 				{
 					playerData = new PlayerData();
-					playerData.setNumber(index, event.getRawSlot(), 0);
+					playerData.setNumber(key, event.getRawSlot(), 0);
 				}
 				
-				usedNumber = playerData.getNumber(index, event.getRawSlot());
-				playerData.setNumber(index, event.getRawSlot(), usedNumber+1);
+				usedNumber = playerData.getNumber(key, event.getRawSlot());
+				playerData.setNumber(key, event.getRawSlot(), usedNumber+1);
 				dataManager.getPlayerData().put(p.getName(), playerData);
 				if(clockGuiItem.getFrequency()<=usedNumber+1)
 				{
@@ -239,13 +239,11 @@ public class EventListener implements Listener
 				}
 			}
 
-			else if(clockGuiItem.getFunction().getType().equalsIgnoreCase("gui"))
-			{
+			else if(clockGuiItem.getFunction().getType().equalsIgnoreCase("gui")) {
+				String OpenGUIId = clockGuiItem.getFunction().getGuiId();
 
-				int OpenGUINumber = clockGuiItem.getFunction().getGuiNumber();
-
-				Inventory inv = InventoryUtil.initInventory(p, configManager.guiNameList.get(OpenGUINumber),
-						configManager.list.get(OpenGUINumber), OpenGUINumber, dataManager.getPlayerData());
+				Inventory inv = InventoryUtil.initInventory(p, configManager.guiNameList.get(OpenGUIId),
+						configManager.list.get(OpenGUIId), OpenGUIId, dataManager.getPlayerData());
 
 				p.openInventory(inv);
 			}
@@ -273,10 +271,10 @@ public class EventListener implements Listener
 					}
 				}
 				
-				int OpenGUINumber = clockGuiItem.getFunction().getGuiNumber();
+				String OpenGUIId = clockGuiItem.getFunction().getGuiId();
 
-				Inventory inv = InventoryUtil.initInventory(p, configManager.guiNameList.get(OpenGUINumber),
-						configManager.list.get(OpenGUINumber), OpenGUINumber, dataManager.getPlayerData());
+				Inventory inv = InventoryUtil.initInventory(p, configManager.guiNameList.get(OpenGUIId),
+						configManager.list.get(OpenGUIId), OpenGUIId, dataManager.getPlayerData());
 
 				p.openInventory(inv);
 			}

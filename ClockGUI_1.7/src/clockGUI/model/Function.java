@@ -1,34 +1,34 @@
 package clockGUI.model;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class Function 
 {
 	String functionType = null;
 
-	ArrayList<String> content = null;
+	List<String> content = null;
 	boolean shouldCloseGui = false;
-	
-	int guiNumber = 0;
-	public Function(String functionType, ArrayList<String> content, boolean shouldCloseGui)
+
+	String guiId = "0";
+	public Function(String functionType, List<String> content, boolean shouldCloseGui)
 	{
 		this.functionType=functionType;
 		this.shouldCloseGui = shouldCloseGui;
 		this.content=content;
 	}
 	
-	public Function(String functionType, int guiNumber)
+	public Function(String functionType, String guiId)
 	{
 		this.functionType=functionType;
 
-		this.guiNumber=guiNumber;
+		this.guiId = guiId;
 	}
 	
-	public Function(String functionType, int guiNumber, ArrayList<String> content)
+	public Function(String functionType, String guiId, List<String> content)
 	{
 		this.functionType=functionType;
 
-		this.guiNumber=guiNumber;
+		this.guiId = guiId;
 		
 		this.content=content;
 	}
@@ -39,14 +39,14 @@ public class Function
 	}
 
 	
-	public ArrayList<String> getCommand()
+	public List<String> getCommand()
 	{
 		return content;
 	}
 	
-	public int getGuiNumber()
+	public String getGuiId()
 	{
-		return guiNumber;
+		return guiId;
 	}
 
 	public boolean shouldCloseGui() {
