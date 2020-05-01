@@ -262,7 +262,6 @@ public class QuestPlayer
 		}
 
 		totalQuest = 0;
-		removeBossBar();
 	}
 
 	public void giveUpCurrentQuest() {
