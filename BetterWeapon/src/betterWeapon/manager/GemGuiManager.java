@@ -1,14 +1,18 @@
-package betterWeapon;
+package betterWeapon.manager;
 
+import betterWeapon.BetterWeapon;
+import betterWeapon.util.ItemStackUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class BetterWeaponGemGui 
+import java.util.ArrayList;
+
+public class GemGuiManager
 {
 	private BetterWeapon plugin;
-	public BetterWeaponGemGui(BetterWeapon plugin)
+	public GemGuiManager(BetterWeapon plugin)
 	{
 		this.plugin=plugin;
 	}
@@ -20,15 +24,15 @@ public class BetterWeaponGemGui
 		 *  │ 0 │ 1 │ 2 │ 3 │ 4 │ 5 │ 6 │ 7 │ 8 │
 		 *  └───┴───┴───┴───┴───┴───┴───┴───┴───┘
 		 */
-		ItemStack hole = plugin.createItem(276, 1, 0, "§5点击打开装备开孔界面");
+		ItemStack hole = ItemStackUtil.createItem("diamond_sword", "§5点击打开装备开孔界面", null, 0);
 		//--------------------------------------------
-		ItemStack attribute = plugin.createItem(145, 1, 0, "§e点击打开装备镶嵌界面");
+		ItemStack attribute = ItemStackUtil.createItem("anvil", "§e点击打开装备镶嵌界面", null, 0);
 		//--------------------------------------------
-		ItemStack gem = plugin.createItem(388, 1, 0, "§e点击打开宝石鉴定界面");
+		ItemStack gem = ItemStackUtil.createItem("emerald", "§e点击打开宝石鉴定界面", null, 0);
 		//--------------------------------------------
-		ItemStack gemSmelt = plugin.createItem(264, 1, 0, "§e点击打开宝石合成界面");
+		ItemStack gemSmelt = ItemStackUtil.createItem("diamond", "§e点击打开宝石合成界面", null, 0);
 		//--------------------------------------------
-		ItemStack back = plugin.createItem(331, 1, 0, "§e点击返回主界面");
+		ItemStack back = ItemStackUtil.createItem("paper", "§e点击返回主界面", null, 12);
 		
 		Inventory inv = Bukkit.createInventory(player, 9, "§5宝石系统");
 		inv.setItem(0, hole);
@@ -42,15 +46,17 @@ public class BetterWeaponGemGui
 	
 	public Inventory initHoleGUI(Player player)
 	{
-		ItemStack windows = plugin.createItem(160, 1, 1, " ");
+		ItemStack windows = ItemStackUtil.createItem("light_gray_stained_glass_pane", " ", null, 0);
 		//--------------------------------------------
-		ItemStack equipment = plugin.createItem(160, 1, 2, "§3上方请放入要开孔的装备");
+		ItemStack equipment = ItemStackUtil.createItem("orange_stained_glass_pane", "§3上方请放入要开孔的装备", null, 0);
 		//--------------------------------------------
-		ItemStack finish = plugin.createItem(160, 1, 5, "§3开完孔的装备会出现在这里");
+		ItemStack finish = ItemStackUtil.createItem("lime_stained_glass_pane", "§3开完孔的装备会出现在这里", null, 0);
 		//--------------------------------------------
-		ItemStack start = plugin.createItem(145, 1, 0, "§5点击开始开孔", "§e需要花费§c"+plugin.priceForHole+"§e金币");
+		ItemStack start = ItemStackUtil.createItem("anvil", "§5点击开始开孔", new ArrayList<String>() {{
+			add("§e需要花费§c"+plugin.gemManager.priceForHole+"§e金币");
+		}}, 0);
 		//--------------------------------------------
-		ItemStack back = plugin.createItem(331, 1, 0, "§e点击返回主界面");
+		ItemStack back = ItemStackUtil.createItem("paper", "§e点击返回主界面", null, 12);
 		
 		Inventory inv = Bukkit.createInventory(player, 27, "§5装备开孔");
 		for(int i=0; i<27; i++)
@@ -68,15 +74,17 @@ public class BetterWeaponGemGui
 	
 	public Inventory initInlayGUI(Player player)
 	{
-		ItemStack windows = plugin.createItem(160, 1, 2, " ");
+		ItemStack windows = ItemStackUtil.createItem("light_gray_stained_glass_pane", " ", null, 0);
 		//--------------------------------------------
-		ItemStack equipment = plugin.createItem(160, 1, 1, "§3上方请放入要镶嵌的装备");
+		ItemStack equipment = ItemStackUtil.createItem("orange_stained_glass_pane", "§3上方请放入要镶嵌的装备", null, 0);
 		//--------------------------------------------
-		ItemStack gem = plugin.createItem(160, 1, 5, "§3上方请放入宝石");
+		ItemStack gem = ItemStackUtil.createItem("lime_stained_glass_pane", "§3上方请放入宝石", null, 0);
 		//--------------------------------------------
-		ItemStack start = plugin.createItem(145, 1, 0, "§5点击开始镶嵌", "§e需要花费§c"+plugin.priceForInlay+"§e金币");
+		ItemStack start = ItemStackUtil.createItem("anvil", "§5点击开始镶嵌", new ArrayList<String>() {{
+			add("§e需要花费§c"+plugin.gemManager.priceForInlay+"§e金币");
+		}}, 0);
 		//--------------------------------------------
-		ItemStack back = plugin.createItem(331, 1, 0, "§e点击返回主界面");
+		ItemStack back = ItemStackUtil.createItem("paper", "§e点击返回主界面", null, 12);
 		
 		Inventory inv = Bukkit.createInventory(player, 45, "§5装备镶嵌");
 		for(int i=0; i<45; i++)
@@ -96,15 +104,17 @@ public class BetterWeaponGemGui
 	
 	public Inventory initEvaluateGUI(Player player)
 	{
-		ItemStack windows = plugin.createItem(160, 1, 0, " ");
+		ItemStack windows = ItemStackUtil.createItem("light_gray_stained_glass_pane", " ", null, 0);
 		//--------------------------------------------
-		ItemStack gemOriginal = plugin.createItem(160, 1, 1, "§3此处请放入要鉴定的宝石");
+		ItemStack gemOriginal = ItemStackUtil.createItem("orange_stained_glass_pane", "§3此处请放入要鉴定的宝石", null, 0);
 		//--------------------------------------------
-		ItemStack gemFinish = plugin.createItem(160, 1, 5, "§3此处为鉴定完的宝石");
+		ItemStack gemFinish = ItemStackUtil.createItem("lime_stained_glass_pane", "§3此处为鉴定完的宝石", null, 0);
 		//--------------------------------------------
-		ItemStack start = plugin.createItem(145, 1, 0, "§5点击开始鉴定", "§e需要花费§c"+plugin.priceForEvaluate+"§e金币");
+		ItemStack start = ItemStackUtil.createItem("anvil", "§5点击开始鉴定", new ArrayList<String>() {{
+			add("§e需要花费§c"+plugin.gemManager.priceForEvaluate+"§e金币");
+		}}, 0);
 		//--------------------------------------------
-		ItemStack back = plugin.createItem(331, 1, 0, "§e点击返回主界面");
+		ItemStack back = ItemStackUtil.createItem("paper", "§e点击返回主界面", null, 12);
 		
 		Inventory inv = Bukkit.createInventory(player, 27, "§5宝石鉴定");
 		for(int i=0; i<27; i++)
@@ -133,15 +143,17 @@ public class BetterWeaponGemGui
 	
 	public Inventory initSynthesisGUI(Player player)
 	{
-		ItemStack windows = plugin.createItem(160, 1, 15, " ");
+		ItemStack windows = ItemStackUtil.createItem("light_gray_stained_glass_pane", " ", null, 0);
 		//--------------------------------------------
-		ItemStack gem1 = plugin.createItem(160, 1, 1, "§3此处请放入宝石");
+		ItemStack gem1 = ItemStackUtil.createItem("orange_stained_glass_pane", "§3此处请放入宝石", null, 0);
 		//--------------------------------------------
-		ItemStack gem2 = plugin.createItem(160, 1, 1, "§3此处请放入相同的宝石");
+		ItemStack gem2 = ItemStackUtil.createItem("orange_stained_glass_pane", "§3此处请放入相同的宝石", null, 0);
 		//--------------------------------------------
-		ItemStack start = plugin.createItem(145, 1, 0, "§5点击开始合成", "§e需要花费§c"+plugin.priceForSynthesis+"§e金币");
+		ItemStack start = ItemStackUtil.createItem("anvil", "§5点击开始合成", new ArrayList<String>() {{
+			add("§e需要花费§c"+plugin.gemManager.priceForSynthesis+"§e金币");
+		}}, 0);
 		//--------------------------------------------
-		ItemStack back = plugin.createItem(331, 1, 0, "§e点击返回主界面");
+		ItemStack back = ItemStackUtil.createItem("paper", "§e点击返回主界面", null, 12);
 		
 		Inventory inv = Bukkit.createInventory(player, 45, "§5宝石合成");
 		for(int i=0; i<45; i++)

@@ -1,6 +1,10 @@
-package betterWeapon;
+package betterWeapon.listener;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import betterWeapon.BetterWeapon;
+import betterWeapon.manager.GemGuiManager;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,18 +24,18 @@ public class BetterWeaponGemListener implements Listener
 	int[] slotInlay = {0,1,2,3,4,5,6,7,8,9,11,12,13,14,15,17,18,19,20,21,22,23,24,25,26,27,28
 			,29,30,32,33,34,35,36,37,38,39,41,42,43,44};
 	
-	BetterWeaponGemGui gemGui;
+	GemGuiManager gemGui;
 	
 	public BetterWeaponGemListener(BetterWeapon plugin)
 	{
 		this.plugin = plugin;
-		gemGui = new BetterWeaponGemGui(plugin);
+		gemGui = new GemGuiManager(plugin);
 	}
 	
 	@EventHandler
 	public void onPlayerClickGUI(InventoryClickEvent event)
 	{
-		if(event.getInventory().getTitle().equalsIgnoreCase("§5宝石系统"))
+		if(event.getView().getTitle().equalsIgnoreCase("§5宝石系统"))
 		{
 			event.setCancelled(true);
 			if(event.getRawSlot()==0)
@@ -60,12 +64,12 @@ public class BetterWeaponGemListener implements Listener
 			
 			if(event.getRawSlot()==8)
 			{
-				event.getWhoClicked().openInventory(plugin.initMainGUI((Player)event.getWhoClicked()));
+				event.getWhoClicked().openInventory(plugin.guiManager.initMainGUI((Player)event.getWhoClicked()));
 				return;
 			}
 		}
 		
-		if(event.getInventory().getTitle().equalsIgnoreCase("§5装备开孔"))
+		if(event.getView().getTitle().equalsIgnoreCase("§5装备开孔"))
 		{
 			if(plugin.isExist(event.getRawSlot(), slotHole))
 			{
@@ -74,7 +78,7 @@ public class BetterWeaponGemListener implements Listener
 			
 			if(event.getRawSlot()==26)
 			{
-				event.getWhoClicked().openInventory(plugin.initMainGUI((Player)event.getWhoClicked()));
+				event.getWhoClicked().openInventory(plugin.gemGui.initMainGUI((Player)event.getWhoClicked()));
 				return;
 			}
 
@@ -90,7 +94,7 @@ public class BetterWeaponGemListener implements Listener
 				}
 
 				if(event.getInventory().getItem(10)!=null && 
-						plugin.gem.get("Equipment").contains(event.getInventory().getItem(10).getTypeId()))
+						plugin.gemManager.equipment.contains(event.getInventory().getItem(10).getType().toString()))
 				{
 					if(event.getInventory().getItem(10).hasItemMeta() && 
 							event.getInventory().getItem(10).getItemMeta().hasLore())
@@ -101,13 +105,13 @@ public class BetterWeaponGemListener implements Listener
 							return;
 						}
 					}
-					
-					if(plugin.economy.getBalance(p.getName())>=plugin.priceForHole)
+
+					int priceForHole = plugin.gemManager.priceForHole;
+					if(plugin.economy.getBalance(p.getName())>=priceForHole)
 					{
-						plugin.economy.withdrawPlayer(p.getName(), plugin.priceForHole);
-						p.sendMessage("§a[宝石系统]§e 扣除§c"+String.valueOf(plugin.priceForHole)+"§e金币");
+						plugin.economy.withdrawPlayer(p.getName(), priceForHole);
+						p.sendMessage("§a[宝石系统]§e 扣除§c"+String.valueOf(priceForHole)+"§e金币");
 						hole(event);
-						return;
 					}
 					else
 					{
@@ -131,11 +135,11 @@ public class BetterWeaponGemListener implements Listener
 		//---------------------------------------------
 		ItemStack equip = event.getInventory().getItem(10);
 		
-		int quantity = plugin.random(plugin.gem.get("HolePossibility").size());
+		int quantity = plugin.random(plugin.gemManager.holePossibility.size());
 
 		for(int i=quantity; i>=0; i--)
 		{
-			if(plugin.random(100)<plugin.gem.get("HolePossibility").get(i))
+			if(plugin.random(100)<plugin.gemManager.holePossibility.get(i))
 			{
 				_hole(event, equip, i);
 				p.sendMessage("§a[宝石系统]§c 恭喜，开孔成功！");
@@ -155,15 +159,7 @@ public class BetterWeaponGemListener implements Listener
 	private void _hole(InventoryClickEvent event, ItemStack equip, int quantity) 
 	{
 		ItemMeta meta = equip.getItemMeta();
-		ArrayList<String> loreList = new ArrayList<String>();
-
-		if(meta.getLore()!=null)
-		{
-			for(String lo:meta.getLore())
-			{
-				loreList.add(lo);
-			}
-		}
+		List<String> loreList = meta.getLore();
 		
 		if(!loreList.isEmpty())
 		{
@@ -215,7 +211,7 @@ public class BetterWeaponGemListener implements Listener
 	public void onPlayerCloseGUI(InventoryCloseEvent event)
 	{
 		
-		if(event.getInventory().getTitle().equalsIgnoreCase("§5装备开孔"))
+		if(event.getView().getTitle().equalsIgnoreCase("§5装备开孔"))
 		{
 			if(event.getInventory().getItem(10)!=null)
 			{
@@ -228,7 +224,7 @@ public class BetterWeaponGemListener implements Listener
 			return;
 		}
 		
-		if(event.getInventory().getTitle().equalsIgnoreCase("§5装备镶嵌"))
+		if(event.getView().getTitle().equalsIgnoreCase("§5装备镶嵌"))
 		{
 			if(event.getInventory().getItem(10)!=null)
 			{
@@ -245,7 +241,7 @@ public class BetterWeaponGemListener implements Listener
 			return;
 		}
 		
-		if(event.getInventory().getTitle().equalsIgnoreCase("§5宝石鉴定"))
+		if(event.getView().getTitle().equalsIgnoreCase("§5宝石鉴定"))
 		{
 			if(event.getInventory().getItem(10)!=null)
 			{
@@ -258,7 +254,7 @@ public class BetterWeaponGemListener implements Listener
 			return;
 		}
 		
-		if(event.getInventory().getTitle().equalsIgnoreCase("§5宝石合成"))
+		if(event.getView().getTitle().equalsIgnoreCase("§5宝石合成"))
 		{
 			if(event.getInventory().getItem(19)!=null)
 			{
@@ -272,7 +268,6 @@ public class BetterWeaponGemListener implements Listener
 			{
 				event.getPlayer().getInventory().addItem(event.getInventory().getItem(40));
 			}
-			return;
 		}
 	}
 	

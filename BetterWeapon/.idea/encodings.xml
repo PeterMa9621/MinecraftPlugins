@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/src/betterWeapon/BetterWeapon.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/betterWeapon/BetterWeaponGemGui.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/betterWeapon/Gem/EquipmentInlayListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/betterWeapon/Gem/GemEvaluateListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/betterWeapon/Gem/GemSynthesisListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/betterWeapon/listener/BetterWeaponEntityListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/betterWeapon/listener/BetterWeaponGemListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/betterWeapon/listener/BetterWeaponListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/betterWeapon/manager/ConfigManager.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/betterWeapon/manager/GemGuiManager.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/betterWeapon/manager/GuiManager.java" charset="GBK" />
+  </component>
+</project>

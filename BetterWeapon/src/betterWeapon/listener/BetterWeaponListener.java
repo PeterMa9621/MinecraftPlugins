@@ -1,7 +1,17 @@
-package betterWeapon;
+package betterWeapon.listener;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+
+import betterWeapon.BetterWeapon;
+import betterWeapon.manager.GemGuiManager;
+import betterWeapon.util.SmeltType;
+import com.mysql.fabric.xmlrpc.base.Array;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -23,12 +33,12 @@ public class BetterWeaponListener implements Listener
 	int[] slot2 = {0,1,2,3,4,5,6,7,8,9,11,12,13,14,15,17,18,19,20,21,22,23,24,25,26,27,28
 			,29,30,32,33,34,35,36,37,38,39,41,42,43,44};
 	
-	BetterWeaponGemGui gemGui;
+	GemGuiManager gemGui;
 	
 	public BetterWeaponListener(BetterWeapon plugin)
 	{
 		this.plugin=plugin;
-		gemGui= new BetterWeaponGemGui(plugin);
+		gemGui= new GemGuiManager(plugin);
 	}
 	
 	
@@ -64,7 +74,8 @@ public class BetterWeaponListener implements Listener
 	{
 		ItemMeta meta = equip.getItemMeta();
 		//meta.getLore().toArray()
-		ArrayList<String> loreList = new ArrayList<String>();
+		List<String> loreList = new ArrayList<>();
+
 		if(meta.getLore()!=null)
 		{
 			for(String lo:meta.getLore())
@@ -73,36 +84,28 @@ public class BetterWeaponListener implements Listener
 			}
 		}
 
-		if(!loreList.isEmpty())
-		{
-			String lore = "§a强化等级:§c"+(level+1)+"%§e[附魔强化]";
-			if(loreList.contains("§e[附魔强化]"))
-			{
+		ArrayList<String> lore = new ArrayList<String>() {{
+			add("§a强化等级:§c"+(level+1));
+			add("§e[附魔强化]");
+		}};
+		if(!loreList.isEmpty()) {
+			if(loreList.contains("§e[附魔强化]")) {
 				int index = loreList.indexOf("§e[附魔强化]");
-				for(int i=0; i<lore.split("%").length; i++)
-				{
+				for(int i=0; i<lore.size(); i++) {
 					loreList.remove(index);
 				}
-				
-				for(String l:lore.split("%"))
-				{
+
+				for(String l:lore) {
 					loreList.add(index, l);
 				}
-			}
-			else
-			{
-				for(String l:lore.split("%"))
-				{
+			} else {
+				for(String l:lore) {
 					loreList.add(0, l);
 				}
 			}
-		}
-		else
-		{
-			String lore = "§e[附魔强化]%§a强化等级:§c"+(level+1);
-			for(String l:lore.split("%"))
-			{
-				loreList.add(l);
+		} else {
+			for(String l:lore) {
+				loreList.add(0, l);
 			}
 		}
 
@@ -111,7 +114,8 @@ public class BetterWeaponListener implements Listener
 		
 		meta.setLore(loreList);
 		equip.setItemMeta(meta);
-		equip.addUnsafeEnchantment(Enchantment.getById(plugin.rule.get(equip.getTypeId())), level+1);
+		Enchantment enchantment = plugin.intensifyManager.getEnchant(equip.getType().toString());
+		equip.addUnsafeEnchantment(enchantment, level+1);
 	}
 	
 	public void intensify(InventoryClickEvent event, boolean assistant1, boolean assistant2)
@@ -119,159 +123,119 @@ public class BetterWeaponListener implements Listener
 		Player p = (Player)event.getWhoClicked();
 		//---------------------------------------------
 		ItemStack equip = event.getInventory().getItem(10);
-		
-		int level = equip.getEnchantmentLevel(
-				Enchantment.getById(plugin.rule.get(equip.getTypeId())));
+		if(equip==null)
+			return;
+		Enchantment enchantment = plugin.intensifyManager.getEnchant(equip.getType().toString());
+		int level = equip.getEnchantmentLevel(enchantment);
 
-		if(level<plugin.possibilityList.size())
-		{
-			if(assistant2==true)
-			{
+		ArrayList<Integer> possibilityList = plugin.intensifyManager.getPossibilityList();
+		if(level<possibilityList.size()) {
+			if(assistant2) {
 				_intensify(event, equip, level);
 				
 				p.sendMessage("§a[强化系统]§c恭喜，强化成功！");
-				if(level+1>5)
-				{
+				if(level+1>5) {
 					p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5F, 0.0F);
 					Bukkit.broadcastMessage("§3恭喜玩家§a"+p.getName()+"§3强化装备§a"+"§3至§a"+(level+1)+"§3级");
 				}
-				else
-				{
+				else {
 					p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 0.5F, 0.0F);
 				}
 				
 				event.getInventory().setItem(10, null);
-				if(event.getInventory().getItem(13).getAmount()>1)
-				{
+				if(event.getInventory().getItem(13).getAmount()>1) {
 					ItemStack item13 = event.getInventory().getItem(13);
 					item13.setAmount(item13.getAmount()-1);
 					event.getInventory().setItem(13, item13);
-				}
-				else
-				{
+				} else {
 					event.getInventory().setItem(13, null);
 				}
 				
-				if(event.getInventory().getItem(16).getAmount()>1)
-				{
+				if(event.getInventory().getItem(16).getAmount()>1) {
 					ItemStack item16 = event.getInventory().getItem(16);
 					item16.setAmount(item16.getAmount()-1);
 					event.getInventory().setItem(16, item16);
-				}
-				else
-				{
+				} else {
 					event.getInventory().setItem(16, null);
 				}
 				
 				event.getInventory().setItem(40, equip);
-			}
-			else if(plugin.random(100)<plugin.possibilityList.get(level))
-			{
+			} else if(plugin.random(100)<possibilityList.get(level)) {
 				_intensify(event, equip, level);
 				p.sendMessage("§a[强化系统]§c恭喜，强化成功！");
-				if(level+1>5)
-				{
+				if(level+1>5) {
 					p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5F, 0.0F);
 					Bukkit.broadcastMessage("§3恭喜玩家§a"+p.getName()+"§3强化装备§a"+"§3至§a"+(level+1)+"§3级");
 				}
-				else
-				{
+				else {
 					p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 0.5F, 0.0F);
 				}
 
 				event.getInventory().setItem(10, null);
-				if(event.getInventory().getItem(13).getAmount()>1)
-				{
+				if(event.getInventory().getItem(13).getAmount()>1) {
 					ItemStack item13 = event.getInventory().getItem(13);
 					item13.setAmount(item13.getAmount()-1);
 					event.getInventory().setItem(13, item13);
-				}
-				else
-				{
+				} else {
 					event.getInventory().setItem(13, null);
 				}
 				
 				event.getInventory().setItem(40, equip);
-			}
-			else
-			{
-				if(level>=5)
-				{
-					if(assistant1==true)
-					{
+			} else {
+				if(level>=5) {
+					if(assistant1) {
 						event.getInventory().setItem(10, null);
 						
-						if(event.getInventory().getItem(13).getAmount()>1)
-						{
+						if(event.getInventory().getItem(13).getAmount()>1) {
 							ItemStack item13 = event.getInventory().getItem(13);
 							item13.setAmount(item13.getAmount()-1);
 							event.getInventory().setItem(13, item13);
-						}
-						else
-						{
+						} else {
 							event.getInventory().setItem(13, null);
 						}
 						
-						if(event.getInventory().getItem(16).getAmount()>1)
-						{
+						if(event.getInventory().getItem(16).getAmount()>1) {
 							ItemStack item16 = event.getInventory().getItem(16);
 							item16.setAmount(item16.getAmount()-1);
 							event.getInventory().setItem(16, item16);
-						}
-						else
-						{
+						} else {
 							event.getInventory().setItem(16, null);
 						}
 						
 						event.getInventory().setItem(40, equip);
 						p.sendMessage("§a[强化系统]§5很遗憾，强化失败，辅助物品发挥效果，保护住了武器！");
-					}
-					else
-					{
+					} else {
 						event.getInventory().setItem(10, null);
-						if(event.getInventory().getItem(13).getAmount()>1)
-						{
+						if(event.getInventory().getItem(13).getAmount()>1) {
 							ItemStack item13 = event.getInventory().getItem(13);
 							item13.setAmount(item13.getAmount()-1);
 							event.getInventory().setItem(13, item13);
-						}
-						else
-						{
+						} else {
 							event.getInventory().setItem(13, null);
 						}
 						p.sendMessage("§a[强化系统]§5很遗憾，强化失败，装备碎掉了！");
 					}
-					
-				}
-				else
-				{
+				} else {
 					event.getInventory().setItem(10, null);
-					if(event.getInventory().getItem(13).getAmount()>1)
-					{
+					if(event.getInventory().getItem(13).getAmount()>1) {
 						ItemStack item13 = event.getInventory().getItem(13);
 						item13.setAmount(item13.getAmount()-1);
 						event.getInventory().setItem(13, item13);
-					}
-					else
-					{
+					} else {
 						event.getInventory().setItem(13, null);
 					}
 					
 					event.getInventory().setItem(40, equip);
 					p.sendMessage("§a[强化系统]§5很遗憾，强化失败！");
 				}
-				
-				
 			}
-		}
-		else
-		{
+		} else {
 			p.sendMessage("§a[强化系统]§5该装备已强化到最大等级，无需继续强化！");
 		}
 		
 	}
 	
-	public void _smelt(InventoryClickEvent event, ItemStack equip, int level, String smeltType)
+	public void _smelt(InventoryClickEvent event, ItemStack equip, int level, SmeltType smeltType)
 	{
 		ItemMeta meta = equip.getItemMeta();
 		ArrayList<String> loreList = new ArrayList<String>();
@@ -284,9 +248,9 @@ public class BetterWeaponListener implements Listener
 			}
 		}
 
-		if(smeltType.equalsIgnoreCase("attack"))
+		if(smeltType.equals(SmeltType.attack))
 			type = "攻击";
-		if(smeltType.equalsIgnoreCase("defend"))
+		if(smeltType.equals(SmeltType.defend))
 			type = "防御";
 
 		if(!loreList.isEmpty())
@@ -349,32 +313,29 @@ public class BetterWeaponListener implements Listener
 		//---------------------------------------------
 		ItemStack equip = event.getInventory().getItem(10);
 		
-		String smeltType = plugin.ruleSmelt.get(equip.getTypeId());
+		SmeltType smeltType = plugin.smeltManager.getRule(equip.getType());
 		
-		if(event.getInventory().getItem(16).getAmount()>1)
-		{
+		if(event.getInventory().getItem(16).getAmount()>1) {
 			ItemStack item16 = event.getInventory().getItem(16);
 			item16.setAmount(item16.getAmount()-1);
 			event.getInventory().setItem(16, item16);
-		}
-		else
-		{
+		} else {
 			event.getInventory().setItem(16, null);
 		}
-		
-		int level = plugin.random(plugin.possibilitySmeltList.size());
+
+		ArrayList<Integer> possibilitySmeltList = plugin.smeltManager.getPossibilitySmeltList();
+		int level = plugin.random(possibilitySmeltList.size());
 
 		for(int i=level; i>=0; i--)
 		{
-			if(plugin.random(100)<plugin.possibilitySmeltList.get(i))
+			if(plugin.random(100)<possibilitySmeltList.get(i))
 			{
 				_smelt(event, equip, i, smeltType);
 				p.sendMessage("§a[熔炼系统] §c恭喜，熔炼成功！");
-				
-				
+
 				if(i+1>5)
 				{
-					if(smeltType.equalsIgnoreCase("attack"))
+					if(smeltType.equals(SmeltType.attack))
 					{
 						Bukkit.broadcastMessage("§3恭喜玩家§a"+p.getName()+"§3熔炼武器出现§a"+(i+1)+"§3级属性加成");
 					}
@@ -403,21 +364,18 @@ public class BetterWeaponListener implements Listener
 	@EventHandler
 	public void onPlayerClickGUI(InventoryClickEvent event)
 	{
-		if(event.getInventory().getTitle().equalsIgnoreCase("§5强化系统"))
+		if(event.getView().getTitle().equalsIgnoreCase("§5强化系统"))
 		{
 			event.setCancelled(true);
-			if(event.getRawSlot()==2)
-			{
-				event.getWhoClicked().openInventory(plugin.initIntensifyGUI((Player)event.getWhoClicked()));
+			if(event.getRawSlot()==2) {
+				event.getWhoClicked().openInventory(plugin.guiManager.initIntensifyGUI((Player)event.getWhoClicked()));
 				return;
 			}
-			if(event.getRawSlot()==6)
-			{
-				event.getWhoClicked().openInventory(plugin.initSmeltGUI((Player)event.getWhoClicked()));
+			if(event.getRawSlot()==6) {
+				event.getWhoClicked().openInventory(plugin.guiManager.initSmeltGUI((Player)event.getWhoClicked()));
 				return;
 			}
-			if(event.getRawSlot()==4)
-			{
+			if(event.getRawSlot()==4) {
 				event.getWhoClicked().openInventory(gemGui.initMainGUI((Player)event.getWhoClicked()));
 				return;
 			}
@@ -425,7 +383,7 @@ public class BetterWeaponListener implements Listener
 		
 		//-----------------------------------------------------------------------
 		
-		if(event.getInventory().getTitle().equalsIgnoreCase("§5附魔强化系统"))
+		if(event.getView().getTitle().equalsIgnoreCase("§5附魔强化系统"))
 		{
 			if(plugin.isExist(event.getRawSlot(), slot))
 			{
@@ -434,12 +392,12 @@ public class BetterWeaponListener implements Listener
 			
 			if(event.getRawSlot()==44)
 			{
-				event.getWhoClicked().openInventory(plugin.initMainGUI((Player)event.getWhoClicked()));
+				event.getWhoClicked().openInventory(plugin.guiManager.initMainGUI((Player)event.getWhoClicked()));
 				return;
 			}
 			
 			if(event.getRawSlot()==31 && 
-					event.getInventory().getItem(31).getItemMeta().getDisplayName()=="§5点击开始强化")
+					event.getInventory().getItem(31).getItemMeta().getDisplayName().equalsIgnoreCase("§5点击开始强化"))
 			{
 				Player p = (Player)event.getWhoClicked();
 				event.setCancelled(true);
@@ -448,10 +406,10 @@ public class BetterWeaponListener implements Listener
 					event.getWhoClicked().sendMessage("§a[强化系统] §c强化按钮下方不允许放置任何物品！");
 					return;
 				}
-				if(event.getInventory().getItem(10)!=null && 
-						plugin.rule.containsKey(event.getInventory().getItem(10).getTypeId()))
+				HashMap<String, String> rule = plugin.intensifyManager.getRule();
+				if(event.getInventory().getItem(10)!=null &&
+						rule.containsKey(event.getInventory().getItem(10).getType().toString()))
 				{
-
 					if(event.getInventory().getItem(13)!=null)
 					{
 						if(!event.getInventory().getItem(13).getItemMeta().hasLore())
@@ -459,8 +417,8 @@ public class BetterWeaponListener implements Listener
 							p.sendMessage("§a[强化系统] §c缺少强化石或无效的强化石");
 							return;
 						}
-						if(!event.getInventory().getItem(13).getItemMeta().getLore().
-								equals(plugin.itemForIntensify.getItemMeta().getLore()))
+						if(!event.getInventory().getItem(13).
+								equals(plugin.intensifyManager.getItem()))
 						{
 							p.sendMessage("§a[强化系统] §c缺少强化石或无效的强化石");
 							return;
@@ -476,21 +434,19 @@ public class BetterWeaponListener implements Listener
 							p.sendMessage("§a[强化系统] §c无效的辅助物品");
 							return;
 						}
-						if(event.getInventory().getItem(16).getItemMeta().getLore().
-								equals(plugin.assistantsList.get(0).getItemMeta().getLore()))//金刚石
+						if(event.getInventory().getItem(16).
+								equals(plugin.assistantManager.getAssistant(0)))//金刚石
 						{
 							intensify(event, true, false);
 							return;
 						}
-						if(event.getInventory().getItem(16).getItemMeta().getLore().
-								equals(plugin.assistantsList.get(1).getItemMeta().getLore()))//金刚石
+						if(event.getInventory().getItem(16).
+								equals(plugin.assistantManager.getAssistant(1)))//金刚石
 						{
 							intensify(event, false, true);
 							return;
 						}
 						p.sendMessage("§a[强化系统] §c无效的辅助物品");
-						
-						
 					}
 					else
 					{
@@ -506,7 +462,7 @@ public class BetterWeaponListener implements Listener
 		
 		//-----------------------------------------------------------------------
 		
-		if(event.getInventory().getTitle().equalsIgnoreCase("§5熔炼系统"))
+		if(event.getView().getTitle().equalsIgnoreCase("§5熔炼系统"))
 		{
 			if(plugin.isExist(event.getRawSlot(), slot2))
 			{
@@ -515,7 +471,7 @@ public class BetterWeaponListener implements Listener
 			
 			if(event.getRawSlot()==44)
 			{
-				event.getWhoClicked().openInventory(plugin.initMainGUI((Player)event.getWhoClicked()));
+				event.getWhoClicked().openInventory(plugin.guiManager.initMainGUI((Player)event.getWhoClicked()));
 				return;
 			}
 			
@@ -529,23 +485,23 @@ public class BetterWeaponListener implements Listener
 					event.getWhoClicked().sendMessage("§a[熔炼系统] §c熔炼按钮下方不允许放置任何物品！");
 					return;
 				}
+				HashMap<Material, SmeltType> ruleSmelt = plugin.smeltManager.getRuleSmelt();
 				if(event.getInventory().getItem(10)!=null && 
-						plugin.ruleSmelt.containsKey(event.getInventory().getItem(10).getTypeId()))
+						ruleSmelt.containsKey(event.getInventory().getItem(10).getType()))
 				{
-					
 					if(event.getInventory().getItem(16)!=null)
 					{
 						if(event.getInventory().getItem(16).getItemMeta().hasLore())
 						{
-							if(event.getInventory().getItem(16).getItemMeta().getLore().
-									equals(plugin.itemForSmelt.getItemMeta().getLore()))
+							if(event.getInventory().getItem(16)
+									.equals(plugin.smeltManager.getItem()))
 							{
-								if(plugin.economy.getBalance(p.getName())>=plugin.priceForSmelt)
+								int priceForSmelt = plugin.smeltManager.getPrice();
+								if(plugin.economy.getBalance(p.getName())>=priceForSmelt)
 								{
-									p.sendMessage("§a[熔炼系统] §e扣除§c"+String.valueOf(plugin.priceForSmelt)+"§e金币");
-									plugin.economy.withdrawPlayer(p.getName(), plugin.priceForSmelt);
+									p.sendMessage("§a[熔炼系统] §e扣除§c" + priceForSmelt + "§e金币");
+									plugin.economy.withdrawPlayer(p.getName(), priceForSmelt);
 									smelt(event);
-									return;
 								}
 								else
 								{
@@ -579,7 +535,7 @@ public class BetterWeaponListener implements Listener
 	@EventHandler
 	public void onPlayerCloseGUI(InventoryCloseEvent event)
 	{
-		if(event.getInventory().getTitle().equalsIgnoreCase("§5附魔强化系统"))
+		if(event.getView().getTitle().equalsIgnoreCase("§5附魔强化系统"))
 		{
 			if(event.getInventory().getItem(10)!=null)
 			{
@@ -600,7 +556,7 @@ public class BetterWeaponListener implements Listener
 			return;
 		}
 		
-		if(event.getInventory().getTitle().equalsIgnoreCase("§5熔炼系统"))
+		if(event.getView().getTitle().equalsIgnoreCase("§5熔炼系统"))
 		{
 			if(event.getInventory().getItem(10)!=null)
 			{

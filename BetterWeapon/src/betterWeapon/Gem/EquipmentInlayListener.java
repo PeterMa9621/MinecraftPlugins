@@ -1,6 +1,8 @@
 package betterWeapon.Gem;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -28,7 +30,7 @@ public class EquipmentInlayListener implements Listener
 	@EventHandler
 	public void onPlayerClickGUI(InventoryClickEvent event)
 	{
-		if(event.getInventory().getTitle().equalsIgnoreCase("§5装备镶嵌"))
+		if(event.getView().getTitle().equalsIgnoreCase("§5装备镶嵌"))
 		{
 			if(plugin.isExist(event.getRawSlot(), slotInlay))
 			{
@@ -37,12 +39,12 @@ public class EquipmentInlayListener implements Listener
 			
 			if(event.getRawSlot()==44)
 			{
-				event.getWhoClicked().openInventory(plugin.initMainGUI((Player)event.getWhoClicked()));
+				event.getWhoClicked().openInventory(plugin.gemGui.initMainGUI((Player)event.getWhoClicked()));
 				return;
 			}
 			
 			if(event.getRawSlot()==31 && 
-					event.getInventory().getItem(31).getItemMeta().getDisplayName()=="§5点击开始镶嵌")
+					event.getInventory().getItem(31).getItemMeta().getDisplayName().equalsIgnoreCase("§5点击开始镶嵌"))
 			{
 				Player p = (Player)event.getWhoClicked();
 				event.setCancelled(true);
@@ -78,21 +80,12 @@ public class EquipmentInlayListener implements Listener
 							if(event.getInventory().getItem(16).getItemMeta().getDisplayName().equalsIgnoreCase("§6已鉴定的宝石") &&
 									event.getInventory().getItem(16).getItemMeta().getLore().get(0).equalsIgnoreCase("§e[已鉴定]"))
 							{
-								boolean access = false;
-								int[] weaponAllowed = new int[plugin.gem.get("InlayWeapon").size()];
-								for(int i=0; i<plugin.gem.get("InlayWeapon").size(); i++)
-								{
-									weaponAllowed[i] = plugin.gem.get("InlayWeapon").get(i);
-								}
+								ArrayList<String> weaponAllowed = new ArrayList<>(plugin.gemManager.inlayWeapon);
 								if(event.getInventory().getItem(16).getItemMeta().getLore().get(1).contains("攻击") ||
 										event.getInventory().getItem(16).getItemMeta().getLore().get(1).contains("暴击") ||
 										event.getInventory().getItem(16).getItemMeta().getLore().get(1).contains("穿透"))
 								{
-									if(plugin.isExist(event.getInventory().getItem(10).getTypeId(), weaponAllowed))
-									{
-										access = true;
-									}
-									else
+									if(!weaponAllowed.contains(event.getInventory().getItem(10).getType().toString()))
 									{
 										p.sendMessage("§a[宝石系统]§c 这个宝石不能镶嵌在这个装备上");
 										return;
@@ -100,31 +93,24 @@ public class EquipmentInlayListener implements Listener
 								}
 								else
 								{
-									if(plugin.isExist(event.getInventory().getItem(10).getTypeId(), weaponAllowed))
+									if(weaponAllowed.contains(event.getInventory().getItem(10).getType().toString()))
 									{
 										p.sendMessage("§a[宝石系统]§c 这个宝石不能镶嵌在这个装备上");
 										return;
 									}
-									else
-									{
-										access = true;
-									}
 								}
-								if(access)
+								int priceForInlay = plugin.gemManager.priceForInlay;
+								if(plugin.economy.getBalance(p.getName())>=priceForInlay)
 								{
-									if(plugin.economy.getBalance(p.getName())>=plugin.priceForInlay)
-									{
-										p.sendMessage("§a[宝石系统]§e 扣除§c"+String.valueOf(plugin.priceForInlay)+"§e金币");
-										plugin.economy.withdrawPlayer(p.getName(), plugin.priceForInlay);
-										inlay(event);
-										return;
-									}
-									else
-									{
-										p.sendMessage("§a[宝石系统]§c 镶嵌所需金币不足");
-									}
+									p.sendMessage("§a[宝石系统]§e 扣除§c" + priceForInlay + "§e金币");
+									plugin.economy.withdrawPlayer(p.getName(), priceForInlay);
+									inlay(event);
 								}
-								
+								else
+								{
+									p.sendMessage("§a[宝石系统]§c 镶嵌所需金币不足");
+								}
+
 							}
 							else
 							{
@@ -172,14 +158,13 @@ public class EquipmentInlayListener implements Listener
 		else
 			event.getInventory().setItem(16, null);
 		event.getInventory().setItem(40, equip);
-		return;
 	}
 
 	private void _inlay(InventoryClickEvent event, ItemStack equip, String attribute) 
 	{
 		ItemMeta meta = equip.getItemMeta();
-		ArrayList<String> loreList = new ArrayList<String>();
-		
+		List<String> loreList = new ArrayList<>();
+
 		if(meta.getLore()!=null)
 		{
 			for(String lo:meta.getLore())
@@ -214,7 +199,7 @@ public class EquipmentInlayListener implements Listener
 						quantity++;
 					}
 					
-					left = Integer.valueOf(loreList.get(index+quantity).split(":")[1].substring(2));
+					left = Integer.parseInt(loreList.get(index+quantity).split(":")[1].substring(2));
 					
 					loreList.remove(index+quantity);
 					
@@ -224,7 +209,7 @@ public class EquipmentInlayListener implements Listener
 				else
 				{
 					int index = loreList.indexOf("§e[已开孔]")+1;
-					int left = Integer.valueOf(loreList.get(index).split(":")[1].substring(2));
+					int left = Integer.parseInt(loreList.get(index).split(":")[1].substring(2));
 					loreList.remove(index);
 					
 					

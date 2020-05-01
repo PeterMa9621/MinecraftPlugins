@@ -1,7 +1,8 @@
-package betterWeapon;
+package betterWeapon.listener;
 
 import java.util.List;
 
+import betterWeapon.BetterWeapon;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;

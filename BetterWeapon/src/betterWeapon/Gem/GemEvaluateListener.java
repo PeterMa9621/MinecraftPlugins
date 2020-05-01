@@ -2,6 +2,7 @@ package betterWeapon.Gem;
 
 import java.util.ArrayList;
 
+import betterWeapon.util.GemType;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -29,7 +30,7 @@ public class GemEvaluateListener implements Listener
 	@EventHandler
 	public void onPlayerClickGUI(InventoryClickEvent event)
 	{
-		if(event.getInventory().getTitle().equalsIgnoreCase("§5宝石鉴定"))
+		if(event.getView().getTitle().equalsIgnoreCase("§5宝石鉴定"))
 		{
 			if(plugin.isExist(event.getRawSlot(), slot))
 			{
@@ -38,7 +39,7 @@ public class GemEvaluateListener implements Listener
 			
 			if(event.getRawSlot()==26)
 			{
-				event.getWhoClicked().openInventory(plugin.initMainGUI((Player)event.getWhoClicked()));
+				event.getWhoClicked().openInventory(plugin.gemGui.initMainGUI((Player)event.getWhoClicked()));
 				return;
 			}
 			
@@ -53,14 +54,14 @@ public class GemEvaluateListener implements Listener
 					return;
 				}
 				if(event.getInventory().getItem(10)!=null && 
-						event.getInventory().getItem(10).getItemMeta().equals(plugin.gemstone.getItemMeta()))
+						event.getInventory().getItem(10).getItemMeta().equals(plugin.gemManager.gemstone.getItemMeta()))
 				{
-					if(plugin.economy.getBalance(p.getName())>=plugin.priceForEvaluate)
+					int priceForEvaluate = plugin.gemManager.priceForEvaluate;
+					if(plugin.economy.getBalance(p.getName()) >= priceForEvaluate)
 					{
-						plugin.economy.withdrawPlayer(p.getName(), plugin.priceForEvaluate);
-						p.sendMessage("§a[宝石系统]§e扣除§c"+String.valueOf(plugin.priceForEvaluate)+"§e金币");
+						plugin.economy.withdrawPlayer(p.getName(), priceForEvaluate);
+						p.sendMessage("§a[宝石系统]§e扣除§c" + priceForEvaluate + "§e金币");
 						evaluate(event);
-						return;
 					}
 					else
 					{
@@ -82,11 +83,11 @@ public class GemEvaluateListener implements Listener
 		//---------------------------------------------
 		ItemStack equip = event.getInventory().getItem(10).clone();
 		equip.setAmount(1);
-		int quantity = plugin.random(plugin.gem.get("EvaPossibility").size());
+		int quantity = plugin.random(plugin.gemManager.evaPossibility.size());
 
 		for(int i=quantity; i>=0; i--)
 		{
-			if(plugin.random(100)<plugin.gem.get("EvaPossibility").get(i))
+			if(plugin.random(100)<plugin.gemManager.evaPossibility.get(i))
 			{
 				_evaluate(event, equip, i);
 				p.sendMessage("§a[宝石系统]§c 恭喜，鉴定成功！");
@@ -122,41 +123,42 @@ public class GemEvaluateListener implements Listener
 		ItemMeta meta = equip.getItemMeta();
 		ArrayList<String> loreList = new ArrayList<String>();
 		
-		int quantity = plugin.random(plugin.gem.get("ItemPossibility").size());
+		int quantity = plugin.random(plugin.gemManager.itemPossibility.size());
 		int typeIndex = 0;
 		for(int i=quantity; i>=0; i--)
 		{
-			if(plugin.random(100)<plugin.gem.get("ItemPossibility").get(i))
+			if(plugin.random(100)<plugin.gemManager.itemPossibility.get(i))
 			{
 				typeIndex = i;
 				break;
 			}
 		}
 		
-		String type = plugin.gemType.get(typeIndex);
+		GemType gemType = plugin.gemManager.gemType.get(typeIndex);
+		String type = "";
 		double value = 0.0;
 
-		if(type.equalsIgnoreCase("attack"))
+		if(gemType.equals(GemType.attack))
 		{
 			type = "攻击";
 			value = (level+1)/2.0;
 		}
-		else if(type.equalsIgnoreCase("defend"))
+		else if(gemType.equals(GemType.defend))
 		{
 			type = "防御";
 			value = (level+1)/2.0;
 		}
-		else if(type.equalsIgnoreCase("block"))
+		else if(gemType.equals(GemType.block))
 		{
 			type = "格挡(百分比)";
 			value = (level+1)/2.0;
 		}
-		else if(type.equalsIgnoreCase("crit"))
+		else if(gemType.equals(GemType.crit))
 		{
 			type = "暴击(百分比)";
 			value = (level+1);
 		}
-		else if(type.equalsIgnoreCase("penetrate"))
+		else if(gemType.equals(GemType.penetrate))
 		{
 			type = "穿透";
 			value = (level+1)/2.0;

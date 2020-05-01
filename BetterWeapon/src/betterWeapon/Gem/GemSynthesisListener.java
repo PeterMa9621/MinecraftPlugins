@@ -1,5 +1,6 @@
 package betterWeapon.Gem;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Sound;
@@ -28,7 +29,7 @@ public class GemSynthesisListener implements Listener
 	@EventHandler
 	public void onPlayerClickGUI(InventoryClickEvent event)
 	{
-		if(event.getInventory().getTitle().equalsIgnoreCase("§5宝石合成"))
+		if(event.getView().getTitle().equalsIgnoreCase("§5宝石合成"))
 		{
 			if(plugin.isExist(event.getRawSlot(), slot))
 			{
@@ -37,7 +38,7 @@ public class GemSynthesisListener implements Listener
 			
 			if(event.getRawSlot()==44)
 			{
-				event.getWhoClicked().openInventory(plugin.initMainGUI((Player)event.getWhoClicked()));
+				event.getWhoClicked().openInventory(plugin.gemGui.initMainGUI((Player)event.getWhoClicked()));
 				return;
 			}
 			
@@ -54,8 +55,8 @@ public class GemSynthesisListener implements Listener
 				
 				if(event.getInventory().getItem(19)!=null && event.getInventory().getItem(25)!=null)
 				{
-					if(event.getInventory().getItem(19).getType().equals(plugin.gemstone.getType())
-							&& event.getInventory().getItem(25).getType().equals(plugin.gemstone.getType()))
+					if(event.getInventory().getItem(19).getType().equals(plugin.gemManager.gemstone.getType())
+							&& event.getInventory().getItem(25).getType().equals(plugin.gemManager.gemstone.getType()))
 					{
 						if((!event.getInventory().getItem(19).getItemMeta().hasLore()) &&
 								(!event.getInventory().getItem(25).getItemMeta().hasLore()))
@@ -91,12 +92,11 @@ public class GemSynthesisListener implements Listener
 								}
 							}
 							
-							if(plugin.economy.getBalance(p.getName())>=plugin.priceForEvaluate)
+							if(plugin.economy.getBalance(p.getName())>=plugin.gemManager.priceForEvaluate)
 							{
-								plugin.economy.withdrawPlayer(p.getName(), plugin.priceForEvaluate);
-								p.sendMessage("§a[宝石系统]§e 扣除§c"+String.valueOf(plugin.priceForEvaluate)+"§e金币");
+								plugin.economy.withdrawPlayer(p.getName(), plugin.gemManager.priceForEvaluate);
+								p.sendMessage("§a[宝石系统]§e 扣除§c"+String.valueOf(plugin.gemManager.priceForEvaluate)+"§e金币");
 								synthesis(event, value, lastLore);
-								return;
 							}
 							else
 							{
@@ -139,7 +139,7 @@ public class GemSynthesisListener implements Listener
 			level = ((int)(value*2))-1;
 		}
 		
-		if(plugin.random(100)<plugin.gem.get("SynthesisPossibility").get(level))
+		if(plugin.random(100)<plugin.gemManager.synthesisPossibility.get(level))
 		{
 			_synthesis(event, gem, value);
 			p.sendMessage("§a[宝石系统]§c 恭喜，合成成功！");
@@ -195,7 +195,15 @@ public class GemSynthesisListener implements Listener
 	private void _synthesis(InventoryClickEvent event, ItemStack gem, double value) 
 	{
 		ItemMeta meta = gem.getItemMeta();
-		List<String> loreList = meta.getLore();
+		List<String> loreList = new ArrayList<>();
+
+		if(meta.getLore()!=null)
+		{
+			for(String lo:meta.getLore())
+			{
+				loreList.add(lo);
+			}
+		}
 		
 		String lore = "";
 		if(loreList.get(1).contains("暴击"))
