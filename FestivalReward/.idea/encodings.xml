@@ -5,8 +5,9 @@
     <file url="file://$PROJECT_DIR$/src/checkInSystem/CheckInSystemListener.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/checkInSystem/expansion/CheckInSystemExpansion.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/com/peter/FestivalReward.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/peter/config/ConfigManager.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/peter/listener/FestivalRewardListener.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/com/peter/listener/PixelPayGUIListener.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/src/com/peter/util/Util.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/com/peter/util/Util.java" charset="GBK" />
   </component>
 </project>

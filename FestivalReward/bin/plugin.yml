@@ -1,17 +1,17 @@
-name: PixelPayGUI
-main: pixelPayGUI.PixelPayGUI
+name: FestivalReward
+main: com.peter.FestivalReward
 version: "1.0"
 api-version: "1.15"
 author: Jingyuan Ma
 commands:
-  paygui:
-    description: used to open gui
-    usage: /paygui
+  reward:
+    description: used to control FestivalReward
+    usage: /reward
     permission-message: §c无权执行！
 permissions:
-  PixelPayGUI.op:
+  FestivalReward.op:
     default: op
-  PixelPayGUI.player:
+  FestivalReward.player:
     default: true
 depend:
-  - PixelPay
+  - PeterUtil

@@ -64,6 +64,12 @@ public class MYSQLStorage implements StorageInterface{
     }
 
     public Connection getConnection(){
+        try {
+            if(connection==null || connection.isClosed())
+                connect(this.databaseName, this.tableName, this.userName, this.password, this.createTableQuery);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return this.connection;
     }
 

@@ -2,6 +2,7 @@ package com.peter.manager;
 
 import com.peter.FestivalReward;
 import com.peter.model.FestivalPlayer;
+import org.bukkit.Bukkit;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -24,7 +25,11 @@ public class FestivalPlayerManager {
     }
 
     public FestivalPlayer getFestivalPlayer(UUID uuid) {
-        return this.festivalPlayers.get(uuid);
+        FestivalPlayer festivalPlayer = this.festivalPlayers.get(uuid);
+        if(festivalPlayer!=null)
+            return this.festivalPlayers.get(uuid);
+        else
+            return this.plugin.configManager.loadPlayerData(Bukkit.getPlayer(uuid));
     }
 
     public boolean containFestivalPlayer(UUID uuid) {
