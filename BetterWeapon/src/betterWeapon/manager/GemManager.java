@@ -27,9 +27,9 @@ public class GemManager {
     public ItemStack gemstone;
     public GemManager(BetterWeapon plugin) {
         this.plugin = plugin;
-        gemstone = ItemStackUtil.createItem("coal", "搂f鏈壌瀹氱殑瀹濈煶", new ArrayList<String>() {{
-            add("搂e[鏈壌瀹歖");
-            add("搂6涓�鍧楃湅璧锋潵鏅�氱殑鐭冲ご");
+        gemstone = ItemStackUtil.createItem("coal", "§f未鉴定的宝石", new ArrayList<String>() {{
+            add("§e[未鉴定]");
+            add("§6一块看起来普通的石头");
         }}, 0);
     }
 

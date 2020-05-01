@@ -11,6 +11,7 @@
     <file url="file://$PROJECT_DIR$/src/betterWeapon/listener/BetterWeaponListener.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/betterWeapon/manager/ConfigManager.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/betterWeapon/manager/GemGuiManager.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/betterWeapon/manager/GemManager.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/betterWeapon/manager/GuiManager.java" charset="GBK" />
   </component>
 </project>
