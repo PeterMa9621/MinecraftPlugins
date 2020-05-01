@@ -255,9 +255,12 @@ public class QuestPlayer
 	}
 
 	public void clearQuestData() {
-		if(currentNumber!=0)
+		if(currentNumber!=0) {
 			currentNumber = 1;
-		whatTheQuestIs = -1;
+		} else {
+			whatTheQuestIs = -1;
+		}
+
 		totalQuest = 0;
 		removeBossBar();
 	}
