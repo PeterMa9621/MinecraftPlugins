@@ -1,15 +1,11 @@
 package dps;
 
-import de.erethon.dungeonsxl.api.dungeon.Game;
-import de.erethon.dungeonsxl.api.event.group.GroupFinishDungeonEvent;
-import de.erethon.dungeonsxl.api.event.group.GroupPlayerKickEvent;
-import de.erethon.dungeonsxl.api.event.group.GroupPlayerLeaveEvent;
-import de.erethon.dungeonsxl.api.event.player.GamePlayerFinishEvent;
-import de.erethon.dungeonsxl.api.event.world.GameWorldStartGameEvent;
-import de.erethon.dungeonsxl.api.event.world.InstanceWorldUnloadEvent;
-import de.erethon.dungeonsxl.api.player.GamePlayer;
-import de.erethon.dungeonsxl.api.player.PlayerGroup;
-import de.erethon.dungeonsxl.api.world.GameWorld;
+import de.erethon.dungeonsxl.event.dplayer.DPlayerKickEvent;
+import de.erethon.dungeonsxl.event.dplayer.instance.game.DGamePlayerEscapeEvent;
+import de.erethon.dungeonsxl.event.dplayer.instance.game.DGamePlayerFinishEvent;
+import de.erethon.dungeonsxl.event.gameworld.GameWorldStartGameEvent;
+import de.erethon.dungeonsxl.event.gameworld.GameWorldUnloadEvent;
+import de.erethon.dungeonsxl.game.Game;
 import dps.listener.PlayerListener;
 import dps.model.DpsPlayer;
 import dps.model.DpsPlayerManager;
@@ -92,6 +88,82 @@ public class DpsListener implements Listener
 		}
     }
 
+	@EventHandler
+	public void onDungeonStart(GameWorldStartGameEvent event) {
+		//Bukkit.getConsoleSender().sendMessage("GameWorldStartGame");
+		Game game = event.getGame();
+		final String dungeonName = game.getDungeon().getName();
+		final UUID worldId = game.getWorld().getWorld().getUID();
+		Collection<Player> players = game.getPlayers();
+		HashMap<UUID, DpsPlayer> dpsPlayers = new HashMap<>();
+		PlayerListener playerListener = new PlayerListener(dpsPlayers);
+		players.forEach(player -> {
+			Dps.scoreBoard.getAPI().stopScoreBoard(player);
+			DpsPlayer dpsPlayer = new DpsPlayer(player, 0d, true, worldId, dungeonName, playerListener);
+
+			DpsPlayerManager.dpsPlayers.put(dpsPlayer.getPlayer().getUniqueId(), dpsPlayer);
+			dpsPlayer.setGroupSize(players.size());
+			dpsPlayers.put(player.getUniqueId(), dpsPlayer);
+		});
+
+		DpsPlayerManager.dpsData.put(worldId, dpsPlayers);
+		ScoreBoardUtil.displayDpsBoard(dpsPlayers);
+	}
+
+	@EventHandler
+	public void onDungeonEnd(GameWorldUnloadEvent event) {
+		World world = event.getGameWorld().getWorld();
+
+		DpsPlayerManager.dpsData.remove(world.getUID());
+		if(pendingDpsPlayers.containsKey(world.getUID())){
+			pendingDpsPlayers.get(world.getUID()).forEach(dpsPlayer -> {
+				Dps.scoreBoard.getAPI().restartScoreBoard(dpsPlayer.getPlayer());
+				RewardTable rewardTable = RewardBoxManager.getRewardTable(dpsPlayer.getDungeonName());
+				if(rewardTable!=null) {
+					RewardBoxManager.showRewardBox(dpsPlayer);
+
+					String playerName = dpsPlayer.getPlayer().getName();
+					int exp = rewardTable.getRandomExp();
+					String command = String.format("level add %s %d", playerName, exp);
+					Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+				}
+
+				DpsPlayerManager.markPlayerExitDungeon(dpsPlayer.getPlayer());
+			});
+			pendingDpsPlayers.remove(world.getUID());
+		}
+	}
+
+	@EventHandler
+	public void onFinishDungeon(DGamePlayerFinishEvent event) {
+		UUID wordId = event.getDPlayer().getWorld().getUID();
+		DpsPlayer dpsPlayer = DpsPlayerManager.dpsData.get(wordId).get(event.getDPlayer().getPlayer().getUniqueId());
+
+		ArrayList<DpsPlayer> players;
+		if(!pendingDpsPlayers.containsKey(wordId)) {
+			players = new ArrayList<>();
+		} else {
+			players = pendingDpsPlayers.get(wordId);
+		}
+
+		players.add(dpsPlayer);
+		pendingDpsPlayers.put(wordId, players);
+		DpsPlayerManager.markPlayerExitDungeon(event.getDPlayer().getPlayer());
+	}
+
+	@EventHandler
+	public void onPlayerEscape(DGamePlayerEscapeEvent event) {
+		Dps.scoreBoard.getAPI().restartScoreBoard(event.getDPlayer().getPlayer());
+		DpsPlayerManager.markPlayerExitDungeon(event.getDPlayer().getPlayer());
+	}
+
+	@EventHandler
+	public void onPlayerKicked(DPlayerKickEvent event) {
+		Dps.scoreBoard.getAPI().restartScoreBoard(event.getDPlayer().getPlayer());
+		DpsPlayerManager.markPlayerExitDungeon(event.getDPlayer().getPlayer());
+	}
+
+    /*
     @EventHandler
 	public void onDungeonStart(GameWorldStartGameEvent event) {
 		//Bukkit.getConsoleSender().sendMessage("GameWorldStartGame");
@@ -169,6 +241,8 @@ public class DpsListener implements Listener
 		Dps.scoreBoard.getAPI().restartScoreBoard(event.getPlayer().getPlayer());
 		DpsPlayerManager.markPlayerExitDungeon(event.getPlayer().getPlayer());
 	}
+
+     */
 
 	@EventHandler
 	public void onPlayerKillEntity(EntityDeathEvent event) {

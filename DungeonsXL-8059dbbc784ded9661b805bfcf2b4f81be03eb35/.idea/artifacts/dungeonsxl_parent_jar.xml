@@ -1,0 +1,15 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="dungeonsxl-parent:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/dungeonsxl_parent_jar</output-path>
+    <root id="archive" name="dungeonsxl-parent.jar">
+      <element id="module-output" name="dungeonsxl-bukkit_magicvalues" />
+      <element id="module-output" name="dungeonsxl-adapter" />
+      <element id="module-output" name="dungeonsxl-api" />
+      <element id="module-output" name="dungeonsxl-core" />
+      <element id="module-output" name="dungeonsxl-bukkit_blockdata" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/de/erethon/vignette/vignette-dist/1.0-SNAPSHOT/vignette-dist-1.0-SNAPSHOT.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/de/erethon/commons/commons-dist/6.1.2/commons-dist-6.1.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/de/erethon/caliburn/0.5.5/caliburn-0.5.5.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

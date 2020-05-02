@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/adapter/dungeonsxl-adapter.iml" filepath="$PROJECT_DIR$/adapter/dungeonsxl-adapter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/api/dungeonsxl-api.iml" filepath="$PROJECT_DIR$/api/dungeonsxl-api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/bukkit_blockdata/dungeonsxl-bukkit_blockdata.iml" filepath="$PROJECT_DIR$/bukkit_blockdata/dungeonsxl-bukkit_blockdata.iml" />
+      <module fileurl="file://$PROJECT_DIR$/bukkit_magicvalues/dungeonsxl-bukkit_magicvalues.iml" filepath="$PROJECT_DIR$/bukkit_magicvalues/dungeonsxl-bukkit_magicvalues.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core/dungeonsxl-core.iml" filepath="$PROJECT_DIR$/core/dungeonsxl-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dist/dungeonsxl-dist.iml" filepath="$PROJECT_DIR$/dist/dungeonsxl-dist.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dungeonsxl-parent.iml" filepath="$PROJECT_DIR$/dungeonsxl-parent.iml" />
+    </modules>
+  </component>
+</project>

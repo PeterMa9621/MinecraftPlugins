@@ -49,7 +49,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../Project0/server/plugins/dungeonsxl-dist-0.18-SNAPSHOT-958.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../Project0/server/plugins/dungeonsxl-dist-0.18-SNAPSHOT.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
