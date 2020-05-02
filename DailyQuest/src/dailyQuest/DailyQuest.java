@@ -13,6 +13,8 @@ import dailyQuest.manager.QuestPlayerManager;
 import dailyQuest.model.Quest;
 import dailyQuest.model.QuestPlayer;
 import dailyQuest.util.Util;
+import levelSystem.API;
+import levelSystem.LevelSystem;
 import net.citizensnpcs.api.CitizensAPI;
 import net.luckperms.api.LuckPerms;
 import net.milkbowl.vault.economy.Economy;
@@ -42,6 +44,7 @@ public class DailyQuest extends JavaPlugin
 	public GuiManager guiManager;
 	public Economy economy;
 	public CitizensAPI citizensAPI;
+	public API levelSystemApi;
 
 	private String previousDate = null;
 	
@@ -58,6 +61,15 @@ public class DailyQuest extends JavaPlugin
 		RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
 		if (provider != null) {
 			luckPermsApi = provider.getProvider();
+			return true;
+		}
+		return false;
+	}
+
+	private boolean hookLevelSystem() {
+		LevelSystem levelSystem = (LevelSystem) Bukkit.getPluginManager().getPlugin("LevelSystem");
+		if (levelSystem != null) {
+			levelSystemApi = levelSystem.getAPI();
 			return true;
 		}
 		return false;
@@ -81,6 +93,11 @@ public class DailyQuest extends JavaPlugin
 
 		if(!hookLP()) {
 			Bukkit.getConsoleSender().sendMessage("§a[DailyQuest] §cLuckPerms插件未加载!");
+			return;
+		}
+
+		if(!hookLevelSystem()) {
+			Bukkit.getConsoleSender().sendMessage("§a[DailyQuest] §cLevelSystem插件未加载!");
 			return;
 		}
 

@@ -229,6 +229,16 @@ public class QuestPlayer
 		}
 
 		// =======================================================
+		// Get exp reward
+		int minExp = plugin.configManager.minExp;
+		int maxExp = plugin.configManager.maxExp;
+		double levelMultiplier = plugin.configManager.levelMultiplier;
+		int expReward = Util.random(maxExp) + 1 + minExp;
+		expReward += plugin.levelSystemApi.getLevel(player) * levelMultiplier;
+		String expCommand = "ls add %s %d";
+		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), String.format(expCommand, player.getName(), expReward));
+
+		// =======================================================
 		// Show message
 		if(!quest.getRewardMessage().equals(""))
 			player.sendMessage("§6[日常任务] §e"+ quest.getRewardMessage());

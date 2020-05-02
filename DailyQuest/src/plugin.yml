@@ -7,6 +7,7 @@ depend:
   - Citizens
   - Vault
   - PeterUtil
+  - LevelSystem
 softdepend:
   - PlaceholderAPI
 commands:

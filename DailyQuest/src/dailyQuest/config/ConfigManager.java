@@ -58,6 +58,10 @@ public class ConfigManager {
 
     public int additionMoney = 10;
 
+    public int maxExp;
+    public int minExp;
+    public double levelMultiplier;
+
     public int extraRewardItemQuantity = 1;
 
     public int getQuestNPCId = 0;
@@ -201,6 +205,10 @@ public class ConfigManager {
 
             config.set("ChanceGetReward", 0.3);
 
+            config.set("ExpReward.Max", 20);
+            config.set("ExpReward.Min", 5);
+            config.set("ExpReward.LevelMultiplier", 0.5);
+
             config.set("Group", group);
 
             // Gui icon settings
@@ -312,6 +320,10 @@ public class ConfigManager {
         defaultDailyLimit = config.getInt("DefaultDailyLimit", 20);
 
         chanceGetReward = config.getDouble("ChanceGetReward", 0.3);
+
+        maxExp = config.getInt("ExpReward.Max", 20);
+        minExp = config.getInt("ExpReward.Min", 5);
+        levelMultiplier = config.getDouble("ExpReward.LevelMultiplier", 2);
 
         randomItemMaxQuantity = config.getInt("RandomItemMaxQuantity");
 
