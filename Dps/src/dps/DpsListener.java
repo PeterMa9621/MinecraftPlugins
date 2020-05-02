@@ -1,12 +1,15 @@
 package dps;
 
-import de.erethon.dungeonsxl.event.dplayer.DPlayerKickEvent;
-import de.erethon.dungeonsxl.event.dplayer.instance.game.DGamePlayerEscapeEvent;
-import de.erethon.dungeonsxl.event.dplayer.instance.game.DGamePlayerFinishEvent;
-
-import de.erethon.dungeonsxl.event.gameworld.GameWorldStartGameEvent;
-import de.erethon.dungeonsxl.event.gameworld.GameWorldUnloadEvent;
-import de.erethon.dungeonsxl.game.Game;
+import de.erethon.dungeonsxl.api.dungeon.Game;
+import de.erethon.dungeonsxl.api.event.group.GroupFinishDungeonEvent;
+import de.erethon.dungeonsxl.api.event.group.GroupPlayerKickEvent;
+import de.erethon.dungeonsxl.api.event.group.GroupPlayerLeaveEvent;
+import de.erethon.dungeonsxl.api.event.player.GamePlayerFinishEvent;
+import de.erethon.dungeonsxl.api.event.world.GameWorldStartGameEvent;
+import de.erethon.dungeonsxl.api.event.world.InstanceWorldUnloadEvent;
+import de.erethon.dungeonsxl.api.player.GamePlayer;
+import de.erethon.dungeonsxl.api.player.PlayerGroup;
+import de.erethon.dungeonsxl.api.world.GameWorld;
 import dps.listener.PlayerListener;
 import dps.model.DpsPlayer;
 import dps.model.DpsPlayerManager;
@@ -16,13 +19,12 @@ import dps.util.ScoreBoardUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.*;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.*;
@@ -113,8 +115,8 @@ public class DpsListener implements Listener
 	}
 
 	@EventHandler
-	public void onDungeonEnd(GameWorldUnloadEvent event) {
-		World world = event.getGameWorld().getWorld();
+	public void onDungeonEnd(InstanceWorldUnloadEvent event) {
+		World world = event.getBukkitWorld();
 
 		DpsPlayerManager.dpsData.remove(world.getUID());
 		if(pendingDpsPlayers.containsKey(world.getUID())){
@@ -137,32 +139,35 @@ public class DpsListener implements Listener
 	}
 
 	@EventHandler
-	public void onFinishDungeon(DGamePlayerFinishEvent event) {
-		UUID wordId = event.getDPlayer().getWorld().getUID();
-		DpsPlayer dpsPlayer = DpsPlayerManager.dpsData.get(wordId).get(event.getDPlayer().getPlayer().getUniqueId());
+	public void onFinishDungeon(GroupFinishDungeonEvent event) {
+		PlayerGroup playerGroup = event.getGroup();
+		UUID wordId = playerGroup.getGameWorld().getWorld().getUID();
+		for(Player player:playerGroup.getMembers().getOnlinePlayers()) {
+			DpsPlayer dpsPlayer = DpsPlayerManager.dpsData.get(wordId).get(player.getUniqueId());
 
-		ArrayList<DpsPlayer> players;
-		if(!pendingDpsPlayers.containsKey(wordId)) {
-			players = new ArrayList<>();
-		} else {
-			players = pendingDpsPlayers.get(wordId);
+			ArrayList<DpsPlayer> players;
+			if(!pendingDpsPlayers.containsKey(wordId)) {
+				players = new ArrayList<>();
+			} else {
+				players = pendingDpsPlayers.get(wordId);
+			}
+
+			players.add(dpsPlayer);
+			pendingDpsPlayers.put(wordId, players);
+			DpsPlayerManager.markPlayerExitDungeon(player);
 		}
-
-		players.add(dpsPlayer);
-		pendingDpsPlayers.put(wordId, players);
-		DpsPlayerManager.markPlayerExitDungeon(event.getDPlayer().getPlayer());
 	}
 
 	@EventHandler
-	public void onPlayerEscape(DGamePlayerEscapeEvent event) {
-		Dps.scoreBoard.getAPI().restartScoreBoard(event.getDPlayer().getPlayer());
-		DpsPlayerManager.markPlayerExitDungeon(event.getDPlayer().getPlayer());
+	public void onPlayerEscape(GroupPlayerLeaveEvent event) {
+		Dps.scoreBoard.getAPI().restartScoreBoard(event.getPlayer().getPlayer());
+		DpsPlayerManager.markPlayerExitDungeon(event.getPlayer().getPlayer());
 	}
 
 	@EventHandler
-	public void onPlayerKicked(DPlayerKickEvent event) {
-		Dps.scoreBoard.getAPI().restartScoreBoard(event.getDPlayer().getPlayer());
-		DpsPlayerManager.markPlayerExitDungeon(event.getDPlayer().getPlayer());
+	public void onPlayerKicked(GroupPlayerKickEvent event) {
+		Dps.scoreBoard.getAPI().restartScoreBoard(event.getPlayer().getPlayer());
+		DpsPlayerManager.markPlayerExitDungeon(event.getPlayer().getPlayer());
 	}
 
 	@EventHandler

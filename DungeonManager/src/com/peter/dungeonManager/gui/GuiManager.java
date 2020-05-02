@@ -161,9 +161,11 @@ public class GuiManager {
                 if(player.isOp()) {
                     RewardTable rewardTable = DungeonManager.dpsAPI.getRewardTable(dungeonName);
                     int numReward = 1;
-                    for(Reward reward:rewardTable.getRewards()) {
-                        lore.add("¡ìf" + numReward + ". " + reward.getIcon().getItemMeta().getDisplayName() + ", " + reward.getChance());
-                        numReward ++;
+                    if(rewardTable!=null) {
+                        for(Reward reward:rewardTable.getRewards()) {
+                            lore.add("¡ìf" + numReward + ". " + reward.getIcon().getItemMeta().getDisplayName() + ", " + reward.getChance());
+                            numReward ++;
+                        }
                     }
                 }
             }

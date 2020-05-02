@@ -27,15 +27,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../Project0/server/plugins/dungeonsxl-dist-0.18-SNAPSHOT-819.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$MODULE_DIR$/../spigot-1.15.2.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -66,6 +57,15 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/../../Project0/server/plugins/Dps.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../Project0/server/plugins/dungeonsxl-dist-0.18-SNAPSHOT-958.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

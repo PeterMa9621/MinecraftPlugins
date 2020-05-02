@@ -2,17 +2,17 @@ package com.peter.dungeonManager.listener;
 
 import com.peter.dungeonManager.DungeonManager;
 import com.peter.dungeonManager.event.LeaveGroupEvent;
-import com.peter.dungeonManager.gui.GuiManager;
 import com.peter.dungeonManager.model.DungeonGroup;
 import com.peter.dungeonManager.model.DungeonPlayer;
-import com.peter.dungeonManager.util.DataManager;
-import de.erethon.dungeonsxl.event.dplayer.instance.game.DGamePlayerFinishEvent;
+import de.erethon.dungeonsxl.api.dungeon.Game;
+import de.erethon.dungeonsxl.api.event.player.GamePlayerFinishEvent;
+import de.erethon.dungeonsxl.api.player.GamePlayer;
+import de.erethon.dungeonsxl.api.player.PlayerGroup;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -48,10 +48,12 @@ public class DungeonGroupListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerFinishDungeon(DGamePlayerFinishEvent event) {
-        Player player = event.getDPlayer().getPlayer();
+    public void onPlayerFinishDungeon(GamePlayerFinishEvent event) {
+        Player player = event.getBukkitPlayer();
         HashMap<String, Long> timestamps = plugin.dataManager.getDungeonPlayer(player).getDungeonTimestamps();
-        String dungeonName = event.getDPlayer().getDGroup().getDungeonName();
+        GamePlayer gamePlayer = event.getGamePlayer();
+        PlayerGroup playerGroup = gamePlayer.getGroup();
+        String dungeonName = playerGroup.getDungeon().getName();
         long timestamp = Calendar.getInstance().getTimeInMillis();
         timestamps.put(dungeonName, timestamp);
     }
