@@ -23,23 +23,23 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class GuiManager {
-    public static final String teamGuiTitle = "¡ì2¼ÓÈë¸±±¾¶ÓÎé";
-    public static final String dungeonGuiTitle = "¡ì2´´½¨¸±±¾¶ÓÎé";
-    public static final String joinPrefix = "¡ì6µã»÷¼ÓÈë¡ì5";
-    public static final String leavePrefix = "¡ì6µã»÷ÍË³ö¡ì5";
-    public static final String refreshTitle = "¡ì3Ë¢ÐÂ";
-    public static final String numPeopleLore = "¡ì7ÒÑ¼ÓÈëÍæ¼Ò:";
-    public static final String nextPageTitle = "¡ìfÏÂÒ»Ò³";
-    public static final String previousPageTitle = "¡ìfÉÏÒ»Ò³";
-    public static final String createTeamTitle = "¡ìf´´½¨¸±±¾¶ÓÎé";
-    public static final String goBackTitle = "¡ìf·µ»Ø";
-    public static final String missGroupNotification = ChatColor.RESET + "¸Ã¶ÓÎé" + ChatColor.RED + "ÒÑ½âÉ¢" +
-            ChatColor.RESET + "»ò" + ChatColor.GREEN + "ÒÑ½øÈë¸±±¾";
-    public static final String duplicateGroupNotification = ChatColor.RED + "ÄãÒÑ¾­¼ÓÈëÒ»¸ö¶ÓÎéÁË";
-    public static final String notSatisfyRequirementNotification = "¡ìcÈËÊýÒªÇó²»Âú×ã,×îÉÙ:¡ì2%d¡ìcÈË,×î¶à:¡ì2%d¡ìcÈË";
-    public static final String groupFullNotification = ChatColor.RED + "ÈËÊýÒÑÂú";
-    public static final String minLevelNotification = "¡ì7×îÐ¡µÈ¼¶ÒªÇó:¡ì6%d";
-    public static final String minLevelNotSatisfy = "¡ìcÄãµÄµÈ¼¶²»Âú×ã¸±±¾ÒªÇó";
+    public static final String teamGuiTitle = "ï¿½ï¿½2ï¿½ï¿½ï¿½ë¸±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½";
+    public static final String dungeonGuiTitle = "ï¿½ï¿½2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½";
+    public static final String joinPrefix = "ï¿½ï¿½6ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½5";
+    public static final String leavePrefix = "ï¿½ï¿½6ï¿½ï¿½ï¿½ï¿½Ë³ï¿½ï¿½ï¿½5";
+    public static final String refreshTitle = "ï¿½ï¿½3Ë¢ï¿½ï¿½";
+    public static final String numPeopleLore = "ï¿½ï¿½7ï¿½Ñ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:";
+    public static final String nextPageTitle = "ï¿½ï¿½fï¿½ï¿½Ò»Ò³";
+    public static final String previousPageTitle = "ï¿½ï¿½fï¿½ï¿½Ò»Ò³";
+    public static final String createTeamTitle = "ï¿½ï¿½fï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½";
+    public static final String goBackTitle = "ï¿½ï¿½fï¿½ï¿½ï¿½ï¿½";
+    public static final String missGroupNotification = ChatColor.RESET + "ï¿½Ã¶ï¿½ï¿½ï¿½" + ChatColor.RED + "ï¿½Ñ½ï¿½É¢" +
+            ChatColor.RESET + "ï¿½ï¿½" + ChatColor.GREEN + "ï¿½Ñ½ï¿½ï¿½ë¸±ï¿½ï¿½";
+    public static final String duplicateGroupNotification = ChatColor.RED + "ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½";
+    public static final String notSatisfyRequirementNotification = "ï¿½ï¿½cï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½:ï¿½ï¿½2%dï¿½ï¿½cï¿½ï¿½,ï¿½ï¿½ï¿½:ï¿½ï¿½2%dï¿½ï¿½cï¿½ï¿½";
+    public static final String groupFullNotification = ChatColor.RED + "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½";
+    public static final String minLevelNotification = "ï¿½ï¿½7ï¿½ï¿½Ð¡ï¿½È¼ï¿½Òªï¿½ï¿½:ï¿½ï¿½6%d";
+    public static final String minLevelNotSatisfy = "ï¿½ï¿½cï¿½ï¿½ÄµÈ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã¸±ï¿½ï¿½Òªï¿½ï¿½";
     public static final int inventorySize = 54;
     public static final int maxDungeonGroupPerPage = 45;
     public static final int refreshIndex = 49;
@@ -163,7 +163,7 @@ public class GuiManager {
                     int numReward = 1;
                     if(rewardTable!=null) {
                         for(Reward reward:rewardTable.getRewards()) {
-                            lore.add("¡ìf" + numReward + ". " + reward.getIcon().getItemMeta().getDisplayName() + ", " + reward.getChance());
+                            lore.add("ï¿½ï¿½f" + numReward + ". " + reward.getIcon().getItemMeta().getDisplayName() + ", " + reward.getChance());
                             numReward ++;
                         }
                     }
@@ -213,7 +213,7 @@ public class GuiManager {
         DungeonGroup dungeonGroup = dungeonPlayer.getDungeonGroup();
         if(dungeonGroup!=null && dungeonGroup.isLeader(dungeonPlayer) && !dungeonPlayer.isWaitingForStart()){
             String groupDisplayName = dungeonGroup.getDungeonSetting().getDisplayName();
-            return Util.createItem(Material.PAPER, ChatColor.RESET + "¿ªÊ¼¸±±¾" + groupDisplayName, 33);
+            return Util.createItem(Material.PAPER, ChatColor.RESET + "ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½" + groupDisplayName, 33);
         }
         return null;
     }
@@ -221,10 +221,10 @@ public class GuiManager {
     public void setDataForJoinLeaveIcon(DungeonGroup dungeonGroup, ItemStack icon, DungeonPlayer dungeonPlayer) {
         ArrayList<String> lore = new ArrayList<String>() {{
             DungeonSetting dungeonSetting = dungeonGroup.getDungeonSetting();
-            add(ChatColor.RESET + "¶ÓÎé: " + dungeonGroup.getGroupName());
+            add(ChatColor.RESET + "ï¿½ï¿½ï¿½ï¿½: " + dungeonGroup.getGroupName());
             add(numPeopleLore + dungeonGroup.getPlayers().size() + "/" + dungeonSetting.getMaxPlayers());
             for(DungeonPlayer dungeonPlayer:dungeonGroup.getPlayers()) {
-                add(ChatColor.RESET + "³ÉÔ±: " + dungeonPlayer.getPlayer().getDisplayName());
+                add(ChatColor.RESET + "ï¿½ï¿½Ô±: " + dungeonPlayer.getPlayer().getDisplayName());
             }
             // Check if this player can join the team
             if(dungeonGroup.isFull())
