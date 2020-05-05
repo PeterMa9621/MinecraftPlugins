@@ -56,6 +56,10 @@ public class LevelSystemListener implements Listener
 	@EventHandler
 	public void onPlayerChangeExp(PlayerExpChangeEvent event) {
 		Player p = event.getPlayer();
+		if(!canGetExp.containsKey(p.getUniqueId())) {
+			canGetExp.put(p.getUniqueId(), true);
+		}
+
 		if(canGetExp.get(p.getUniqueId())) {
 			int expAmount = event.getAmount();
 			LevelPlayer levelPlayer = plugin.players.get(p.getUniqueId());
