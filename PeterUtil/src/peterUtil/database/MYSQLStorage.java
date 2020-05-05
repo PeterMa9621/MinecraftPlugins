@@ -225,7 +225,7 @@ public class MYSQLStorage implements StorageInterface{
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-            }, 20*15);
+            }, 20*1800);
         }
     }
 

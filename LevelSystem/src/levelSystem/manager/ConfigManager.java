@@ -4,11 +4,11 @@ import levelSystem.LevelSystem;
 import levelSystem.model.ExpFormula;
 import levelSystem.model.LevelPlayer;
 import levelSystem.model.LevelReward;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 import peterUtil.database.Database;
 import peterUtil.database.DatabaseType;
 import peterUtil.database.StorageInterface;
@@ -111,24 +111,28 @@ public class ConfigManager
 		return maxLevel;
 	}
 
-	public LevelPlayer loadPlayerConfig(Player player) {
+	public void loadPlayerConfig(Player player) {
 		UUID uniqueId = player.getUniqueId();
+		/*
 		if(plugin.players.containsKey(uniqueId)) {
 			LevelPlayer levelPlayer = plugin.players.get(uniqueId);
 			levelPlayer.setPlayer(player);
 			return levelPlayer;
 		}
-		HashMap<String, Object> result = database.get(player.getUniqueId(), new String[] {"name", "current_exp", "level"});
 
-		int level = 1;
-		int current_exp = 0;
-		if(result!=null){
-			level = (int) result.get("level");
-			current_exp = (int) result.get("current_exp");
-		}
-		LevelPlayer levelPlayer = new LevelPlayer(player, level, current_exp);
-		plugin.players.put(uniqueId, levelPlayer);
-		return levelPlayer;
+		 */
+		Bukkit.getScheduler().runTaskLater(plugin, () -> {
+			HashMap<String, Object> result = database.get(player.getUniqueId(), new String[] {"name", "current_exp", "level"});
+
+			int level = 1;
+			int current_exp = 0;
+			if(result!=null){
+				level = (int) result.get("level");
+				current_exp = (int) result.get("current_exp");
+			}
+			LevelPlayer levelPlayer = new LevelPlayer(player, level, current_exp);
+			plugin.players.put(uniqueId, levelPlayer);
+		}, 20);
 	}
 
 	public void savePlayerConfig(Player player) throws IOException {

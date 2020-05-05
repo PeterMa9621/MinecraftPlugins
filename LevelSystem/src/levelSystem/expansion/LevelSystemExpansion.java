@@ -89,7 +89,7 @@ public class LevelSystemExpansion extends PlaceholderExpansion {
             LevelPlayer levelPlayer = this.plugin.players.get(player.getUniqueId());
             if(levelPlayer!=null)
                 return String.valueOf(levelPlayer.getLevel());
-            return "error";
+            return "";
         }
 
         // %example_placeholder2%
@@ -97,7 +97,7 @@ public class LevelSystemExpansion extends PlaceholderExpansion {
             LevelPlayer levelPlayer = this.plugin.players.get(player.getUniqueId());
             if(levelPlayer!=null)
                 return String.valueOf(levelPlayer.getCurrentExp());
-            return "error";
+            return "";
         }
 
         if(identifier.equals("required_exp")){
@@ -106,7 +106,7 @@ public class LevelSystemExpansion extends PlaceholderExpansion {
                 int level = levelPlayer.getLevel();
                 return String.valueOf(ExpManager.getExp(level));
             }
-            return "error";
+            return "";
         }
 
         // We return null if an invalid placeholder (f.e. %example_placeholder3%)

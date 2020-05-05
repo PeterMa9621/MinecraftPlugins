@@ -106,6 +106,8 @@ public class LevelSystem extends JavaPlugin
 				if(sender instanceof Player) {
 					Player p = (Player)sender;
 					LevelPlayer levelPlayer = players.get(p.getUniqueId());
+					if(levelPlayer==null)
+						return true;
 					int level = levelPlayer.getLevel();
 					int currentLevelExp = ExpManager.getExp(level);
 					int currentExp = levelPlayer.getCurrentExp();

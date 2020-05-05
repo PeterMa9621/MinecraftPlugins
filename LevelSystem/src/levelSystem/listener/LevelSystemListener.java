@@ -10,19 +10,19 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerExpChangeEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import static levelSystem.manager.ConfigManager.useChatPrefix;
 
 public class LevelSystemListener implements Listener
 {
 	private LevelSystem plugin;
+	private HashMap<UUID, Boolean> canGetExp = new HashMap<>();
 	
 	public LevelSystemListener(LevelSystem plugin)
 	{
@@ -45,13 +45,23 @@ public class LevelSystemListener implements Listener
 		if(useChatPrefix)
 			event.setFormat("¡ìf[¡ì2"+plugin.players.get(event.getPlayer().getUniqueId()).getLevel()+"¼¶¡ìf]"+event.getFormat());
     }
-	
+
+    @EventHandler
+	public void onPlayerFishing(PlayerFishEvent event) {
+		Player player = event.getPlayer();
+		UUID uuid = player.getUniqueId();
+		canGetExp.put(uuid, false);
+	}
+
 	@EventHandler
 	public void onPlayerChangeExp(PlayerExpChangeEvent event) {
-		int expAmount = event.getAmount();
 		Player p = event.getPlayer();
-		LevelPlayer levelPlayer = plugin.players.get(p.getUniqueId());
-		levelPlayer.addExp(expAmount);
+		if(canGetExp.get(p.getUniqueId())) {
+			int expAmount = event.getAmount();
+			LevelPlayer levelPlayer = plugin.players.get(p.getUniqueId());
+			levelPlayer.addExp(expAmount);
+		}
+		canGetExp.put(p.getUniqueId(), true);
     }
 
     @EventHandler
@@ -80,8 +90,8 @@ public class LevelSystemListener implements Listener
 
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent event) throws IOException {
-		//Player player = event.getPlayer();
-		//plugin.configManager.savePlayerConfig(player);
+		Player player = event.getPlayer();
+		plugin.configManager.savePlayerConfig(player);
 	}
 
 }

@@ -120,9 +120,13 @@ public class DpsListener implements Listener
 				Dps.scoreBoard.getAPI().restartScoreBoard(dpsPlayer.getPlayer());
 				RewardTable rewardTable = RewardBoxManager.getRewardTable(dpsPlayer.getDungeonName());
 				if(rewardTable!=null) {
-					RewardBoxManager.showRewardBox(dpsPlayer);
+					Player player = dpsPlayer.getPlayer();
+					player.sendMessage(ChatColor.GOLD + "奖励窗口即将打开...");
+					Bukkit.getScheduler().runTaskLater(plugin, ()->{
+						RewardBoxManager.showRewardBox(dpsPlayer);
+					},40);
 
-					String playerName = dpsPlayer.getPlayer().getName();
+					String playerName = player.getName();
 					int exp = rewardTable.getRandomExp();
 					String command = String.format("level add %s %d", playerName, exp);
 					Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
@@ -258,6 +262,8 @@ public class DpsListener implements Listener
 				double randomNumber = random.nextDouble();
 				RewardTable rewardTable = RewardBoxManager.getRewardTable(dpsPlayer.getDungeonName());
 				// To Do: check if the map contains reward
+				if(rewardTable==null)
+					return;
 				if(randomNumber < rewardTable.getBonusRewardProb() &&
 						dpsPlayer.getNumBonusReward() < RewardBoxManager.maxBonusRewards) {
 					dpsPlayer.addBonusReward();
