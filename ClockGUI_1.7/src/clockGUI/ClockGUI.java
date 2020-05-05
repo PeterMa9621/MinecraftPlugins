@@ -22,12 +22,9 @@ import java.util.HashMap;
 
 public class ClockGUI extends JavaPlugin
 {
-
-	
 	public Economy economy;
-	public boolean isEco;
+	public boolean isEco = true;
 	public boolean isPP = true;
-	boolean useDps = true;
 	
 	public PlayerPoints playerPoints;
 
@@ -36,30 +33,32 @@ public class ClockGUI extends JavaPlugin
 	
 	private boolean hookPlayerPoints() 
 	{
-	    final Plugin plugin = this.getServer().getPluginManager().getPlugin("PlayerPoints");
-	    playerPoints = PlayerPoints.class.cast(plugin);
-	    return playerPoints != null; 
+		if(Bukkit.getPluginManager().getPlugin("PlayerPoints")!=null) {
+			final Plugin plugin = this.getServer().getPluginManager().getPlugin("PlayerPoints");
+			playerPoints = (PlayerPoints) plugin;
+			return playerPoints != null;
+		}
+	    return false;
 	}
 	
 	private boolean setupEconomy()
 	{
-		RegisteredServiceProvider<Economy> economyProvider = Bukkit.getServicesManager().getRegistration(Economy.class);
-		if (economyProvider != null)
-		{
-			economy = economyProvider.getProvider();
+		if(Bukkit.getPluginManager().getPlugin("Vault")!=null) {
+			RegisteredServiceProvider<Economy> economyProvider = Bukkit.getServicesManager().getRegistration(Economy.class);
+			if (economyProvider != null) {
+				economy = economyProvider.getProvider();
+			}
+			return economy != null;
 		}
-		return (economy!=null);
+		return false;
 	}
 	
 	public void onEnable() 
 	{
-		if(Bukkit.getPluginManager().getPlugin("Vault")!=null)
-		{
-			isEco=setupEconomy();
-		}
-		if(!isEco)
+		if(!setupEconomy())
 		{
 			Bukkit.getConsoleSender().sendMessage("§a[ClockGUI] §4Valut未加载!");
+			isEco = false;
 		}
 		if(!hookPlayerPoints())
 		{
@@ -96,7 +95,9 @@ public class ClockGUI extends JavaPlugin
 			if(args.length==0) {
 				if (sender instanceof Player) {
 					Player p = (Player)sender;
-					Inventory inv = InventoryUtil.initInventory(p, configManager.guiNameList.get(0), configManager.list.get(0), 0, dataManager.getPlayerData());
+					String mainGuiId = configManager.mainGuiId;
+					Inventory inv = InventoryUtil.initInventory(p, configManager.guiNameList.get(mainGuiId),
+							configManager.list.get(mainGuiId), configManager.mainGuiId, dataManager.getPlayerData());
 					p.openInventory(inv);
 				}
 				return true;
@@ -108,14 +109,15 @@ public class ClockGUI extends JavaPlugin
 				sender.sendMessage("§a/clock help  §6打开帮助");
 				if(sender.isOp())
 				{
-					sender.sendMessage("§a/clock give   §6给予钟表菜单");
-					sender.sendMessage("§a/clock open [GUI编号]   §6打开GUI界面(0为主菜单)");
-					sender.sendMessage("§a/clock delete [GUI编号] [按钮位置]  §6删除该按钮位置的玩家使用次数数据");
+					sender.sendMessage("§a/clock get   §6给予钟表菜单");
+					sender.sendMessage("§a/clock open [GUI ID]   §6打开GUI界面");
+					//sender.sendMessage("§a/clock delete [GUI编号] [按钮位置]  §6删除该按钮位置的玩家使用次数数据");
 					sender.sendMessage("§a/clock reload   §6重载配置");
 				}
 				return true;
 			}
 
+			/*
 			if (args[0].equalsIgnoreCase("delete"))
 			{
 				if (sender.isOp())
@@ -166,8 +168,10 @@ public class ClockGUI extends JavaPlugin
 					sender.sendMessage("§a[钟表菜单] §c没有权限！");
 				}
 			}
+
+			 */
 			
-			if (args[0].equalsIgnoreCase("give"))
+			if (args[0].equalsIgnoreCase("get"))
 			{
 				if(sender.isOp())
 				{
@@ -190,28 +194,22 @@ public class ClockGUI extends JavaPlugin
 					if (sender instanceof Player)
 					{
 						Player p = (Player)sender;
-						if(args[1].matches("[0-9]*"))
+						String guiId = args[1];
+						if(configManager.guiNameList.containsKey(guiId))
 						{
-							if(Integer.parseInt(args[1])<=configManager.list.size()-1 && Integer.parseInt(args[1])>=0)
-							{
-								Inventory inv = InventoryUtil.initInventory(p, configManager.guiNameList.get(Integer.valueOf(args[1])),
-										configManager.list.get(Integer.valueOf(args[1])), Integer.parseInt(args[1]), dataManager.getPlayerData());
-								p.openInventory(inv);
-							}
-							else
-							{
-								sender.sendMessage("§a[钟表菜单] §c没有以这个为编号的GUI");
-							}
+							Inventory inv = InventoryUtil.initInventory(p, configManager.guiNameList.get(guiId),
+									configManager.list.get(guiId), guiId, dataManager.getPlayerData());
+							p.openInventory(inv);
 						}
 						else
 						{
-							sender.sendMessage("§a[钟表菜单] §c编号必须为数字");
+							sender.sendMessage("§a[钟表菜单] §c没有以这个为编号的GUI");
 						}
 					}
 				}
 				else
 				{
-					sender.sendMessage("§a/clock open [GUI编号] §6打开钟表菜单(0为主菜单)");
+					sender.sendMessage("§a/clock open [GUI ID] §6打开钟表菜单");
 				}
 			}
 			

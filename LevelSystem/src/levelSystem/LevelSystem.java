@@ -4,6 +4,7 @@ import levelSystem.expansion.LevelSystemExpansion;
 import levelSystem.listener.LevelSystemListener;
 import levelSystem.manager.ConfigManager;
 import levelSystem.manager.ExpManager;
+import levelSystem.manager.LevelPlayerManager;
 import levelSystem.manager.RewardManager;
 import levelSystem.model.LevelPlayer;
 import org.bukkit.Bukkit;
@@ -24,12 +25,13 @@ import java.util.UUID;
 
 public class LevelSystem extends JavaPlugin
 {
-	public HashMap<UUID, LevelPlayer> players = new  HashMap<>();
+
 
 	public API api;
 
 	public ConfigManager configManager;
 	public RewardManager rewardManager;
+	public LevelPlayerManager levelPlayerManager;
 
 	public void onEnable() {
 		if(!getDataFolder().exists())
@@ -39,6 +41,7 @@ public class LevelSystem extends JavaPlugin
 		if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null){
 			new LevelSystemExpansion(this).register();
 		}
+		levelPlayerManager = new LevelPlayerManager(this);
 		configManager = new ConfigManager(this);
 		rewardManager = new RewardManager(this);
 
@@ -50,7 +53,7 @@ public class LevelSystem extends JavaPlugin
 	}
 
 	public void onDisable() {
-		for(LevelPlayer levelPlayer:players.values()) {
+		for(LevelPlayer levelPlayer:levelPlayerManager.getPlayers()) {
 			try {
 				configManager.savePlayerConfig(levelPlayer.getPlayer());
 			} catch (IOException e) {
@@ -105,7 +108,7 @@ public class LevelSystem extends JavaPlugin
 			if(args.length==0) {
 				if(sender instanceof Player) {
 					Player p = (Player)sender;
-					LevelPlayer levelPlayer = players.get(p.getUniqueId());
+					LevelPlayer levelPlayer = levelPlayerManager.getLevelPlayer(p);
 					if(levelPlayer==null)
 						return true;
 					int level = levelPlayer.getLevel();
@@ -141,7 +144,7 @@ public class LevelSystem extends JavaPlugin
 						return true;
 					}
 
-					LevelPlayer levelPlayer = players.get(player.getUniqueId());
+					LevelPlayer levelPlayer = levelPlayerManager.getLevelPlayer(player);
 					levelPlayer.addExp(Integer.parseInt(args[2]));
 					sender.sendMessage("§6[等级系统] §a已为玩家§5"+args[1]+"§a增加§e" + args[2] + "§a点经验");
 					levelPlayer.getPlayer().sendMessage("§6获得§e" + args[2] + "§6点经验");
@@ -156,7 +159,7 @@ public class LevelSystem extends JavaPlugin
 				if(args.length==2) {
 					Player player = Bukkit.getPlayer(args[1]);
 					if(player!=null) {
-						players.get(player.getUniqueId()).clearLevel();
+						levelPlayerManager.getLevelPlayer(player).clearLevel();
 						sender.sendMessage("§6[等级系统] §a已清空玩家§5"+args[1]+"§a的总经验");
 					}
 					else {
@@ -186,7 +189,7 @@ public class LevelSystem extends JavaPlugin
 							int level = Integer.parseInt(args[2]);
 							if(level<=configManager.getMaxLevel() && level>0)
 							{
-								LevelPlayer levelPlayer = this.players.get(player.getUniqueId());
+								LevelPlayer levelPlayer = levelPlayerManager.getLevelPlayer(player);
 								levelPlayer.setLevel(level);
 								levelPlayer.setCurrentExp(0);
 								sender.sendMessage("§6[等级系统] §a已设置玩家§5"+args[1]+"§a等级为§e"+args[2]);

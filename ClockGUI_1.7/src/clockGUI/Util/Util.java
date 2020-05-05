@@ -9,22 +9,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Util {
-    public static ItemStack setItem(ItemStack item, String name, ArrayList<String> lore, String itemID)
+    public static ItemStack setItem(ItemStack item, String name, List<String> lore, String itemID)
     {
         ItemMeta meta = item.getItemMeta();
-        if(name!=null)
-        {
+        if(name!=null) {
             meta.setDisplayName(name);
         }
 
-        if(lore!=null)
-        {
+        if(lore!=null) {
             meta.setLore(lore);
         }
         item.setItemMeta(meta);
 
-        if(itemID!=null)
-        {
+        if(itemID!=null) {
             item.setType(Material.getMaterial(itemID));
         }
         return item;

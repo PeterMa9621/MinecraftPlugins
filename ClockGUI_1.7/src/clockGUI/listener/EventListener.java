@@ -2,6 +2,7 @@ package clockGUI.listener;
 
 import clockGUI.ClockGUI;
 import clockGUI.model.ClockGuiItem;
+import clockGUI.model.Function;
 import clockGUI.model.PlayerData;
 import clockGUI.Util.InventoryUtil;
 import clockGUI.manager.ConfigManager;
@@ -21,6 +22,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class EventListener implements Listener
@@ -44,8 +46,7 @@ public class EventListener implements Listener
 		}
 		
 	}
-	
-	//监视玩家进入时，执行
+
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event)
     {
@@ -77,9 +78,9 @@ public class EventListener implements Listener
 			{
 				if(itemMeta.getLore().equals(configManager.clock.getItemMeta().getLore()))
 				{
-					int guiNumber = 0;
-					Inventory inv = InventoryUtil.initInventory(player, configManager.guiNameList.get(guiNumber),
-							configManager.list.get(guiNumber), guiNumber, dataManager.getPlayerData());
+					String mainGuiId = configManager.mainGuiId;
+					Inventory inv = InventoryUtil.initInventory(player, configManager.guiNameList.get(mainGuiId),
+							configManager.list.get(mainGuiId), mainGuiId, dataManager.getPlayerData());
 					player.openInventory(inv);
 				}
 			}
@@ -169,7 +170,7 @@ public class EventListener implements Listener
 			// ==================================================
 			if(!clockGuiItem.getMessage().isEmpty())
 			{
-				ArrayList<String> messageList = clockGuiItem.getMessage();
+				List<String> messageList = clockGuiItem.getMessage();
 				for(String i:messageList)
 				{
 					p.sendMessage(i);
@@ -213,42 +214,39 @@ public class EventListener implements Listener
 			// ========================================
 			if(clockGuiItem.getFunction().getType().equalsIgnoreCase("command"))
 			{
-				if(clockGuiItem.getFunction().shouldCloseGui())
+				Function function = clockGuiItem.getFunction();
+				if(function.shouldCloseGui())
 					p.closeInventory();
 
-				for(String i:clockGuiItem.getFunction().getCommand())
+				for(String command:function.getCommand())
 				{
-					if(i.contains("{ignoreOP}"))
+					command = command.replace("{player}", p.getName());
+					if(function.shouldRunAsOp())
 					{
 						if(p.hasPermission("clock.bypass"))
 						{
-							p.performCommand(i.replace("{ignoreOP}", "").replace("/", "").replace("{player}", event.getWhoClicked().getName()));
+							Bukkit.dispatchCommand(p, command);
 						}
 						else
 						{
 							p.setOp(true);
-							p.performCommand(i.replace("{ignoreOP}", "").replace("/", "").replace("{player}", event.getWhoClicked().getName()));
+							Bukkit.dispatchCommand(p, command);
 							p.setOp(false);
 						}
 					}
 					else
 					{
-						Bukkit.dispatchCommand(p, i.replace("/", ""));
-						//p.performCommand(i.replace("/", ""));
+						Bukkit.dispatchCommand(p, command);
 					}
 				}
-			}
-
-			else if(clockGuiItem.getFunction().getType().equalsIgnoreCase("gui")) {
+			} else if(clockGuiItem.getFunction().getType().equalsIgnoreCase("gui")) {
 				String OpenGUIId = clockGuiItem.getFunction().getGuiId();
 
 				Inventory inv = InventoryUtil.initInventory(p, configManager.guiNameList.get(OpenGUIId),
 						configManager.list.get(OpenGUIId), OpenGUIId, dataManager.getPlayerData());
 
 				p.openInventory(inv);
-			}
-
-			else if(clockGuiItem.getFunction().getType().equalsIgnoreCase("guiAndCommand"))
+			} else if(clockGuiItem.getFunction().getType().equalsIgnoreCase("guiAndCommand"))
 			{
 				for(String i:clockGuiItem.getFunction().getCommand())
 				{

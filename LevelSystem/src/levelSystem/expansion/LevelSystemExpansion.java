@@ -1,6 +1,7 @@
 package levelSystem.expansion;
 
 import levelSystem.LevelSystem;
+import levelSystem.callback.LevelPlayerCallback;
 import levelSystem.manager.ExpManager;
 import levelSystem.model.LevelPlayer;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -86,7 +87,7 @@ public class LevelSystemExpansion extends PlaceholderExpansion {
 
         // %example_placeholder1%
         if(identifier.equals("level")){
-            LevelPlayer levelPlayer = this.plugin.players.get(player.getUniqueId());
+            LevelPlayer levelPlayer = this.plugin.levelPlayerManager.getLevelPlayer(player);
             if(levelPlayer!=null)
                 return String.valueOf(levelPlayer.getLevel());
             return "";
@@ -94,14 +95,14 @@ public class LevelSystemExpansion extends PlaceholderExpansion {
 
         // %example_placeholder2%
         if(identifier.equals("current_exp")){
-            LevelPlayer levelPlayer = this.plugin.players.get(player.getUniqueId());
+            LevelPlayer levelPlayer = this.plugin.levelPlayerManager.getLevelPlayer(player);
             if(levelPlayer!=null)
                 return String.valueOf(levelPlayer.getCurrentExp());
             return "";
         }
 
         if(identifier.equals("required_exp")){
-            LevelPlayer levelPlayer = this.plugin.players.get(player.getUniqueId());
+            LevelPlayer levelPlayer = this.plugin.levelPlayerManager.getLevelPlayer(player);
             if(levelPlayer!=null) {
                 int level = levelPlayer.getLevel();
                 return String.valueOf(ExpManager.getExp(level));

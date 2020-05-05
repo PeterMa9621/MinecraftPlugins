@@ -79,6 +79,9 @@ public class DungeonManager extends JavaPlugin
 				guiManager.openDungeonGui(player, GuiType.Group);
 				return true;
 			} else {
+				if(!sender.isOp()) {
+					return true;
+				}
 				if(args[0].equalsIgnoreCase("reload")){
 					configManager.loadConfig();
 

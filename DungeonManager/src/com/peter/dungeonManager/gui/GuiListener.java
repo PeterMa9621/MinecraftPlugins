@@ -123,9 +123,11 @@ public class GuiListener implements Listener
 				LeaveGroupEvent event = new LeaveGroupEvent(dungeonPlayer);
 				Bukkit.getPluginManager().callEvent(event);
 
-				if(!dungeonGroup.isLeader(dungeonPlayer))
+				if(!dungeonGroup.isLeader(dungeonPlayer)) {
 					itemStack = plugin.guiManager.createGroupIcon(dungeonGroup, dungeonPlayer, true);
-				else {
+					DungeonPlayer leader = dungeonGroup.getLeader();
+					leader.getPlayer().sendMessage(GuiManager.msgPrefix + "§f成员§2" + dungeonPlayer.getPlayer().getName() + "§f离开了队伍");
+				} else {
 					itemStack = null;
 					inventory.setItem(GuiManager.startDungeonIndex, null);
 				}
@@ -136,6 +138,8 @@ public class GuiListener implements Listener
 				if(groupResponse.canCreateOrJoinGroup()) {
 					dungeonGroup.addPlayer(dungeonPlayer);
 					itemStack = plugin.guiManager.createGroupIcon(dungeonGroup, dungeonPlayer, false);
+					DungeonPlayer leader = dungeonGroup.getLeader();
+					leader.getPlayer().sendMessage(GuiManager.msgPrefix + "§f玩家§2" + dungeonPlayer.getPlayer().getName() + "§f加入了队伍");
 				} else {
 					Util.setLoreForItem(itemStack, groupResponse.getReason());
 				}

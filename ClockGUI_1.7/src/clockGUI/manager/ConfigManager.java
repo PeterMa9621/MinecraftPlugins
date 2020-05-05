@@ -30,8 +30,14 @@ public class ConfigManager {
 
     public ItemStack clock = new ItemStack(Material.CLOCK);
 
+    /**
+     *  Key is gui id
+     */
     public HashMap<String, String> guiNameList = new HashMap<>();
 
+    /**
+     *  Key is gui id
+     */
     public HashMap<String, HashMap<Integer, ClockGuiItem>> list = new HashMap<>();
 
     public List<String> enableWorlds;
@@ -106,21 +112,24 @@ public class ConfigManager {
             // Clock Settings
             config.set("Clock.AutoGetClock", true);
             config.set("Clock.MainGuiId", 0);
-            config.set("Clock.Name", "Â§aé’Ÿè¡¨èœå•");
-            config.set("Clock.Lore", "Â§1æˆ‘çš„ä¸–ç•Œé’Ÿè¡¨èœå•%Â§2å³é”®æˆ‘æ‰“å¼€èœå•");
+            config.set("Clock.Name", "¡ìaÖÓ±í²Ëµ¥");
+            config.set("Clock.Lore", new ArrayList<String>() {{
+                add("¡ì1ÎÒµÄÊÀ½çÖÓ±í²Ëµ¥");
+                add("¡ì2ÓÒ¼üÎÒ´ò¿ª²Ëµ¥");
+            }});
             config.set("Clock.World", new ArrayList<String>() {{
                 add("world");
             }}.toArray());
 
-            config.set("GUI.0.Name", "Â§1æˆ‘çš„ä¸–ç•Œé’Ÿè¡¨èœå•");
+            config.set("GUI.0.Name", "¡ì1ÎÒµÄÊÀ½çÖÓ±í²Ëµ¥");
             config.set("GUI.0.Item.1.Position", 1);
             config.set("GUI.0.Item.1.ItemID", "CLOCK");
             config.set("GUI.0.Item.1.Model", 0);
-            config.set("GUI.0.Item.1.Name", "ç¤ºä¾‹1");
+            config.set("GUI.0.Item.1.Name", "Ê¾Àı1");
             config.set("GUI.0.Item.1.HideItem", false);
             config.set("GUI.0.Item.1.Lore", new ArrayList<String>() {{
-                add("ç¬¬ä¸€è¡Œ");
-                add("ç¬¬äºŒè¡Œ");
+                add("µÚÒ»ĞĞ");
+                add("µÚ¶şĞĞ");
             }});
             config.set("GUI.0.Item.1.Enchantment.ID", "fortune");
             config.set("GUI.0.Item.1.Enchantment.Level", 1);
@@ -129,29 +138,29 @@ public class ConfigManager {
             config.set("GUI.0.Item.1.Cost.Type", "Money");
             config.set("GUI.0.Item.1.Cost.Price", 1000);
             config.set("GUI.0.Item.1.Message", new ArrayList<String>() {{
-                add("&aä½ å·²æŒ‰ä¸‹è¿™ä¸ªæŒ‰é’®");
-                add("&cæµ‹è¯•");
+                add("&aÄãÒÑ°´ÏÂÕâ¸ö°´Å¥");
+                add("&c²âÊÔ");
             }});
             config.set("GUI.0.Item.1.Frequency", 1);
             config.set("GUI.0.Item.1.Function.OpenAnotherGUI.Use", true);
             config.set("GUI.0.Item.1.Function.OpenAnotherGUI.Id", 1);
             config.set("GUI.0.Item.1.Function.Command.Use", false);
             config.set("GUI.0.Item.1.Function.Command.Content", new ArrayList<String>() {{
-                add("say é’Ÿè¡¨èœå•");
+                add("say ÖÓ±í²Ëµ¥");
             }});
             config.set("GUI.0.Item.2.Position", 10);
             config.set("GUI.0.Item.2.ItemID", "CLOCK");
-            config.set("GUI.0.Item.2.Name", "ç¤ºä¾‹2");
+            config.set("GUI.0.Item.2.Name", "Ê¾Àı2");
             config.set("GUI.0.Item.2.Lore", new ArrayList<String>() {{
-                add("ç¬¬ä¸€è¡Œ");
-                add("ç¬¬äºŒè¡Œ");
+                add("µÚÒ»ĞĞ");
+                add("µÚ¶şĞĞ");
             }});
             config.set("GUI.0.Item.2.Cost.Type", "PlayerPoints");
             config.set("GUI.0.Item.2.Cost.Price", 500);
             config.set("GUI.0.Item.2.Function.Command.Use", true);
             config.set("GUI.0.Item.2.Function.Command.CloseGui", true);
             config.set("GUI.0.Item.2.Function.Command.Content", new ArrayList<String>() {{
-                add("say é’Ÿè¡¨èœå•");
+                add("say ÖÓ±í²Ëµ¥");
                 add("eco set {player} 10000");
             }});
             config.set("GUI.0.Item.2.Function.Command.RunAsOp", true);
@@ -159,29 +168,29 @@ public class ConfigManager {
             config.set("GUI.0.Item.2.Function.OpenAnotherGUI.Id", 2);
 
             // GUI Settings
-            config.set("GUI.1.Name", "ç¬¬ä¸€ä¸ªGUI");
+            config.set("GUI.1.Name", "µÚÒ»¸öGUI");
             config.set("GUI.1.Item.1.Position", 3);
             config.set("GUI.1.Item.1.ItemID", "diamond");
-            config.set("GUI.1.Item.1.Name", "ç¤ºä¾‹3");
+            config.set("GUI.1.Item.1.Name", "Ê¾Àı3");
             config.set("GUI.1.Item.1.Lore", new ArrayList<String>() {{
-                add("ç¬¬ä¸€è¡Œ");
-                add("ç¬¬äºŒè¡Œ");
+                add("µÚÒ»ĞĞ");
+                add("µÚ¶şĞĞ");
             }});
             config.set("GUI.1.Item.1.Function.Command.Use", true);
             config.set("GUI.1.Item.1.Function.Command.Content", new ArrayList<String>() {{
-                add("say é’Ÿè¡¨èœå•2");
+                add("say ÖÓ±í²Ëµ¥2");
                 add("eco set {player} 10000");
             }});
             config.set("GUI.1.Item.2.Position", 16);
             config.set("GUI.1.Item.2.ItemID", "iron_pickaxe");
-            config.set("GUI.1.Item.2.Name", "ç¤ºä¾‹4");
+            config.set("GUI.1.Item.2.Name", "Ê¾Àı4");
             config.set("GUI.1.Item.2.Lore", new ArrayList<String>() {{
-                add("ç¬¬ä¸€è¡Œ");
-                add("ç¬¬äºŒè¡Œ");
+                add("µÚÒ»ĞĞ");
+                add("µÚ¶şĞĞ");
             }});
             config.set("GUI.1.Item.2.Function.Command.Use", true);
             config.set("GUI.1.Item.2.Function.Command.Content", new ArrayList<String>() {{
-                add("say é’Ÿè¡¨èœå•");
+                add("say ÖÓ±í²Ëµ¥");
             }});
 
 
@@ -203,11 +212,7 @@ public class ConfigManager {
         autoGetClock = config.getBoolean("Clock.AutoGetClock");
         mainGuiId = config.getString("Clock.MainGuiId");
         String clockName = config.getString("Clock.Name");
-        ArrayList<String> clockLore = new ArrayList<String>();
-        for(String i:config.getString("Clock.Lore").split("%"))
-        {
-            clockLore.add(i);
-        }
+        List<String> clockLore = config.getStringList("Clock.Lore");
         Util.setItem(clock, clockName, clockLore, "CLOCK");
 
         enableWorlds = config.getStringList("Clock.World");
@@ -243,11 +248,12 @@ public class ConfigManager {
                 boolean openGUI = eachItemSection.getBoolean("Function.OpenAnotherGUI.Use", false);
                 String guiId = eachItemSection.getString("Function.OpenAnotherGUI.Id", "0");
                 boolean command = eachItemSection.getBoolean("Function.Command.Use", false);
+                boolean runAsOp = eachItemSection.getBoolean("Function.Command.RunAsOp", false);
                 boolean shouldCloseGui = eachItemSection.getBoolean("Function.Command.CloseGui", false);
                 List<String> commandList = eachItemSection.getStringList("Function.Command.Content");
                 String costType = eachItemSection.getString("Cost.Type");
                 int price = eachItemSection.getInt("Cost.Price");
-                String message = eachItemSection.getString("Message");
+                List<String> message = eachItemSection.getStringList("Message");
                 int frequency = eachItemSection.getInt("Frequency");
 
                 ItemStack item;
@@ -272,15 +278,15 @@ public class ConfigManager {
 
                 if(command && !openGUI)
                 {
-                    function = new Function("command", commandList, shouldCloseGui);
+                    function = new Function("command", commandList, shouldCloseGui, runAsOp);
                 }
                 else if(!command && openGUI)
                 {
-                    function = new Function("gui", guiId);
+                    function = new Function("gui", guiId, runAsOp);
                 }
                 else if(command)
                 {
-                    function = new Function("guiAndCommand", guiId, commandList);
+                    function = new Function("guiAndCommand", guiId, commandList, runAsOp);
                 }
                 else {
                     function = new Function("none", null, shouldCloseGui);
@@ -324,8 +330,8 @@ public class ConfigManager {
     public FileConfiguration load(File file)
     {
         if (!(file.exists()))
-        { //å‡å¦‚æ–‡ä»¶ä¸å­˜åœ¨
-            try   //æ•æ‰å¼‚å¸¸ï¼Œå› ä¸ºæœ‰å¯èƒ½åˆ›å»ºä¸æˆåŠŸ
+        { //¼ÙÈçÎÄ¼ş²»´æÔÚ
+            try   //²¶×½Òì³££¬ÒòÎªÓĞ¿ÉÄÜ´´½¨²»³É¹¦
             {
                 file.createNewFile();
             }

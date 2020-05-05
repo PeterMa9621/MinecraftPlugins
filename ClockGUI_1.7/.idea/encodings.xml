@@ -4,5 +4,6 @@
     <file url="file://$PROJECT_DIR$/src/clockGUI/ClockGUI.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/clockGUI/listener/EventListen.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/clockGUI/listener/EventListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/clockGUI/manager/ConfigManager.java" charset="GBK" />
   </component>
 </project>

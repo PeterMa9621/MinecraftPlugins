@@ -2,6 +2,7 @@ package com.peter.dungeonManager.model;
 
 import com.peter.dungeonManager.DungeonManager;
 import com.peter.dungeonManager.config.ConfigManager;
+import com.peter.dungeonManager.gui.GuiManager;
 import com.peter.dungeonManager.util.DataManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -18,7 +19,7 @@ public class DungeonGroup {
     private String startGameCmd;
     private final String startGameTitle = ChatColor.GOLD + "副本将在" + ChatColor.GREEN + ConfigManager.startGameDelay +
             ChatColor.GOLD + "秒后开始，请做好准备";
-    private final String disbandNotification = ChatColor.GOLD + "你的队伍已解散!";
+    private final String disbandNotification = ChatColor.RESET + "你的队伍已解散!";
 
     public DungeonGroup(String groupName, String dungeonName, DungeonSetting dungeonSetting, DungeonPlayer leader) {
         this.groupName = groupName;
@@ -58,7 +59,7 @@ public class DungeonGroup {
     public void disband(Boolean notifyPlayer) {
         for(DungeonPlayer dungeonPlayer:this.players) {
             if(notifyPlayer) {
-                dungeonPlayer.getPlayer().sendMessage(ChatColor.GREEN + "[副本系统] " + disbandNotification);
+                dungeonPlayer.getPlayer().sendMessage(GuiManager.msgPrefix + disbandNotification);
                 dungeonPlayer.getPlayer().sendTitle(disbandNotification, "", 5, 3*20, 5);
             }
             dungeonPlayer.leaveDungeonGroup();
@@ -83,6 +84,10 @@ public class DungeonGroup {
 
     public Boolean isLeader(DungeonPlayer dungeonPlayer) {
         return leader.equals(dungeonPlayer);
+    }
+
+    public DungeonPlayer getLeader() {
+        return leader;
     }
 
     public Boolean containsPlayer(DungeonPlayer player) {

@@ -1,11 +1,12 @@
 package dps;
 
-import de.erethon.dungeonsxl.event.dplayer.DPlayerKickEvent;
-import de.erethon.dungeonsxl.event.dplayer.instance.game.DGamePlayerEscapeEvent;
-import de.erethon.dungeonsxl.event.dplayer.instance.game.DGamePlayerFinishEvent;
-import de.erethon.dungeonsxl.event.gameworld.GameWorldStartGameEvent;
-import de.erethon.dungeonsxl.event.gameworld.GameWorldUnloadEvent;
-import de.erethon.dungeonsxl.game.Game;
+import de.erethon.dungeonsxl.api.dungeon.Game;
+import de.erethon.dungeonsxl.api.event.group.GroupFinishDungeonEvent;
+import de.erethon.dungeonsxl.api.event.group.GroupPlayerKickEvent;
+import de.erethon.dungeonsxl.api.event.group.GroupPlayerLeaveEvent;
+import de.erethon.dungeonsxl.api.event.world.GameWorldStartGameEvent;
+import de.erethon.dungeonsxl.api.event.world.InstanceWorldUnloadEvent;
+import de.erethon.dungeonsxl.api.player.PlayerGroup;
 import dps.listener.PlayerListener;
 import dps.model.DpsPlayer;
 import dps.model.DpsPlayerManager;
@@ -88,6 +89,7 @@ public class DpsListener implements Listener
 		}
     }
 
+    /*
 	@EventHandler
 	public void onDungeonStart(GameWorldStartGameEvent event) {
 		//Bukkit.getConsoleSender().sendMessage("GameWorldStartGame");
@@ -167,7 +169,9 @@ public class DpsListener implements Listener
 		DpsPlayerManager.markPlayerExitDungeon(event.getDPlayer().getPlayer());
 	}
 
-    /*
+     */
+
+
     @EventHandler
 	public void onDungeonStart(GameWorldStartGameEvent event) {
 		//Bukkit.getConsoleSender().sendMessage("GameWorldStartGame");
@@ -200,8 +204,11 @@ public class DpsListener implements Listener
 				Dps.scoreBoard.getAPI().restartScoreBoard(dpsPlayer.getPlayer());
 				RewardTable rewardTable = RewardBoxManager.getRewardTable(dpsPlayer.getDungeonName());
 				if(rewardTable!=null) {
-					RewardBoxManager.showRewardBox(dpsPlayer);
-
+					Player player = dpsPlayer.getPlayer();
+					player.sendMessage(ChatColor.GOLD + "奖励窗口即将打开...");
+					Bukkit.getScheduler().runTaskLater(plugin, ()->{
+						RewardBoxManager.showRewardBox(dpsPlayer);
+					},40);
 					String playerName = dpsPlayer.getPlayer().getName();
 					int exp = rewardTable.getRandomExp();
 					String command = String.format("level add %s %d", playerName, exp);
@@ -245,8 +252,6 @@ public class DpsListener implements Listener
 		Dps.scoreBoard.getAPI().restartScoreBoard(event.getPlayer().getPlayer());
 		DpsPlayerManager.markPlayerExitDungeon(event.getPlayer().getPlayer());
 	}
-
-     */
 
 	@EventHandler
 	public void onPlayerKillEntity(EntityDeathEvent event) {

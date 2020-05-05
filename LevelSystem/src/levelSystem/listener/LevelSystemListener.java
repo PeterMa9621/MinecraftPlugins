@@ -1,6 +1,7 @@
 package levelSystem.listener;
 
 import levelSystem.LevelSystem;
+import levelSystem.callback.LevelPlayerCallback;
 import levelSystem.event.LevelUpEvent;
 import levelSystem.manager.RewardManager;
 import levelSystem.model.LevelPlayer;
@@ -31,7 +32,7 @@ public class LevelSystemListener implements Listener
 	
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event) {
-		plugin.configManager.loadPlayerConfig(event.getPlayer());
+		plugin.configManager.loadPlayerConfig(event.getPlayer(), null);
     }
 
 	@EventHandler
@@ -43,7 +44,7 @@ public class LevelSystemListener implements Listener
 		String message = event.getMessage();
 		*/
 		if(useChatPrefix)
-			event.setFormat("¡ìf[¡ì2"+plugin.players.get(event.getPlayer().getUniqueId()).getLevel()+"¼¶¡ìf]"+event.getFormat());
+			event.setFormat("¡ìf[¡ì2"+plugin.levelPlayerManager.getLevelPlayer(event.getPlayer()).getLevel()+"¼¶¡ìf]"+event.getFormat());
     }
 
     @EventHandler
@@ -62,8 +63,17 @@ public class LevelSystemListener implements Listener
 
 		if(canGetExp.get(p.getUniqueId())) {
 			int expAmount = event.getAmount();
-			LevelPlayer levelPlayer = plugin.players.get(p.getUniqueId());
-			levelPlayer.addExp(expAmount);
+			LevelPlayer levelPlayer = plugin.levelPlayerManager.getLevelPlayer(p);
+			if(levelPlayer==null) {
+				plugin.configManager.loadPlayerConfig(p, new LevelPlayerCallback() {
+					@Override
+					public void run(LevelPlayer levelPlayer) {
+						levelPlayer.addExp(expAmount);
+					}
+				});
+			} else {
+				levelPlayer.addExp(expAmount);
+			}
 		}
 		canGetExp.put(p.getUniqueId(), true);
     }

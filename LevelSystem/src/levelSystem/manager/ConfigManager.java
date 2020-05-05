@@ -1,6 +1,7 @@
 package levelSystem.manager;
 
 import levelSystem.LevelSystem;
+import levelSystem.callback.LevelPlayerCallback;
 import levelSystem.model.ExpFormula;
 import levelSystem.model.LevelPlayer;
 import levelSystem.model.LevelReward;
@@ -111,8 +112,7 @@ public class ConfigManager
 		return maxLevel;
 	}
 
-	public void loadPlayerConfig(Player player) {
-		UUID uniqueId = player.getUniqueId();
+	public void loadPlayerConfig(Player player, LevelPlayerCallback callback) {
 		/*
 		if(plugin.players.containsKey(uniqueId)) {
 			LevelPlayer levelPlayer = plugin.players.get(uniqueId);
@@ -131,13 +131,17 @@ public class ConfigManager
 				current_exp = (int) result.get("current_exp");
 			}
 			LevelPlayer levelPlayer = new LevelPlayer(player, level, current_exp);
-			plugin.players.put(uniqueId, levelPlayer);
+			plugin.levelPlayerManager.addLevelPlayer(levelPlayer);
+
+			if(callback!=null)
+				callback.run(levelPlayer);
 		}, 20);
 	}
 
 	public void savePlayerConfig(Player player) throws IOException {
-		UUID uniqueId = player.getUniqueId();
-		LevelPlayer levelPlayer = plugin.players.get(uniqueId);
+		LevelPlayer levelPlayer = plugin.levelPlayerManager.getLevelPlayer(player);
+		if(levelPlayer==null)
+			return;
 		HashMap<String, Object> data = new HashMap<String, Object>() {{
 			put("name", player.getName());
 			put("current_exp", levelPlayer.getCurrentExp());

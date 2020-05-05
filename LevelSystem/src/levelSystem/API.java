@@ -13,8 +13,8 @@ public class API
 	
 	public int getLevel(Player p)
 	{
-		if(plugin.players.containsKey(p.getUniqueId())) {
-			LevelPlayer levelPlayer = plugin.players.get(p.getUniqueId());
+		if(plugin.levelPlayerManager.containsLevelPlayer(p)) {
+			LevelPlayer levelPlayer = plugin.levelPlayerManager.getLevelPlayer(p);
 			return levelPlayer.getLevel();
 		}
 		return 1;

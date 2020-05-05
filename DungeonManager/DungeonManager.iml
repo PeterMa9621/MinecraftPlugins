@@ -56,7 +56,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../Project0/server/plugins/Dps.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../Project0/MinecraftServerDungeonServer/plugins/Dps.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -65,7 +65,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../Project0/server/plugins/dungeonsxl-dist-0.18-SNAPSHOT.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../Project0/MinecraftServerDungeonServer/plugins/dungeonsxl-dist-0.18-SNAPSHOT-959.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

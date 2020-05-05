@@ -1,6 +1,8 @@
 package clockGUI.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.bukkit.inventory.ItemStack;
 
@@ -9,21 +11,15 @@ public class ClockGuiItem
 	ItemStack item = null;
 	Function function = null;
 	Money money = null;
-	ArrayList<String> message = new ArrayList<String>();
+	List<String> message;
 	int frequency = 0;
 	Boolean hideItem;
-	public ClockGuiItem(ItemStack item, Function function, Money money, String message, int frequency, Boolean hideItem)
+	public ClockGuiItem(ItemStack item, Function function, Money money, List<String> message, int frequency, Boolean hideItem)
 	{
 		this.item = item;
 		this.function = function;
 		this.money = money;
-		if(message!=null && message!="")
-		{
-			for(String s:message.split("%"))
-			{
-				this.message.add(s);
-			}
-		}
+		this.message = message;
 		this.frequency = frequency;
 		this.hideItem = hideItem;
 	}
@@ -48,8 +44,7 @@ public class ClockGuiItem
 		return money;
 	}
 	
-	public ArrayList<String> getMessage()
-	{
+	public List<String> getMessage() {
 		return message;
 	}
 
