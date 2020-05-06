@@ -1,0 +1,5 @@
+name: WorldBossBungeecord
+main: me.peterma.worldBossBungeecord.WorldBossBungeecord
+version: '1.0'
+api-version: '1.15'
+author: peterMa
