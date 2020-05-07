@@ -1,16 +1,14 @@
 package com.peter.worldBoss;
 
-import com.peter.worldBoss.WorldBossListener;
 import com.peter.worldBoss.config.ConfigManager;
 import com.peter.worldBoss.expansion.WorldBossExpansion;
-
 import com.peter.worldBoss.gui.GuiListener;
 import com.peter.worldBoss.gui.GuiManager;
+import com.peter.worldBoss.listener.BungeecordListener;
 import com.peter.worldBoss.manager.BossGroupManager;
 import com.peter.worldBoss.model.BossGroup;
 import com.peter.worldBoss.model.BossGroupSetting;
-import com.peter.worldBoss.model.BossPlayer;
-import de.erethon.dungeonsxl.api.DungeonsAPI;
+import com.peter.worldBoss.util.BungeecordUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -19,11 +17,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.awt.*;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.UUID;
 
 public class WorldBoss extends JavaPlugin
 {
@@ -31,6 +25,9 @@ public class WorldBoss extends JavaPlugin
 	@Override
 	public void onEnable()
 	{
+		checkIfBungee();
+		getServer().getMessenger().registerOutgoingPluginChannel( this, "BungeeCord" );
+		getServer().getMessenger().registerIncomingPluginChannel( this, "peter:worldboss", new BungeecordListener(this)); // we register the incoming channel
 		if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null){
 			new WorldBossExpansion(this).register();
 		}
@@ -39,6 +36,7 @@ public class WorldBoss extends JavaPlugin
 		getServer().getPluginManager().registerEvents(new GuiListener(this), this);
 		runTimerToCheckBeginTime();
 		GuiManager.plugin = this;
+		BossGroupManager.plugin = this;
 		Bukkit.getConsoleSender().sendMessage("°Ïa[ ¿ΩÁBoss] °ÏeWorldBoss loaded");
 	}
 
@@ -53,6 +51,7 @@ public class WorldBoss extends JavaPlugin
 
 			if (args.length==0 && sender instanceof Player) {
 				Player player = (Player) sender;
+				player.sendMessage(String.valueOf(Bukkit.getServer().getPort()));
 				GuiManager.openWorldBossGui(player);
 				return true;
 			} else {
@@ -100,6 +99,26 @@ public class WorldBoss extends JavaPlugin
 				}
 			}
 		}.runTaskTimer(this, 0, 200);
+	}
+
+	// we check like that if the specified server is BungeeCord.
+	private void checkIfBungee()
+	{
+		// we check if the server is Spigot/Paper (because of the spigot.yml file)
+		if ( !getServer().getVersion().contains( "Spigot" ) && !getServer().getVersion().contains( "Paper" ) )
+		{
+			getLogger().severe( "You probably run CraftBukkit... Please update atleast to spigot for this to work..." );
+			getLogger().severe( "Plugin disabled!" );
+			getServer().getPluginManager().disablePlugin( this );
+			return;
+		}
+		if ( getServer().spigot().getConfig().getConfigurationSection("settings").getBoolean( "settings.bungeecord" ) )
+		{
+			getLogger().severe( "This server is not BungeeCord." );
+			getLogger().severe( "If the server is already hooked to BungeeCord, please enable it into your spigot.yml aswell." );
+			getLogger().severe( "Plugin disabled!" );
+			getServer().getPluginManager().disablePlugin( this );
+		}
 	}
 }
 

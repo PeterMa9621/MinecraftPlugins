@@ -22,6 +22,8 @@ import java.util.List;
 
 public class ConfigManager {
     public static ItemStack leaveGroupIcon;
+    public static int ipPort;
+    public static String destServer;
 
     public static void loadConfig(WorldBoss plugin) {
         File file = new File(plugin.getDataFolder(), "/config.yml");
@@ -41,6 +43,9 @@ public class ConfigManager {
                     config.set("group"+(i+1) + ".day", new int[] {1,2,3,4,5});
                 config.set("group"+(i+1) + ".time", "15:50");
             }
+
+            config.set("destServer", "dungeon");
+            config.set("bungeecord.address.dungeonServerPort", 25595);
 
             try {
                 config.save(file);
@@ -96,6 +101,10 @@ public class ConfigManager {
             BossGroupManager.bossGroupSetting.put(name, bossGroupSetting);
             numGroup ++;
         }
+
+        destServer = config.getString("destServer", "dungeon");
+        ipPort = config.getInt("bungeecord.address.dungeonServerPort", 25595);
+
         Bukkit.getConsoleSender().sendMessage("§a[世界Boss] §e已加载" + numGroup + "个Boss队伍");
     }
 
@@ -113,21 +122,5 @@ public class ConfigManager {
             }
         }
         return YamlConfiguration.loadConfiguration(file);
-    }
-    public static FileConfiguration load(String path)
-    {
-        File file=new File(path);
-        if(!file.exists())
-        {
-            try
-            {
-                file.createNewFile();
-            }
-            catch(IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-        return YamlConfiguration.loadConfiguration(new File(path));
     }
 }

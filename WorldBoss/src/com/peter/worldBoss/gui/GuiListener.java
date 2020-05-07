@@ -74,8 +74,6 @@ public class GuiListener implements Listener
 					}});
 					icon = itemStack;
 				}
-
-
 				event.getInventory().setItem(index, icon);
 			}
 		}

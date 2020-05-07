@@ -1,14 +1,19 @@
 package me.peterma.worldBossBungeecord.command;
 
+import me.peterma.worldBossBungeecord.WorldBossBungeecord;
+import me.peterma.worldBossBungeecord.util.Util;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 
 public class WorldBossCommand extends Command {
-    public WorldBossCommand() {
+    private WorldBossBungeecord plugin;
+    public WorldBossCommand(WorldBossBungeecord plugin) {
         super("wbb", "worldboss.admin");
+        this.plugin = plugin;
     }
 
     @Override
@@ -20,10 +25,13 @@ public class WorldBossCommand extends Command {
 
         if(strings[0].equalsIgnoreCase("tp")) {
             if(strings.length == 2) {
-                if(commandSender instanceof ProxiedPlayer) {
-                    ProxiedPlayer proxiedPlayer = (ProxiedPlayer) commandSender;
-                    proxiedPlayer.sendMessage(new ComponentBuilder("Hello World!").color(ChatColor.GREEN).create());
+                String playerName = strings[1];
+                ProxiedPlayer proxiedPlayer = ProxyServer.getInstance().getPlayer(playerName);
+                if(proxiedPlayer!=null) {
+                    Util.sendPluginData(proxiedPlayer, "Test data");
+                    this.plugin.getLogger().info("Send plugin message");
                 }
+                commandSender.sendMessage(new ComponentBuilder("Hello World!").color(ChatColor.GREEN).create());
             }
         }
     }

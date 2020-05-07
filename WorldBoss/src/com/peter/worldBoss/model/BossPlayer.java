@@ -1,18 +1,21 @@
 package com.peter.worldBoss.model;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+
+import java.util.UUID;
 
 public class BossPlayer {
     private BossGroup group;
-    private Player player;
+    private UUID uuid;
 
-    public BossPlayer(BossGroup group, Player player) {
+    public BossPlayer(BossGroup group, UUID uuid) {
         this.group = group;
-        this.player = player;
+        this.uuid = uuid;
     }
 
     public Player getPlayer() {
-        return player;
+        return Bukkit.getPlayer(uuid);
     }
 
     public BossGroup getGroup() {
@@ -21,5 +24,9 @@ public class BossPlayer {
 
     public void setGroup(BossGroup group) {
         this.group = group;
+    }
+
+    public UUID getUuid() {
+        return uuid;
     }
 }

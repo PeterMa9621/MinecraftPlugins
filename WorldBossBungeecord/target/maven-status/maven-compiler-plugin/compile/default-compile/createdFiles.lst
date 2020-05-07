@@ -1,2 +1,4 @@
+me\peterma\worldBossBungeecord\listener\ChannelListener.class
 me\peterma\worldBossBungeecord\command\WorldBossCommand.class
+me\peterma\worldBossBungeecord\util\Util.class
 me\peterma\worldBossBungeecord\WorldBossBungeecord.class

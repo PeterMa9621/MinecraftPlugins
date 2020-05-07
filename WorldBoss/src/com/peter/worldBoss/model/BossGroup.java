@@ -1,12 +1,16 @@
 package com.peter.worldBoss.model;
 
 import com.peter.worldBoss.WorldBoss;
+import com.peter.worldBoss.config.ConfigManager;
 import com.peter.worldBoss.manager.BossGroupManager;
+import com.peter.worldBoss.util.BungeecordUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
-import java.util.ArrayList;
+import java.util.*;
 
 public class BossGroup {
     private String groupName;
@@ -46,6 +50,21 @@ public class BossGroup {
     }
 
     public void startGame(String startGameCmd, WorldBoss plugin) {
+        if(plugin.getServer().getPort() != ConfigManager.ipPort) {
+            // Create plugin message for bungeecord
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("server", ConfigManager.destServer);
+            jsonObject.put("groupName", getGroupName());
+            JSONArray jsonArray = new JSONArray();
+
+            for (BossPlayer bossPlayer : players) {
+                UUID uuid = bossPlayer.getUuid();
+                jsonArray.add(uuid.toString());
+            }
+            jsonObject.put("players", jsonArray);
+            BungeecordUtil.sendMessageToBungeecord(players.get(0).getPlayer(), jsonObject.toJSONString(), plugin);
+            return;
+        }
         //Bukkit.getConsoleSender().sendMessage("Start Game!");
 
         int numPlayer = this.players.size();
