@@ -210,7 +210,11 @@ public class ScoreBoard extends JavaPlugin implements Listener
     	for(int j=0; j<lines.size()-1; j++)
     	{
     		String content = lines.get(j+1);
-    		content = PlaceholderAPI.setPlaceholders(p, content);
+    		try {
+				content = PlaceholderAPI.setPlaceholders(p, content);
+			} catch (Exception e) {
+    			content = "";
+			}
         	
     		randomObjective.getScore(content).setScore(15-j);
     	}

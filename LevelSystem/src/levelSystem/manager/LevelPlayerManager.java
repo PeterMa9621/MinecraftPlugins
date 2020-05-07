@@ -17,8 +17,11 @@ public class LevelPlayerManager {
     }
 
     public LevelPlayer getLevelPlayer(Player player) {
-        UUID uuid = player.getUniqueId();
-        return this.players.get(uuid);
+        if(player!=null) {
+            UUID uuid = player.getUniqueId();
+            return this.players.get(uuid);
+        }
+        return null;
     }
 
     public void addLevelPlayer(LevelPlayer levelPlayer) {

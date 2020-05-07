@@ -113,14 +113,11 @@ public class ConfigManager
 	}
 
 	public void loadPlayerConfig(Player player, LevelPlayerCallback callback) {
-		/*
-		if(plugin.players.containsKey(uniqueId)) {
-			LevelPlayer levelPlayer = plugin.players.get(uniqueId);
-			levelPlayer.setPlayer(player);
-			return levelPlayer;
+		final LevelPlayer[] levelPlayer = {null};
+		if(plugin.levelPlayerManager.containsLevelPlayer(player)) {
+			levelPlayer[0] = plugin.levelPlayerManager.getLevelPlayer(player);
 		}
 
-		 */
 		Bukkit.getScheduler().runTaskLater(plugin, () -> {
 			HashMap<String, Object> result = database.get(player.getUniqueId(), new String[] {"name", "current_exp", "level"});
 
@@ -130,11 +127,17 @@ public class ConfigManager
 				level = (int) result.get("level");
 				current_exp = (int) result.get("current_exp");
 			}
-			LevelPlayer levelPlayer = new LevelPlayer(player, level, current_exp);
-			plugin.levelPlayerManager.addLevelPlayer(levelPlayer);
+			if(levelPlayer[0] == null)
+				levelPlayer[0] = new LevelPlayer(player, level, current_exp);
+			else {
+				levelPlayer[0].setLevel(level);
+				levelPlayer[0].setCurrentExp(current_exp);
+			}
+
+			plugin.levelPlayerManager.addLevelPlayer(levelPlayer[0]);
 
 			if(callback!=null)
-				callback.run(levelPlayer);
+				callback.run(levelPlayer[0]);
 		}, 20);
 	}
 
