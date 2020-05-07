@@ -96,9 +96,9 @@ public class ConfigManager {
             List<Integer> day = section.getIntegerList(group + ".day");
 
             String startTime = section.getString(group + ".time");
-            BossGroupSetting bossGroupSetting = new BossGroupSetting(name, startTime, day, startGameCmd, minuteBefore, icon, plugin);
+            BossGroupSetting bossGroupSetting = new BossGroupSetting(group, startTime, day, startGameCmd, minuteBefore, icon, plugin);
             bossGroupSetting.setDisplayName(displayName);
-            BossGroupManager.bossGroupSetting.put(name, bossGroupSetting);
+            BossGroupManager.bossGroupSetting.put(group, bossGroupSetting);
             numGroup ++;
         }
 

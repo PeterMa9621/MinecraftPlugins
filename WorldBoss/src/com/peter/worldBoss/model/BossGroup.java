@@ -81,6 +81,9 @@ public class BossGroup {
             dispatchDungeonCommand(players.get(i).getPlayer(), true, plugin);
         }
         dispatchStartGameCommand(leader, startGameCmd, plugin);
+        for(BossPlayer eachBossPlayer:players) {
+            eachBossPlayer.setGroup(null);
+        }
     }
 
     private void dispatchDungeonCommand(Player player, Boolean isJoin, WorldBoss plugin) {

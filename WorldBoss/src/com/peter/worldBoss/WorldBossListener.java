@@ -1,7 +1,6 @@
 package com.peter.worldBoss;
 
 import com.peter.worldBoss.model.BossGroup;
-import de.erethon.dungeonsxl.player.DGroup;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

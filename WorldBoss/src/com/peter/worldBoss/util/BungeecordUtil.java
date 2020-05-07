@@ -9,6 +9,7 @@ public class BungeecordUtil {
     public static String mainChannel = "peter:worldboss";
     public static String subChannel = "worldBossNotification";
     public static String bungeecordChannel = "BungeeCord";
+    public static boolean shouldWaitForBungeecord = false;
 
     public static void sendMessageToBungeecord(Player player, String message, WorldBoss plugin){
         ByteArrayDataOutput out = ByteStreams.newDataOutput();

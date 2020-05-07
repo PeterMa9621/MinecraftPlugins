@@ -27,7 +27,7 @@ public class WorldBoss extends JavaPlugin
 	{
 		checkIfBungee();
 		getServer().getMessenger().registerOutgoingPluginChannel( this, "BungeeCord" );
-		getServer().getMessenger().registerIncomingPluginChannel( this, "peter:worldboss", new BungeecordListener(this)); // we register the incoming channel
+		getServer().getMessenger().registerIncomingPluginChannel( this, BungeecordUtil.mainChannel, new BungeecordListener(this)); // we register the incoming channel
 		if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null){
 			new WorldBossExpansion(this).register();
 		}
@@ -51,7 +51,6 @@ public class WorldBoss extends JavaPlugin
 
 			if (args.length==0 && sender instanceof Player) {
 				Player player = (Player) sender;
-				player.sendMessage(String.valueOf(Bukkit.getServer().getPort()));
 				GuiManager.openWorldBossGui(player);
 				return true;
 			} else {
@@ -89,16 +88,29 @@ public class WorldBoss extends JavaPlugin
 					setting.notifyPlayers(WorldBoss.this);
 					if(setting.canStart()){
 						setting.setPrevStartTime(now);
-						Bukkit.broadcastMessage("§6[世界Boss] §2世界BOSS活动§5" + setting.getDisplayName() + "§2开始了!");
-						BossGroup bossGroup = BossGroupManager.bossGroups.get(setting.getGroupName());
-						if(bossGroup!=null){
-							bossGroup.startGame(setting.getStartGameCmd(), WorldBoss.this);
-							BossGroupManager.bossGroups.remove(bossGroup.getGroupName());
+						Bukkit.broadcastMessage("§6[世界Boss] §2世界BOSS活动§5" + setting.getDisplayName() + "§2将在10秒后开始!");
+						Bukkit.getScheduler().runTaskLater(WorldBoss.this, ()->{
+							Bukkit.broadcastMessage("§6[世界Boss] §2世界BOSS活动§5" + setting.getDisplayName() + "§2开始了!");
+							if(getServer().getPort()==ConfigManager.ipPort && !BungeecordUtil.shouldWaitForBungeecord) {
+								startGame(setting);
+							}
+						}, 20*10);
+
+						if(getServer().getPort()!=ConfigManager.ipPort) {
+							startGame(setting);
 						}
 					}
 				}
 			}
-		}.runTaskTimer(this, 0, 200);
+		}.runTaskTimer(this, 0, 40);
+	}
+
+	private void startGame(BossGroupSetting setting) {
+		BossGroup bossGroup = BossGroupManager.bossGroups.get(setting.getGroupName());
+		if(bossGroup!=null){
+			bossGroup.startGame(setting.getStartGameCmd(), WorldBoss.this);
+			BossGroupManager.bossGroups.remove(bossGroup.getGroupName());
+		}
 	}
 
 	// we check like that if the specified server is BungeeCord.

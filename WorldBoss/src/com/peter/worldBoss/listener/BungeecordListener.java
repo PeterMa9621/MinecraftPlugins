@@ -33,6 +33,7 @@ public class BungeecordListener implements PluginMessageListener {
         ByteArrayDataInput in = ByteStreams.newDataInput( bytes );
         String subChannel = in.readUTF();
         if ( subChannel.equalsIgnoreCase( BungeecordUtil.subChannel ) ) {
+
             String data = in.readUTF();
 
             JSONParser parser = new JSONParser();
@@ -41,6 +42,8 @@ public class BungeecordListener implements PluginMessageListener {
                 JSONArray uuids = (JSONArray) jsonObject.get("players");
                 String groupName = (String) jsonObject.get("groupName");
                 BossGroup bossGroup = BossGroupManager.bossGroups.get(groupName);
+                if(bossGroup==null)
+                    bossGroup = new BossGroup(groupName);
 
                 for (Object o : uuids) {
                     String uuid = (String) o;
@@ -51,9 +54,11 @@ public class BungeecordListener implements PluginMessageListener {
                 }
 
                 BossGroupSetting setting = BossGroupManager.bossGroupSetting.get(groupName);
+                BossGroup finalBossGroup = bossGroup;
                 Bukkit.getScheduler().runTaskLater(plugin, ()-> {
-                    bossGroup.startGame(setting.getStartGameCmd(), plugin);
+                    finalBossGroup.startGame(setting.getStartGameCmd(), plugin);
                 }, 20);
+                BungeecordUtil.shouldWaitForBungeecord = true;
             } catch (ParseException e) {
                 e.printStackTrace();
             }
