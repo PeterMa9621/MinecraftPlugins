@@ -88,17 +88,20 @@ public class WorldBoss extends JavaPlugin
 					setting.notifyPlayers(WorldBoss.this);
 					if(setting.canStart()){
 						setting.setPrevStartTime(now);
-						Bukkit.broadcastMessage("§6[世界Boss] §2世界BOSS活动§5" + setting.getDisplayName() + "§2将在10秒后开始!");
-						Bukkit.getScheduler().runTaskLater(WorldBoss.this, ()->{
-							Bukkit.broadcastMessage("§6[世界Boss] §2世界BOSS活动§5" + setting.getDisplayName() + "§2开始了!");
-							if(getServer().getPort()==ConfigManager.ipPort && !BungeecordUtil.shouldWaitForBungeecord) {
-								startGame(setting);
-							}
-						}, 20*10);
 
 						if(getServer().getPort()!=ConfigManager.ipPort) {
+							Bukkit.broadcastMessage("§6[世界Boss] §2世界BOSS活动§5" + setting.getDisplayName() + "§2开始了!");
 							startGame(setting);
+						} else {
+							//Bukkit.broadcastMessage("§6[世界Boss] §2世界BOSS活动§5" + setting.getDisplayName() + "§2将在20秒后开始!");
+							Bukkit.getScheduler().runTaskLater(WorldBoss.this, ()->{
+								if(getServer().getPort()==ConfigManager.ipPort && !BungeecordUtil.shouldWaitForBungeecord) {
+									Bukkit.broadcastMessage("§6[世界Boss] §2世界BOSS活动§5" + setting.getDisplayName() + "§2开始了!");
+									startGame(setting);
+								}
+							}, 20*20);
 						}
+
 					}
 				}
 			}

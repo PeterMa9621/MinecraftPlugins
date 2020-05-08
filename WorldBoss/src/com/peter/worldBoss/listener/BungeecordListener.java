@@ -54,10 +54,11 @@ public class BungeecordListener implements PluginMessageListener {
                 }
 
                 BossGroupSetting setting = BossGroupManager.bossGroupSetting.get(groupName);
+                Bukkit.broadcastMessage("§6[世界Boss] §2世界BOSS活动§5" + setting.getDisplayName() + "§2将在60秒后开始!请玩家不要离开副本世界");
                 BossGroup finalBossGroup = bossGroup;
                 Bukkit.getScheduler().runTaskLater(plugin, ()-> {
                     finalBossGroup.startGame(setting.getStartGameCmd(), plugin);
-                }, 20);
+                }, 20*60);
                 BungeecordUtil.shouldWaitForBungeecord = true;
             } catch (ParseException e) {
                 e.printStackTrace();

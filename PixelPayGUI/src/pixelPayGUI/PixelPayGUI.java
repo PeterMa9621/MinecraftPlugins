@@ -41,6 +41,7 @@ public class PixelPayGUI extends JavaPlugin
 			if (args.length == 1 && sender instanceof Player) {
 				if(args[0].equalsIgnoreCase("reload")) {
 					configManager.loadKitInfo();
+					sender.sendMessage("°Ïc6÷ÿ‘ÿ≈‰÷√≥…π¶");
 					return true;
 				}
 				Player player = (Player) sender;

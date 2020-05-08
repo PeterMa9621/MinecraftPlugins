@@ -22,4 +22,8 @@ public class RewardManager {
     public void addReward(int level, LevelReward levelReward) {
         this.levelRewardHashMap.put(level, levelReward);
     }
+
+    public void clear() {
+        levelRewardHashMap.clear();
+    }
 }

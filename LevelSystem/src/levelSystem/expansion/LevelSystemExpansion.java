@@ -3,9 +3,13 @@ package levelSystem.expansion;
 import levelSystem.LevelSystem;
 import levelSystem.callback.LevelPlayerCallback;
 import levelSystem.manager.ExpManager;
+import levelSystem.model.BonusCard;
 import levelSystem.model.LevelPlayer;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 /**
  * This class will automatically register as a placeholder expansion
@@ -106,6 +110,19 @@ public class LevelSystemExpansion extends PlaceholderExpansion {
             if(levelPlayer!=null) {
                 int level = levelPlayer.getLevel();
                 return String.valueOf(ExpManager.getExp(level));
+            }
+            return "";
+        }
+
+        if(identifier.equals("bonus_card_info")){
+            LevelPlayer levelPlayer = this.plugin.levelPlayerManager.getLevelPlayer(player);
+            if(levelPlayer!=null && !levelPlayer.isBonusCardExpired()) {
+                BonusCard bonusCard = levelPlayer.getBonusCard();
+                LocalDateTime now = LocalDateTime.now();
+                LocalDateTime expiredTime = levelPlayer.getBonusCardExpiredTime();
+                Duration duration = Duration.between(now, expiredTime);
+                int leftMinutes = (int) duration.toMinutes();
+                return String.format("&f经验加成:&6%.1f倍&f,剩余%d&f分钟", bonusCard.getTimes(), leftMinutes);
             }
             return "";
         }

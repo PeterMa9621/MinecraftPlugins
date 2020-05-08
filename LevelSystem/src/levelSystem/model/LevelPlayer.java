@@ -1,21 +1,29 @@
 package levelSystem.model;
 
 import levelSystem.event.LevelUpEvent;
+import levelSystem.manager.BonusCardManager;
 import levelSystem.manager.ConfigManager;
 import levelSystem.manager.ExpManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
+import java.time.LocalDateTime;
+import java.util.Calendar;
+
 public class LevelPlayer
 {
 	private Player player;
 	private Integer level = 0;
 	private Integer currentExp = 0;
-	public LevelPlayer(Player player, Integer level, Integer currentExp) {
+	private LocalDateTime bonusCardExpiredTime;
+	private String bonusName;
+	public LevelPlayer(Player player, Integer level, Integer currentExp, LocalDateTime bonusCardExpiredTime, String bonusName) {
 		this.player=player;
 		this.level=level;
 		this.currentExp=currentExp;
+		this.bonusCardExpiredTime = bonusCardExpiredTime;
+		this.bonusName = bonusName;
 	}
 	
 	public Player getPlayer() {
@@ -46,7 +54,12 @@ public class LevelPlayer
 		return ExpManager.getExp(level);
 	}
 
-	public void addExp(int exp) {
+	public int addExp(int exp) {
+		if(!isBonusCardExpired()) {
+			BonusCard bonusCard = getBonusCard();
+			double times = bonusCard.getTimes();
+			exp = (int) (exp * times);
+		}
 		int requiredExp = ExpManager.getExp(level);
 		if(currentExp + exp < requiredExp) {
 			currentExp += exp;
@@ -60,6 +73,7 @@ public class LevelPlayer
 				Bukkit.getServer().getPluginManager().callEvent(levelUpEvent);
 			}
 		}
+		return exp;
 	}
 
 	public void levelUp(int overflowExp) {
@@ -74,5 +88,34 @@ public class LevelPlayer
 	public void clearLevel() {
 		this.level = 1;
 		this.currentExp = 0;
+	}
+
+	public LocalDateTime getBonusCardExpiredTime() {
+		return bonusCardExpiredTime;
+	}
+
+	public void setBonusCardExpiredTime(LocalDateTime bonusCardExpiredTime) {
+		this.bonusCardExpiredTime = bonusCardExpiredTime;
+	}
+
+	public boolean isBonusCardExpired() {
+		if(this.bonusCardExpiredTime==null)
+			return true;
+		LocalDateTime now = LocalDateTime.now();
+		return now.isAfter(this.bonusCardExpiredTime);
+	}
+
+	public String getBonusCardName() {
+		if(isBonusCardExpired())
+			return null;
+		return bonusName;
+	}
+
+	public BonusCard getBonusCard() {
+		return BonusCardManager.bonusCardHashMap.get(bonusName);
+	}
+
+	public void setBonusName(String bonusName) {
+		this.bonusName = bonusName;
 	}
 }

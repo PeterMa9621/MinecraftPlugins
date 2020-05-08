@@ -11,7 +11,7 @@ public class ItemUtil {
     public static ItemStack createItem(String ID, String displayName, List<String> lore, int customModelId) {
         ArrayList<String> loreList = new ArrayList<>();
         for(String eachLore:lore) {
-            eachLore = eachLore.replace("&", "Â§");
+            eachLore = eachLore.replace("&", "¡ì");
             loreList.add(eachLore);
         }
         ItemStack item = new ItemStack(Material.getMaterial(ID.toUpperCase()));
@@ -19,7 +19,7 @@ public class ItemUtil {
         if(meta != null){
             meta.setLore(loreList);
             if(displayName!=null) {
-                displayName = displayName.replace("&", "Â§");
+                displayName = displayName.replace("&", "¡ì");
                 meta.setDisplayName(displayName);
             }
             if(customModelId>0) {

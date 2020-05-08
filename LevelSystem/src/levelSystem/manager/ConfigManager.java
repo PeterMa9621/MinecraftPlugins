@@ -19,10 +19,11 @@ import peterUtil.database.StorageInterface;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
 public class ConfigManager
 {
@@ -41,7 +42,7 @@ public class ConfigManager
 
 	private void initDatabase() {
 		database = Database.getInstance(databaseType, plugin);
-		String createTableQuery = "create table if not exists level_system(id varchar(100), name varchar(100), current_exp int, level int, primary key(id));";
+		String createTableQuery = "create table if not exists level_system(id varchar(100), name varchar(100), current_exp int, level int, bonus_card_expired_time datetime, bonus_name varchar(50), primary key(id));";
 		database.connect(databaseName, "level_system" , "root", "mjy159357", createTableQuery);
 	}
 
@@ -55,8 +56,8 @@ public class ConfigManager
 
 			config.set("databaseName", "minecraft");
 
-			config.set("bonusExpCard.normal.itemId", "PAPER");
-			config.set("bonusExpCard.normal.customModelId", 70);
+			config.set("bonusExpCard.normal.itemId", "STICK");
+			config.set("bonusExpCard.normal.customModelId", 34);
 			config.set("bonusExpCard.normal.displayName", "&f2倍经验卡");
 			config.set("bonusExpCard.normal.lore", new ArrayList<String>() {{
 				add("&6使用后所有获得历练经验 × 2");
@@ -66,8 +67,8 @@ public class ConfigManager
 			config.set("bonusExpCard.normal.times", 2);
 			config.set("bonusExpCard.normal.duration", 120);
 
-			config.set("bonusExpCard.advance.itemId", "PAPER");
-			config.set("bonusExpCard.advance.customModelId", 70);
+			config.set("bonusExpCard.advance.itemId", "STICK");
+			config.set("bonusExpCard.advance.customModelId", 35);
 			config.set("bonusExpCard.advance.displayName", "&f3倍经验卡");
 			config.set("bonusExpCard.advance.lore", new ArrayList<String>() {{
 				add("&6使用后所有获得历练经验 × 3");
@@ -109,6 +110,9 @@ public class ConfigManager
 		}
 		config = load(file);
 
+		plugin.rewardManager.clear();
+		plugin.bonusCardManager.clear();
+
 		databaseName = config.getString("databaseName", "minecraft");
 
 		maxLevel = config.getInt("maxLevel", 1);
@@ -142,7 +146,7 @@ public class ConfigManager
 				ItemStack bonusExpCard = ItemUtil.createItem(itemId, displayName, lore, customModelId);
 				int duration = cardSection.getInt("duration", 60);
 				double times = cardSection.getDouble("times", 2.0);
-				BonusCard bonusCard = new BonusCard(bonusExpCard, times, duration);
+				BonusCard bonusCard = new BonusCard(bonusExpCard, times, duration, cardName);
 				plugin.bonusCardManager.addBonusCard(cardName, bonusCard);
 			}
 		}
@@ -161,19 +165,29 @@ public class ConfigManager
 		}
 
 		Bukkit.getScheduler().runTaskLater(plugin, () -> {
-			HashMap<String, Object> result = database.get(player.getUniqueId(), new String[] {"name", "current_exp", "level"});
+			HashMap<String, Object> result = database.get(player.getUniqueId(), new String[] {"name", "current_exp", "level", "bonus_card_expired_time", "bonus_name"});
 
 			int level = 1;
 			int current_exp = 0;
+			LocalDateTime bonus_card_expired_time = null;
+			String bonusName = null;
 			if(result!=null){
 				level = (int) result.get("level");
 				current_exp = (int) result.get("current_exp");
+				Object obj = result.get("bonus_card_expired_time");
+				if(obj!=null)
+					bonus_card_expired_time = ((Timestamp) obj).toLocalDateTime();
+				obj = result.get("bonus_name");
+				if(obj!=null)
+					bonusName = (String) obj;
 			}
 			if(levelPlayer[0] == null)
-				levelPlayer[0] = new LevelPlayer(player, level, current_exp);
+				levelPlayer[0] = new LevelPlayer(player, level, current_exp, bonus_card_expired_time, bonusName);
 			else {
 				levelPlayer[0].setLevel(level);
 				levelPlayer[0].setCurrentExp(current_exp);
+				levelPlayer[0].setBonusCardExpiredTime(bonus_card_expired_time);
+				levelPlayer[0].setBonusName(bonusName);
 			}
 
 			plugin.levelPlayerManager.addLevelPlayer(levelPlayer[0]);
@@ -191,6 +205,8 @@ public class ConfigManager
 			put("name", player.getName());
 			put("current_exp", levelPlayer.getCurrentExp());
 			put("level", levelPlayer.getLevel());
+			put("bonus_card_expired_time", levelPlayer.getBonusCardExpiredTime());
+			put("bonus_name", levelPlayer.getBonusCardName());
 		}};
 
 		database.store(player.getUniqueId(), data);

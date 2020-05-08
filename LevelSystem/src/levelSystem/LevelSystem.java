@@ -1,8 +1,10 @@
 package levelSystem;
 
 import levelSystem.expansion.LevelSystemExpansion;
+import levelSystem.listener.BonusCardListener;
 import levelSystem.listener.LevelSystemListener;
 import levelSystem.manager.*;
+import levelSystem.model.BonusCard;
 import levelSystem.model.LevelPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -10,6 +12,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import peterUtil.database.Database;
 import peterUtil.database.DatabaseType;
@@ -47,6 +51,7 @@ public class LevelSystem extends JavaPlugin
 		configManager.loadConfig();
 
 		getServer().getPluginManager().registerEvents(new LevelSystemListener(this), this);
+		getServer().getPluginManager().registerEvents(new BonusCardListener(this), this);
 		api = new API(this);
 		Bukkit.getConsoleSender().sendMessage("§a[LevelSystem] §e等级系统加载完毕");
 	}
@@ -124,9 +129,42 @@ public class LevelSystem extends JavaPlugin
 				sender.sendMessage("§a/level help §3查看帮助");
 				if(sender.isOp()) {
 					sender.sendMessage("§a/level add [玩家名] [数量] §3增加该玩家的经验");
+					sender.sendMessage("§a/level give [玩家名] [经验卡名字] [数量] §3给予玩家经验卡");
 					sender.sendMessage("§a/level clear [玩家名] §3清空该玩家等级和经验");
 					sender.sendMessage("§a/level set [玩家名] [数量] §3设置玩家等级");
 					sender.sendMessage("§a/level reload §3重读配置");
+				}
+				return true;
+			}
+
+			if(args[0].equalsIgnoreCase("give") && sender.isOp()) {
+				if(args.length==4) {
+					Player player = Bukkit.getPlayer(args[1]);
+					if(bonusCardManager.getBonusCard(args[2])==null) {
+						sender.sendMessage("§6[等级系统] §c不存在的经验卡");
+						return true;
+					}
+					if(!args[3].matches("[0-9]*")) {
+						sender.sendMessage("§6[等级系统] §c等级必须是数字");
+						return true;
+					}
+					if(player==null) {
+						sender.sendMessage("§6[等级系统] §c玩家不存在或不在线");
+						return true;
+					}
+
+					BonusCard bonusCard = bonusCardManager.getBonusCard(args[2]);
+					ItemStack itemStack = bonusCard.getItemStack();
+					itemStack.setAmount(Integer.parseInt(args[3]));
+					Inventory inventory = player.getInventory();
+					if(inventory.firstEmpty()<0) {
+						player.getWorld().dropItem(player.getLocation(), itemStack);
+					} else {
+						inventory.addItem(itemStack);
+					}
+				}
+				else {
+					sender.sendMessage("§4用法：§a/level add [玩家名] [数量] §3增加该玩家的经验");
 				}
 				return true;
 			}
@@ -144,9 +182,11 @@ public class LevelSystem extends JavaPlugin
 					}
 
 					LevelPlayer levelPlayer = levelPlayerManager.getLevelPlayer(player);
-					levelPlayer.addExp(Integer.parseInt(args[2]));
-					sender.sendMessage("§6[等级系统] §a已为玩家§5"+args[1]+"§a增加§e" + args[2] + "§a点经验");
-					levelPlayer.getPlayer().sendMessage("§6获得§e" + args[2] + "§6点经验");
+					int exp = Integer.parseInt(args[2]);
+					int finalExp = levelPlayer.addExp(exp);
+					sender.sendMessage("§6[等级系统] §a已为玩家§5"+args[1]+"§a增加§e" + finalExp + "§a点经验");
+					String message = "§6获得§e%d§6点经验§e(基础%d,加成%d)";
+					levelPlayer.getPlayer().sendMessage(String.format(message, finalExp, exp, finalExp-exp));
 				}
 				else {
 					sender.sendMessage("§4用法：§a/level add [玩家名] [数量] §3增加该玩家的经验");

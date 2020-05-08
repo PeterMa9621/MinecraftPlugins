@@ -9,6 +9,7 @@
     <file url="file://$PROJECT_DIR$/src/com/peter/worldBoss/config/ConfigManager.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/com/peter/worldBoss/gui/GuiListener.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/com/peter/worldBoss/gui/GuiManager.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/com/peter/worldBoss/listener/BungeecordListener.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/com/peter/worldBoss/model/BossGroupSetting.java" charset="GBK" />
   </component>
 </project>
