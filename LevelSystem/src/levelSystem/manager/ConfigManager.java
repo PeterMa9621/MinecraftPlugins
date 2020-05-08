@@ -2,14 +2,17 @@ package levelSystem.manager;
 
 import levelSystem.LevelSystem;
 import levelSystem.callback.LevelPlayerCallback;
+import levelSystem.model.BonusCard;
 import levelSystem.model.ExpFormula;
 import levelSystem.model.LevelPlayer;
 import levelSystem.model.LevelReward;
+import levelSystem.util.ItemUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import peterUtil.database.Database;
 import peterUtil.database.DatabaseType;
 import peterUtil.database.StorageInterface;
@@ -51,6 +54,29 @@ public class ConfigManager
 			config = load(file);
 
 			config.set("databaseName", "minecraft");
+
+			config.set("bonusExpCard.normal.itemId", "PAPER");
+			config.set("bonusExpCard.normal.customModelId", 70);
+			config.set("bonusExpCard.normal.displayName", "&f2倍经验卡");
+			config.set("bonusExpCard.normal.lore", new ArrayList<String>() {{
+				add("&6使用后所有获得历练经验 × 2");
+				add("&6有效时长: &22小时");
+				add("&5右键使用");
+			}});
+			config.set("bonusExpCard.normal.times", 2);
+			config.set("bonusExpCard.normal.duration", 120);
+
+			config.set("bonusExpCard.advance.itemId", "PAPER");
+			config.set("bonusExpCard.advance.customModelId", 70);
+			config.set("bonusExpCard.advance.displayName", "&f3倍经验卡");
+			config.set("bonusExpCard.advance.lore", new ArrayList<String>() {{
+				add("&6使用后所有获得历练经验 × 3");
+				add("&6有效时长: &22小时");
+				add("&5右键使用");
+			}});
+			config.set("bonusExpCard.advance.times", 3);
+			config.set("bonusExpCard.advance.duration", 120);
+
 
 			config.set("maxLevel", 30);
 			config.set("chatPrefix", true);
@@ -102,6 +128,22 @@ public class ConfigManager
 				List<String> commands = section.getStringList(levelString+".command");
 				LevelReward levelReward = new LevelReward(level, commands, msg);
 				plugin.rewardManager.addReward(level, levelReward);
+			}
+		}
+
+		section = config.getConfigurationSection("bonusExpCard");
+		if(section!=null) {
+			for(String cardName:section.getKeys(false)) {
+				ConfigurationSection cardSection = section.getConfigurationSection(cardName);
+				String itemId = cardSection.getString("itemId", "PAPER");
+				int customModelId = cardSection.getInt("customModelId", 70);
+				String displayName = cardSection.getString("displayName", "&f2倍经验卡");
+				List<String> lore = cardSection.getStringList("lore");
+				ItemStack bonusExpCard = ItemUtil.createItem(itemId, displayName, lore, customModelId);
+				int duration = cardSection.getInt("duration", 60);
+				double times = cardSection.getDouble("times", 2.0);
+				BonusCard bonusCard = new BonusCard(bonusExpCard, times, duration);
+				plugin.bonusCardManager.addBonusCard(cardName, bonusCard);
 			}
 		}
 

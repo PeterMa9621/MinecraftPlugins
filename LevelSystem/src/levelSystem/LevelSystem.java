@@ -2,10 +2,7 @@ package levelSystem;
 
 import levelSystem.expansion.LevelSystemExpansion;
 import levelSystem.listener.LevelSystemListener;
-import levelSystem.manager.ConfigManager;
-import levelSystem.manager.ExpManager;
-import levelSystem.manager.LevelPlayerManager;
-import levelSystem.manager.RewardManager;
+import levelSystem.manager.*;
 import levelSystem.model.LevelPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -32,6 +29,7 @@ public class LevelSystem extends JavaPlugin
 	public ConfigManager configManager;
 	public RewardManager rewardManager;
 	public LevelPlayerManager levelPlayerManager;
+	public BonusCardManager bonusCardManager;
 
 	public void onEnable() {
 		if(!getDataFolder().exists())
@@ -42,6 +40,7 @@ public class LevelSystem extends JavaPlugin
 			new LevelSystemExpansion(this).register();
 		}
 		levelPlayerManager = new LevelPlayerManager(this);
+		bonusCardManager = new BonusCardManager(this);
 		configManager = new ConfigManager(this);
 		rewardManager = new RewardManager(this);
 
