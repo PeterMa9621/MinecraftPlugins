@@ -3,6 +3,7 @@ package betterWeapon.Gem;
 import java.util.ArrayList;
 
 import betterWeapon.util.GemType;
+import betterWeapon.util.Util;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -83,11 +84,11 @@ public class GemEvaluateListener implements Listener
 		//---------------------------------------------
 		ItemStack equip = event.getInventory().getItem(10).clone();
 		equip.setAmount(1);
-		int quantity = plugin.random(plugin.gemManager.evaPossibility.size());
+		int quantity = Util.getRandomInt(plugin.gemManager.evaPossibility.size());
 
 		for(int i=quantity; i>=0; i--)
 		{
-			if(plugin.random(100)<plugin.gemManager.evaPossibility.get(i))
+			if(Util.getRandomInt(100)<plugin.gemManager.evaPossibility.get(i))
 			{
 				_evaluate(event, equip, i);
 				p.sendMessage("§a[宝石系统]§c 恭喜，鉴定成功！");
@@ -123,11 +124,11 @@ public class GemEvaluateListener implements Listener
 		ItemMeta meta = equip.getItemMeta();
 		ArrayList<String> loreList = new ArrayList<String>();
 		
-		int quantity = plugin.random(plugin.gemManager.itemPossibility.size());
+		int quantity = Util.getRandomInt(plugin.gemManager.itemPossibility.size());
 		int typeIndex = 0;
 		for(int i=quantity; i>=0; i--)
 		{
-			if(plugin.random(100)<plugin.gemManager.itemPossibility.get(i))
+			if(Util.getRandomInt(100)<plugin.gemManager.itemPossibility.get(i))
 			{
 				typeIndex = i;
 				break;

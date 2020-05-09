@@ -3,9 +3,7 @@ package betterWeapon;
 import betterWeapon.Gem.EquipmentInlayListener;
 import betterWeapon.Gem.GemEvaluateListener;
 import betterWeapon.Gem.GemSynthesisListener;
-import betterWeapon.listener.BetterWeaponEntityListener;
-import betterWeapon.listener.BetterWeaponGemListener;
-import betterWeapon.listener.BetterWeaponListener;
+import betterWeapon.listener.*;
 import betterWeapon.manager.*;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
@@ -72,6 +70,8 @@ public class BetterWeapon extends JavaPlugin
 		getServer().getPluginManager().registerEvents(new GemEvaluateListener(this), this);
 		getServer().getPluginManager().registerEvents(new EquipmentInlayListener(this), this);
 		getServer().getPluginManager().registerEvents(new GemSynthesisListener(this), this);
+		getServer().getPluginManager().registerEvents(new IntensifyListener(this), this);
+		getServer().getPluginManager().registerEvents(new SmeltListener(this), this);
 		Bukkit.getConsoleSender().sendMessage("§a[BetterWeapon] §e强化系统加载完毕");
 		//getLogger().info("Finish loading");
 	}
@@ -93,20 +93,12 @@ public class BetterWeapon extends JavaPlugin
 	
 	public boolean isExist(int number, int[] numberList)
 	{
-		for(int i=0; i<numberList.length; i++)
-		{
-			if(number==numberList[i])
-			{
+		for (int value : numberList) {
+			if (number == value) {
 				return true;
 			}
 		}
 		return false;
-	}
-	
-	public int random(int range)
-	{
-		int i = rand.nextInt(range); //生成随机数
-		return i;
 	}
 	
 	public boolean onCommand(CommandSender sender,Command cmd,String label,String[] args)  

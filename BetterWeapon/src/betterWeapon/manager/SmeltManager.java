@@ -2,6 +2,7 @@ package betterWeapon.manager;
 
 import betterWeapon.BetterWeapon;
 import betterWeapon.util.SmeltType;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -53,7 +54,7 @@ public class SmeltManager {
     }
 
     public void addRule(String materialId, String smeltType) {
-        ruleSmelt.put(Material.getMaterial(materialId), SmeltType.valueOf(smeltType));
+        ruleSmelt.put(Material.getMaterial(materialId.toUpperCase()), SmeltType.valueOf(smeltType));
     }
 
     public void addPossibility(int possibility) {

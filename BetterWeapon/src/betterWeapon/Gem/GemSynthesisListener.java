@@ -3,6 +3,7 @@ package betterWeapon.Gem;
 import java.util.ArrayList;
 import java.util.List;
 
+import betterWeapon.util.Util;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -139,7 +140,7 @@ public class GemSynthesisListener implements Listener
 			level = ((int)(value*2))-1;
 		}
 		
-		if(plugin.random(100)<plugin.gemManager.synthesisPossibility.get(level))
+		if(Util.getRandomInt(100)<plugin.gemManager.synthesisPossibility.get(level))
 		{
 			_synthesis(event, gem, value);
 			p.sendMessage("§a[宝石系统]§c 恭喜，合成成功！");

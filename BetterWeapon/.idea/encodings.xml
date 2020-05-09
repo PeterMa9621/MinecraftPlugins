@@ -6,12 +6,16 @@
     <file url="file://$PROJECT_DIR$/src/betterWeapon/Gem/EquipmentInlayListener.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/betterWeapon/Gem/GemEvaluateListener.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/betterWeapon/Gem/GemSynthesisListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/betterWeapon/Gem/OpenHoleListener.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/betterWeapon/listener/BetterWeaponEntityListener.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/betterWeapon/listener/BetterWeaponGemListener.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/betterWeapon/listener/BetterWeaponListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/betterWeapon/listener/IntensifyListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/betterWeapon/listener/SmeltListener.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/betterWeapon/manager/ConfigManager.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/betterWeapon/manager/GemGuiManager.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/betterWeapon/manager/GemManager.java" charset="GBK" />
     <file url="file://$PROJECT_DIR$/src/betterWeapon/manager/GuiManager.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/betterWeapon/util/Util.java" charset="GBK" />
   </component>
 </project>

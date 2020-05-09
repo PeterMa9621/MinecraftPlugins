@@ -3,6 +3,7 @@ package betterWeapon.listener;
 import java.util.List;
 
 import betterWeapon.BetterWeapon;
+import betterWeapon.util.Util;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -84,7 +85,7 @@ public class BetterWeaponEntityListener implements Listener
 				}
 				double result = 0;
 
-				if(plugin.random(100)<(blockPercent/1.5))
+				if(Util.getRandomInt(100)<(blockPercent/1.5))
 				{
 					p.sendMessage("§7已格挡此次伤害");
 					result = 0;
@@ -222,7 +223,7 @@ public class BetterWeaponEntityListener implements Listener
 					}
 				}
 				double result = 0;
-				if(plugin.random(100)<(blockPercent/1.5))
+				if(Util.getRandomInt(100)<(blockPercent/1.5))
 				{
 					p.sendMessage("§7对方已格挡此次伤害");
 					event.getEntity().sendMessage("§7已格挡此次伤害");
@@ -230,7 +231,7 @@ public class BetterWeaponEntityListener implements Listener
 				}
 				else
 				{
-					if(plugin.random(100)<critPercent)
+					if(Util.getRandomInt(100)<critPercent)
 					{
 						p.sendMessage("§7暴击");
 						result = (event.getDamage()+attack-(defend/2))*2;
@@ -310,7 +311,7 @@ public class BetterWeaponEntityListener implements Listener
 				}
 
 				double result = 0;
-				if(plugin.random(100)<critPercent)
+				if(Util.getRandomInt(100)<critPercent)
 				{
 					p.sendMessage("§7暴击");
 					result = (event.getDamage()+attack+directAttack)*2;
@@ -319,7 +320,7 @@ public class BetterWeaponEntityListener implements Listener
 				{
 					result = (event.getDamage()+attack+directAttack);
 				}
-				if(plugin.notify==true)
+				if(plugin.notify)
 				{
 					if(p.isOp())
 						p.sendMessage("§a攻击:§c"+attack+"§a,穿透伤害:§c"+directAttack+"§a,总伤害:§c"+result);

@@ -3,6 +3,8 @@ main: betterWeapon.BetterWeapon
 version: '1.0'
 api-version: '1.15'
 author: Jingyuan Ma
+depend:
+  - Vault
 commands:
   qh:
     description: used to check in
