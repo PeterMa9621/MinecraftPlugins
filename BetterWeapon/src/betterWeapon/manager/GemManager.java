@@ -24,6 +24,8 @@ public class GemManager {
     public int priceForEvaluate = 0;
     public int priceForSynthesis = 0;
 
+    public int afterEvaluateModel;
+
     public ItemStack gemstone;
     public GemManager(BetterWeapon plugin) {
         this.plugin = plugin;

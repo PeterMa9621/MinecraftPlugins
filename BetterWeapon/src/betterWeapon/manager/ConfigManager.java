@@ -110,7 +110,8 @@ public class ConfigManager {
 
             config.set("Gem.Item.ItemID", "IRON_INGOT");
             config.set("Gem.Item.Name", "§f未鉴定的宝石");
-            config.set("Gem.Item.Model", 4);
+            config.set("Gem.Item.Model", 24);
+            config.set("Gem.Item.AnotherModel", 25);
             config.set("Gem.Item.Lore", new ArrayList<String>() {{
                 add("§e[未鉴定]");
                 add("§6一块看起来普通的石头");
@@ -222,7 +223,9 @@ public class ConfigManager {
         itemID = config.getString("Gem.Item.ItemID", "IRON_INGOT");
         String displayName =  config.getString("Gem.Item.Name", "§f未鉴定的宝石");
         customModelId = config.getInt("Gem.Item.Model", 4);
+
         itemLore = config.getStringList("Gem.Item.Lore");
+        gemManager.afterEvaluateModel = config.getInt("Gem.Item.AnotherModel", 25);
         gemManager.setGemstone(itemID, displayName, customModelId, itemLore);
         gemManager.setGemType(gemType);
     }

@@ -3,6 +3,7 @@ package levelSystem.listener;
 import levelSystem.LevelSystem;
 import levelSystem.callback.LevelPlayerCallback;
 import levelSystem.event.LevelUpEvent;
+import levelSystem.manager.ConfigManager;
 import levelSystem.manager.RewardManager;
 import levelSystem.model.LevelPlayer;
 import levelSystem.model.LevelReward;
@@ -65,13 +66,18 @@ public class LevelSystemListener implements Listener
 			int expAmount = event.getAmount();
 			LevelPlayer levelPlayer = plugin.levelPlayerManager.getLevelPlayer(p);
 			if(levelPlayer==null) {
+				int finalExpAmount = expAmount;
 				plugin.configManager.loadPlayerConfig(p, new LevelPlayerCallback() {
 					@Override
 					public void run(LevelPlayer levelPlayer) {
-						levelPlayer.addExp(expAmount);
+						levelPlayer.addExp(finalExpAmount);
 					}
 				});
 			} else {
+				if(!levelPlayer.canGetExpInThisMinute()) {
+					expAmount = 1;
+				}
+				levelPlayer.addExpInOneMinute(expAmount);
 				levelPlayer.addExp(expAmount);
 			}
 		}

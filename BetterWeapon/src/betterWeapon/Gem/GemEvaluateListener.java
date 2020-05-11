@@ -166,7 +166,7 @@ public class GemEvaluateListener implements Listener
 		String lore = "§e[已鉴定]%§a"+"属性:§c"+type+"+"+value;
 
 		loreList.addAll(Arrays.asList(lore.split("%")));
-		
+		meta.setCustomModelData(plugin.gemManager.afterEvaluateModel);
 		meta.setDisplayName("§6已鉴定的宝石");
 		meta.setLore(loreList);
 		meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);

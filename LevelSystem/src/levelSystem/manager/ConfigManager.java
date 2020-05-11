@@ -34,6 +34,8 @@ public class ConfigManager
 	private StorageInterface database;
 	private String databaseName;
 
+	public static int maxExpPerMinute;
+
 	public DatabaseType databaseType = DatabaseType.MYSQL;
 	
 	public ConfigManager(LevelSystem plugin) {
@@ -55,6 +57,8 @@ public class ConfigManager
 			config = load(file);
 
 			config.set("databaseName", "minecraft");
+
+			config.set("maxExpPerMinute", 30);
 
 			config.set("bonusExpCard.normal.itemId", "STICK");
 			config.set("bonusExpCard.normal.customModelId", 34);
@@ -114,6 +118,8 @@ public class ConfigManager
 		plugin.bonusCardManager.clear();
 
 		databaseName = config.getString("databaseName", "minecraft");
+
+		maxExpPerMinute = config.getInt("maxExpPerMinute", 30);
 
 		maxLevel = config.getInt("maxLevel", 1);
 		useChatPrefix = config.getBoolean("chatPrefix", true);

@@ -15,25 +15,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
-import peterUtil.database.Database;
-import peterUtil.database.DatabaseType;
-import peterUtil.database.StorageInterface;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.UUID;
 
 public class LevelSystem extends JavaPlugin
 {
-
-
 	public API api;
 
 	public ConfigManager configManager;
 	public RewardManager rewardManager;
 	public LevelPlayerManager levelPlayerManager;
 	public BonusCardManager bonusCardManager;
+	public BukkitTask bukkitTask;
 
 	public void onEnable() {
 		if(!getDataFolder().exists())
@@ -53,6 +48,7 @@ public class LevelSystem extends JavaPlugin
 		getServer().getPluginManager().registerEvents(new LevelSystemListener(this), this);
 		getServer().getPluginManager().registerEvents(new BonusCardListener(this), this);
 		api = new API(this);
+		runTaskResetExpPerMinute();
 		Bukkit.getConsoleSender().sendMessage("§a[LevelSystem] §e等级系统加载完毕");
 	}
 
@@ -65,6 +61,7 @@ public class LevelSystem extends JavaPlugin
 			}
 		}
 		configManager.closeDatabase();
+		bukkitTask.cancel();
 		Bukkit.getConsoleSender().sendMessage("§a[LevelSystem] §e等级系统卸载完毕");
 	}
 
@@ -72,7 +69,13 @@ public class LevelSystem extends JavaPlugin
 		return api;
 	}
 	
-
+	public void runTaskResetExpPerMinute() {
+		bukkitTask = Bukkit.getScheduler().runTaskTimer(this, ()-> {
+			for(LevelPlayer levelPlayer:levelPlayerManager.getPlayers()) {
+				levelPlayer.resetExpInOneMinute();
+			}
+		}, 20, 20*60);
+	}
 	
 	public FileConfiguration load(File file)
 	{

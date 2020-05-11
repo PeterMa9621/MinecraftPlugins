@@ -120,7 +120,8 @@ public class OpenHoleListener implements Listener {
         }
         else
         {
-            loreList = new ArrayList<>();
+            if(loreList==null)
+                loreList = new ArrayList<>();
             for(String l:lore) {
                 loreList.add(index, l);
             }

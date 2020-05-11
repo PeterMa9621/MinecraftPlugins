@@ -18,6 +18,7 @@ public class LevelPlayer
 	private Integer currentExp = 0;
 	private LocalDateTime bonusCardExpiredTime;
 	private String bonusName;
+	private int expInOneMinute;
 	public LevelPlayer(Player player, Integer level, Integer currentExp, LocalDateTime bonusCardExpiredTime, String bonusName) {
 		this.player=player;
 		this.level=level;
@@ -117,5 +118,21 @@ public class LevelPlayer
 
 	public void setBonusName(String bonusName) {
 		this.bonusName = bonusName;
+	}
+
+	public int getExpInOneMinute() {
+		return expInOneMinute;
+	}
+
+	public void addExpInOneMinute(int amount) {
+		expInOneMinute += amount;
+	}
+
+	public void resetExpInOneMinute() {
+		expInOneMinute = 0;
+	}
+
+	public boolean canGetExpInThisMinute() {
+		return expInOneMinute < ConfigManager.maxExpPerMinute || !isBonusCardExpired();
 	}
 }
