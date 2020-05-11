@@ -6,6 +6,7 @@ import clockGUI.model.ClockGuiItem;
 import clockGUI.model.Function;
 import clockGUI.model.Money;
 import clockGUI.model.PlayerData;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.Configuration;
@@ -78,7 +79,10 @@ public class ConfigManager {
 
     public void savePlayerConfig()
     {
-        File file=new File(dataFolder,"/Data/player.yml");
+        File file = new File(dataFolder, "/Data");
+        if(!file.exists())
+            file.mkdir();
+        file=new File(dataFolder,"/Data/player.yml");
         FileConfiguration config;
         config = load(file);
 
@@ -112,16 +116,16 @@ public class ConfigManager {
             // Clock Settings
             config.set("Clock.AutoGetClock", true);
             config.set("Clock.MainGuiId", 0);
-            config.set("Clock.Name", "§a钟表菜单");
+            config.set("Clock.Name", "&a钟表菜单");
             config.set("Clock.Lore", new ArrayList<String>() {{
-                add("§1我的世界钟表菜单");
-                add("§2右键我打开菜单");
+                add("&1我的世界钟表菜单");
+                add("&2右键我打开菜单");
             }});
             config.set("Clock.World", new ArrayList<String>() {{
                 add("world");
             }}.toArray());
 
-            config.set("GUI.0.Name", "§1我的世界钟表菜单");
+            config.set("GUI.0.Name", "&1我的世界钟表菜单");
             config.set("GUI.0.Item.1.Position", 1);
             config.set("GUI.0.Item.1.ItemID", "CLOCK");
             config.set("GUI.0.Item.1.Model", 0);
@@ -225,6 +229,7 @@ public class ConfigManager {
             String guiName = guiSection.getString("Name");
             if(guiName==null)
                 continue;
+            guiName = guiName.replace('&', ChatColor.COLOR_CHAR);
             HashMap<Integer, ClockGuiItem> guiList = new HashMap<>();
             ConfigurationSection itemSection = guiSection.getConfigurationSection("Item");
             if(itemSection==null)

@@ -20,7 +20,6 @@ public class EquipmentInlayListener implements Listener
 	
 	int[] slotInlay = {0,1,2,3,4,5,6,7,8,9,11,12,13,14,15,17,18,19,20,21,22,23,24,25,26,27,28
 			,29,30,32,33,34,35,36,37,38,39,41,42,43,44};
-	//int[] weaponAllowed = {};
 	
 	public EquipmentInlayListener(BetterWeapon plugin)
 	{
@@ -48,22 +47,21 @@ public class EquipmentInlayListener implements Listener
 			{
 				Player p = (Player)event.getWhoClicked();
 				event.setCancelled(true);
-				if(event.getInventory().getItem(40)!=null)
-				{
+				if(event.getInventory().getItem(40)!=null) {
 					event.getWhoClicked().sendMessage("§a[宝石系统]§c 镶嵌按钮下方不允许放置任何物品！");
 					return;
 				}
-				
-				if(event.getInventory().getItem(10)!=null && 
-						event.getInventory().getItem(10).getItemMeta().hasLore() &&
-						event.getInventory().getItem(10).getItemMeta().getLore().contains("§e[已开孔]"))
+
+				ItemStack equip = event.getInventory().getItem(10);
+				if(equip!=null && equip.hasItemMeta() &&
+						equip.getItemMeta().hasLore() && equip.getItemMeta().getLore().contains("§e[已开孔]"))
 				{
 					int quantity = 0;
-					for(String l:event.getInventory().getItem(10).getItemMeta().getLore())
+					for(String l:equip.getItemMeta().getLore())
 					{
 						if(l.contains("开孔数量") || l.contains("剩余开孔"))
 						{
-							quantity = Integer.valueOf(l.split(":")[1].substring(2));
+							quantity = Integer.parseInt(l.split(":")[1].substring(2));
 							break;
 						}
 					}
@@ -72,63 +70,45 @@ public class EquipmentInlayListener implements Listener
 						p.sendMessage("§a[宝石系统]§c 这个装备已经无法再镶嵌任何宝石了!");
 						return;
 					}
-					if(event.getInventory().getItem(16)!=null)
-					{
-						if(event.getInventory().getItem(16).hasItemMeta() &&
-								event.getInventory().getItem(16).getItemMeta().hasLore())
-						{
-							if(event.getInventory().getItem(16).getItemMeta().getDisplayName().equalsIgnoreCase("§6已鉴定的宝石") &&
-									event.getInventory().getItem(16).getItemMeta().getLore().get(0).equalsIgnoreCase("§e[已鉴定]"))
+					ItemStack gem = event.getInventory().getItem(16);
+					if(gem!=null) {
+						if(gem.hasItemMeta() && gem.getItemMeta().hasLore()) {
+							if(gem.getItemMeta().getDisplayName().equalsIgnoreCase("§6已鉴定的宝石") &&
+									gem.getItemMeta().getLore().get(0).equalsIgnoreCase("§e[已鉴定]"))
 							{
-								ArrayList<String> weaponAllowed = new ArrayList<>(plugin.gemManager.inlayWeapon);
-								if(event.getInventory().getItem(16).getItemMeta().getLore().get(1).contains("攻击") ||
-										event.getInventory().getItem(16).getItemMeta().getLore().get(1).contains("暴击") ||
-										event.getInventory().getItem(16).getItemMeta().getLore().get(1).contains("穿透"))
+								ArrayList<String> weaponAllowed = new ArrayList<>(plugin.gemManager.inlayEquipment);
+								if(gem.getItemMeta().getLore().get(1).contains("攻击") ||
+										gem.getItemMeta().getLore().get(1).contains("暴击") ||
+										gem.getItemMeta().getLore().get(1).contains("穿透"))
 								{
-									if(!weaponAllowed.contains(event.getInventory().getItem(10).getType().toString()))
-									{
+									if(!weaponAllowed.contains(equip.getType().toString())) {
 										p.sendMessage("§a[宝石系统]§c 这个宝石不能镶嵌在这个装备上");
 										return;
 									}
-								}
-								else
-								{
-									if(weaponAllowed.contains(event.getInventory().getItem(10).getType().toString()))
-									{
+								} else {
+									if(weaponAllowed.contains(equip.getType().toString())) {
 										p.sendMessage("§a[宝石系统]§c 这个宝石不能镶嵌在这个装备上");
 										return;
 									}
 								}
 								int priceForInlay = plugin.gemManager.priceForInlay;
-								if(plugin.economy.getBalance(p.getName())>=priceForInlay)
-								{
+								if(plugin.economy.getBalance(p.getName())>=priceForInlay) {
 									p.sendMessage("§a[宝石系统]§e 扣除§c" + priceForInlay + "§e金币");
 									plugin.economy.withdrawPlayer(p.getName(), priceForInlay);
 									inlay(event);
-								}
-								else
-								{
+								} else {
 									p.sendMessage("§a[宝石系统]§c 镶嵌所需金币不足");
 								}
-
-							}
-							else
-							{
+							} else {
 								p.sendMessage("§a[宝石系统]§c 缺少宝石或无效的宝石");
 							}
-						}
-						else
-						{
+						} else {
 							p.sendMessage("§a[宝石系统]§c 缺少宝石或无效的宝石");
 						}
-					}
-					else
-					{
+					} else {
 						p.sendMessage("§a[宝石系统]§c 缺少宝石或无效的宝石");
 					}
-				}
-				else
-				{
+				} else {
 					p.sendMessage("§a[宝石系统]§c 缺少装备或无效的装备");
 				}
 			}
@@ -186,35 +166,27 @@ public class EquipmentInlayListener implements Listener
 						break;
 					}
 				}
-				
-				if(found)
-				{
-					int index = loreList.indexOf("§e[已开孔]")+1;
+
+				int indexStart = loreList.indexOf("§e[已开孔]") + 1;
+				if(found) {
+					loreList.add(indexStart, "§2镶嵌:"+attribute);
+					int leftNumberHole;
+					int indexEnd = indexStart;
 					
-					int left = 0;
-					int quantity = 0;
-					
-					for(int i=index; !loreList.get(i).contains("剩余开孔"); i++)
-					{
-						quantity++;
+					for(int i=indexStart; !loreList.get(i).contains("剩余开孔"); i++) {
+						indexEnd++;
 					}
 					
-					left = Integer.parseInt(loreList.get(index+quantity).split(":")[1].substring(2));
+					leftNumberHole = Integer.parseInt(loreList.get(indexEnd).split(":")[1].substring(2));
 					
-					loreList.remove(index+quantity);
-					
-					loreList.add(index, "§a剩余开孔:§c"+(left-1));
-					loreList.add(index, "§2镶嵌:"+attribute);
-				}
-				else
-				{
-					int index = loreList.indexOf("§e[已开孔]")+1;
-					int left = Integer.parseInt(loreList.get(index).split(":")[1].substring(2));
-					loreList.remove(index);
-					
-					
-					loreList.add(index, "§a剩余开孔:§c"+(left-1));
-					loreList.add(index, "§2镶嵌:"+attribute);
+					loreList.remove(indexEnd);
+					loreList.add(indexEnd, "§a剩余开孔:§c"+(leftNumberHole-1));
+				} else {
+					int numberHole = Integer.parseInt(loreList.get(indexStart).split(":")[1].substring(2));
+					loreList.remove(indexStart);
+
+					loreList.add(indexStart, "§a剩余开孔:§c"+(numberHole-1));
+					loreList.add(indexStart, "§2镶嵌:"+attribute);
 				}
 			}
 

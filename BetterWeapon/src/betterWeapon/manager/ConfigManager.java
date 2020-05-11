@@ -97,7 +97,7 @@ public class ConfigManager {
             config.set("Gem.Hole.Price", 5000);
 
             config.set("Gem.Inlay.Price", 5000);
-            config.set("Gem.Inlay.Weapon", new ArrayList<String>() {{
+            config.set("Gem.Inlay.Equipment", new ArrayList<String>() {{
                 add("iron_sword");
                 add("wooden_sword");
                 add("stone_sword");
@@ -107,6 +107,14 @@ public class ConfigManager {
 
             config.set("Gem.Evaluate.Possibility", new int[] {100,40,20,5,3,1});
             config.set("Gem.Evaluate.Price", 1000);
+
+            config.set("Gem.Item.ItemID", "IRON_INGOT");
+            config.set("Gem.Item.Name", "§f未鉴定的宝石");
+            config.set("Gem.Item.Model", 4);
+            config.set("Gem.Item.Lore", new ArrayList<String>() {{
+                add("§e[未鉴定]");
+                add("§6一块看起来普通的石头");
+            }});
 
             config.set("Gem.Item.Type", new ArrayList<String>() {{
                 add("attack");
@@ -204,13 +212,18 @@ public class ConfigManager {
         int priceForSynthesis = config.getInt("Gem.Synthesis.Price");
         gemManager.setPriceForSynthesis(priceForSynthesis);
 
-        gemManager.equipment = config.getStringList("Gem.Hole.Equipment");
+        gemManager.setEquipment(config.getStringList("Gem.Hole.Equipment"));
         gemManager.holePossibility = config.getIntegerList("Gem.Hole.Possibility");
-        gemManager.inlayWeapon = config.getStringList("Gem.Inlay.Weapon");
+        gemManager.setInlayEquipment(config.getStringList("Gem.Inlay.Equipment"));
         gemManager.evaPossibility = config.getIntegerList("Gem.Evaluate.Possibility");
         gemManager.itemPossibility = config.getIntegerList("Gem.Item.Possibility");
         gemManager.synthesisPossibility = config.getIntegerList("Gem.Synthesis.Possibility");
         List<String> gemType = config.getStringList("Gem.Item.Type");
+        itemID = config.getString("Gem.Item.ItemID", "IRON_INGOT");
+        String displayName =  config.getString("Gem.Item.Name", "§f未鉴定的宝石");
+        customModelId = config.getInt("Gem.Item.Model", 4);
+        itemLore = config.getStringList("Gem.Item.Lore");
+        gemManager.setGemstone(itemID, displayName, customModelId, itemLore);
         gemManager.setGemType(gemType);
     }
 

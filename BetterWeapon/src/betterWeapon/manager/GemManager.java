@@ -13,7 +13,7 @@ public class GemManager {
     private BetterWeapon plugin;
 
     public List<String> equipment;
-    public List<String> inlayWeapon;
+    public List<String> inlayEquipment;
     public List<Integer> holePossibility;
     public List<Integer> evaPossibility;
     public List<Integer> itemPossibility;
@@ -27,10 +27,6 @@ public class GemManager {
     public ItemStack gemstone;
     public GemManager(BetterWeapon plugin) {
         this.plugin = plugin;
-        gemstone = ItemStackUtil.createItem("coal", "§f未鉴定的宝石", new ArrayList<String>() {{
-            add("§e[未鉴定]");
-            add("§6一块看起来普通的石头");
-        }}, 0);
     }
 
     public int getPriceForEvaluate() {
@@ -65,11 +61,31 @@ public class GemManager {
         this.priceForSynthesis = priceForSynthesis;
     }
 
+    public void setGemstone(String itemID, String displayName, int customModelId, List<String> lore) {
+        gemstone = ItemStackUtil.createItem(itemID, displayName, lore, customModelId);
+    }
+
     public void setGemType(List<String> gemType) {
         this.gemType = new ArrayList<>();
         for(String type:gemType) {
             this.gemType.add(GemType.valueOf(type));
         }
+    }
+
+    public void setEquipment(List<String> equipment) {
+        List<String> uppercaseEquipment = new ArrayList<>();
+        for (String s:equipment){
+            uppercaseEquipment.add(s.toUpperCase());
+        }
+        this.equipment = uppercaseEquipment;
+    }
+
+    public void setInlayEquipment(List<String> inlayEquipment) {
+        List<String> uppercaseEquipment = new ArrayList<>();
+        for (String s:equipment){
+            uppercaseEquipment.add(s.toUpperCase());
+        }
+        this.inlayEquipment = uppercaseEquipment;
     }
 
     public void clear() {

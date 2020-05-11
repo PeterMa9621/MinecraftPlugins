@@ -5,6 +5,7 @@ import betterWeapon.util.Util;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
@@ -13,7 +14,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OpenHoleListener {
+public class OpenHoleListener implements Listener {
     private BetterWeapon plugin;
     private int[] slotHole = {0,1,2,3,4,5,6,7,8,9,11,12,13,14,15,17,18,19,20,21,23,24,25,26};
     public OpenHoleListener(BetterWeapon plugin) {
@@ -106,16 +107,20 @@ public class OpenHoleListener {
             add("§e[已开孔]");
         }};
         int index = Util.getLoreIndex(equip);
-        if(loreList.contains("§e[已开孔]"))
+        if(loreList!=null && loreList.contains("§e[已开孔]"))
         {
             int existedIndex = loreList.indexOf("§e[已开孔]");
-            for(String l:lore) {
+            for(String ignored:lore) {
                 loreList.remove(existedIndex);
+            }
+
+            for(String l:lore) {
                 loreList.add(existedIndex, l);
             }
         }
         else
         {
+            loreList = new ArrayList<>();
             for(String l:lore) {
                 loreList.add(index, l);
             }

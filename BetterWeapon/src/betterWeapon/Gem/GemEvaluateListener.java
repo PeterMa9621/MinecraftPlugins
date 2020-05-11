@@ -1,8 +1,10 @@
 package betterWeapon.Gem;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import betterWeapon.util.GemType;
+import betterWeapon.util.ItemStackUtil;
 import betterWeapon.util.Util;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
@@ -54,8 +56,8 @@ public class GemEvaluateListener implements Listener
 					event.getWhoClicked().sendMessage("§a[宝石系统]§c 宝石出产区域禁止放置任何物品！");
 					return;
 				}
-				if(event.getInventory().getItem(10)!=null && 
-						event.getInventory().getItem(10).getItemMeta().equals(plugin.gemManager.gemstone.getItemMeta()))
+				ItemStack gem = event.getInventory().getItem(10);
+				if(gem!=null && ItemStackUtil.isSimilar(gem, plugin.gemManager.gemstone))
 				{
 					int priceForEvaluate = plugin.gemManager.priceForEvaluate;
 					if(plugin.economy.getBalance(p.getName()) >= priceForEvaluate)
@@ -82,27 +84,23 @@ public class GemEvaluateListener implements Listener
 	{
 		Player p = (Player)event.getWhoClicked();
 		//---------------------------------------------
-		ItemStack equip = event.getInventory().getItem(10).clone();
-		equip.setAmount(1);
+		ItemStack clonedGem = event.getInventory().getItem(10).clone();
+		clonedGem.setAmount(1);
 		int quantity = Util.getRandomInt(plugin.gemManager.evaPossibility.size());
 
 		for(int i=quantity; i>=0; i--)
 		{
 			if(Util.getRandomInt(100)<plugin.gemManager.evaPossibility.get(i))
 			{
-				_evaluate(event, equip, i);
+				_evaluate(event, clonedGem, i);
 				p.sendMessage("§a[宝石系统]§c 恭喜，鉴定成功！");
 				
 				p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 0.5F, 0.0F);
-				if(event.getInventory().getItem(10).getAmount()>1)
-				{
-					ItemStack item = event.getInventory().getItem(10);
-					item.setAmount(item.getAmount()-1);
-					event.getInventory().setItem(10, item);
-				}
-				else
-					event.getInventory().setItem(10, null);
-				event.getInventory().setItem(16, equip);
+
+				ItemStack gem = event.getInventory().getItem(10);
+				gem.setAmount(gem.getAmount()-1);
+
+				event.getInventory().setItem(16, clonedGem);
 				return;
 			}
 		}
@@ -119,9 +117,9 @@ public class GemEvaluateListener implements Listener
 		event.getInventory().setItem(16, null);
 	}
 
-	private void _evaluate(InventoryClickEvent event, ItemStack equip, int level) 
+	private void _evaluate(InventoryClickEvent event, ItemStack gem, int level)
 	{
-		ItemMeta meta = equip.getItemMeta();
+		ItemMeta meta = gem.getItemMeta();
 		ArrayList<String> loreList = new ArrayList<String>();
 		
 		int quantity = Util.getRandomInt(plugin.gemManager.itemPossibility.size());
@@ -166,16 +164,13 @@ public class GemEvaluateListener implements Listener
 		}
 		
 		String lore = "§e[已鉴定]%§a"+"属性:§c"+type+"+"+value;
-		
-		for(String l:lore.split("%"))
-		{
-			loreList.add(l);
-		}
+
+		loreList.addAll(Arrays.asList(lore.split("%")));
 		
 		meta.setDisplayName("§6已鉴定的宝石");
 		meta.setLore(loreList);
 		meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-		equip.setItemMeta(meta);
-		equip.addUnsafeEnchantment(Enchantment.LUCK, 1);
+		gem.setItemMeta(meta);
+		gem.addUnsafeEnchantment(Enchantment.LUCK, 1);
 	}
 }

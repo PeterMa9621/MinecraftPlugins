@@ -1,6 +1,7 @@
 package betterWeapon.listener;
 
 import betterWeapon.BetterWeapon;
+import betterWeapon.util.ItemStackUtil;
 import betterWeapon.util.SmeltType;
 import betterWeapon.util.Util;
 import org.bukkit.Bukkit;
@@ -148,7 +149,7 @@ public class SmeltListener implements Listener {
                         return;
                     }
 
-                    if(smeltRock.isSimilar(plugin.smeltManager.getItem())) {
+                    if(ItemStackUtil.isSimilar(smeltRock, plugin.smeltManager.getItem())) {
                         int priceForSmelt = plugin.smeltManager.getPrice();
                         if(plugin.economy.getBalance(p.getName())>=priceForSmelt) {
                             p.sendMessage("¡ìa[ÈÛÁ¶ÏµÍ³] ¡ìe¿Û³ý¡ìc" + priceForSmelt + "¡ìe½ð±Ò");

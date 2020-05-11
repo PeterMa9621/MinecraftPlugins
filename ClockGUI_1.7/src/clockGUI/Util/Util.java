@@ -1,5 +1,7 @@
 package clockGUI.Util;
 
+import com.mysql.fabric.xmlrpc.base.Array;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -13,11 +15,15 @@ public class Util {
     {
         ItemMeta meta = item.getItemMeta();
         if(name!=null) {
-            meta.setDisplayName(name);
+            meta.setDisplayName(name.replace('&', ChatColor.COLOR_CHAR));
         }
 
         if(lore!=null) {
-            meta.setLore(lore);
+            ArrayList<String> tmp = new ArrayList<>();
+            for(String s:lore) {
+                tmp.add(s.replace('&', ChatColor.COLOR_CHAR));
+            }
+            meta.setLore(tmp);
         }
         item.setItemMeta(meta);
 
@@ -31,9 +37,15 @@ public class Util {
     {
         ItemStack item = new ItemStack(Material.getMaterial(ID.toUpperCase()), quantity);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(displayName);
+        meta.setDisplayName(displayName.replace('&', ChatColor.COLOR_CHAR));
         meta.setCustomModelData(customModelId);
-        meta.setLore(lore);
+
+        ArrayList<String> tmp = new ArrayList<>();
+        for(String s:lore) {
+            tmp.add(s.replace('&', ChatColor.COLOR_CHAR));
+        }
+        meta.setLore(tmp);
+
         if(hideAttribute)
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         if(hideEnchant)

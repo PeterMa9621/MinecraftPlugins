@@ -3,6 +3,7 @@ package betterWeapon;
 import betterWeapon.Gem.EquipmentInlayListener;
 import betterWeapon.Gem.GemEvaluateListener;
 import betterWeapon.Gem.GemSynthesisListener;
+import betterWeapon.Gem.OpenHoleListener;
 import betterWeapon.listener.*;
 import betterWeapon.manager.*;
 import net.milkbowl.vault.economy.Economy;
@@ -72,6 +73,7 @@ public class BetterWeapon extends JavaPlugin
 		getServer().getPluginManager().registerEvents(new GemSynthesisListener(this), this);
 		getServer().getPluginManager().registerEvents(new IntensifyListener(this), this);
 		getServer().getPluginManager().registerEvents(new SmeltListener(this), this);
+		getServer().getPluginManager().registerEvents(new OpenHoleListener(this), this);
 		Bukkit.getConsoleSender().sendMessage("§a[BetterWeapon] §e强化系统加载完毕");
 		//getLogger().info("Finish loading");
 	}

@@ -8,6 +8,7 @@ import clockGUI.model.ClockGuiItem;
 import net.milkbowl.vault.economy.Economy;
 import org.black_ixx.playerpoints.PlayerPoints;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -95,6 +96,9 @@ public class ClockGUI extends JavaPlugin
 			if(args.length==0) {
 				if (sender instanceof Player) {
 					Player p = (Player)sender;
+					World world = p.getWorld();
+					if(!configManager.enableWorlds.contains(world.getName()))
+						return true;
 					String mainGuiId = configManager.mainGuiId;
 					Inventory inv = InventoryUtil.initInventory(p, configManager.guiNameList.get(mainGuiId),
 							configManager.list.get(mainGuiId), configManager.mainGuiId, dataManager.getPlayerData());

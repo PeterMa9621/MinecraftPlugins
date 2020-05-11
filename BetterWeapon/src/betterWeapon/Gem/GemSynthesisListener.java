@@ -46,36 +46,39 @@ public class GemSynthesisListener implements Listener
 			if(event.getRawSlot()==31 &&
 					event.getInventory().getItem(31).getItemMeta().getDisplayName().equalsIgnoreCase("§5点击开始合成"))
 			{
-				Player p = (Player)event.getWhoClicked();
 				event.setCancelled(true);
-				if(event.getInventory().getItem(40)!=null)
-				{
+				Player p = (Player)event.getWhoClicked();
+				if(event.getInventory().getItem(40)!=null) {
 					event.getWhoClicked().sendMessage("§a[宝石系统]§c 宝石出产区域禁止放置任何物品！");
 					return;
 				}
-				
-				if(event.getInventory().getItem(19)!=null && event.getInventory().getItem(25)!=null)
+
+				ItemStack firstGem = event.getInventory().getItem(19);
+				ItemStack secondGem = event.getInventory().getItem(25);
+
+				if(firstGem!=null && secondGem!=null)
 				{
-					if(event.getInventory().getItem(19).getType().equals(plugin.gemManager.gemstone.getType())
-							&& event.getInventory().getItem(25).getType().equals(plugin.gemManager.gemstone.getType()))
-					{
-						if((!event.getInventory().getItem(19).getItemMeta().hasLore()) &&
-								(!event.getInventory().getItem(25).getItemMeta().hasLore()))
+					ItemMeta firstGemItemMeta = firstGem.getItemMeta();
+					ItemMeta secondGemItemMeta = secondGem.getItemMeta();
+					if(firstGemItemMeta!=null && secondGemItemMeta!=null && firstGem.isSimilar(secondGem)) {
+
+						if((!firstGemItemMeta.hasLore()) &&
+								(!secondGemItemMeta.hasLore()))
 						{
 							p.sendMessage("§a[宝石系统] §c缺少已鉴定的宝石");
 							return;
 						}
 						
-						if((!event.getInventory().getItem(19).getItemMeta().getLore().contains("§e[已鉴定]")) &&
-								(!event.getInventory().getItem(25).getItemMeta().getLore().contains("§e[已鉴定]")))
+						if((!firstGemItemMeta.getLore().contains("§e[已鉴定]")) &&
+								(!secondGemItemMeta.getLore().contains("§e[已鉴定]")))
 						{
 							p.sendMessage("§a[宝石系统] §c缺少已鉴定的宝石");
 							return;
 						}
-						if(event.getInventory().getItem(19).getItemMeta().getLore().equals(event.getInventory().getItem(25).getItemMeta().getLore()))
+						if(firstGemItemMeta.getLore().equals(secondGemItemMeta.getLore()))
 						{
-							String lastLore = event.getInventory().getItem(19).getItemMeta().getLore().get(1);
-							Double value = Double.valueOf(lastLore.substring(lastLore.length()-3));
+							String lastLore = firstGemItemMeta.getLore().get(1);
+							double value = Double.parseDouble(lastLore.substring(lastLore.length()-3));
 							if(lastLore.contains("暴击"))
 							{
 								if(value>=6.0)
@@ -139,58 +142,20 @@ public class GemSynthesisListener implements Listener
 		{
 			level = ((int)(value*2))-1;
 		}
-		
-		if(Util.getRandomInt(100)<plugin.gemManager.synthesisPossibility.get(level))
-		{
+		ItemStack firstGem = event.getInventory().getItem(19);
+		ItemStack secondGem = event.getInventory().getItem(25);
+		if(Util.getRandomInt(100)<plugin.gemManager.synthesisPossibility.get(level)) {
 			_synthesis(event, gem, value);
 			p.sendMessage("§a[宝石系统]§c 恭喜，合成成功！");
-			
 			p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_PLACE, 0.5F, 0.0F);
-			if(event.getInventory().getItem(19).getAmount()>1)
-			{
-				ItemStack item = event.getInventory().getItem(19);
-				item.setAmount(item.getAmount()-1);
-				event.getInventory().setItem(19, item);
-			}
-			else
-				event.getInventory().setItem(19, null);
-			
-			if(event.getInventory().getItem(25).getAmount()>1)
-			{
-				ItemStack item = event.getInventory().getItem(25);
-				item.setAmount(item.getAmount()-1);
-				event.getInventory().setItem(25, item);
-			}
-			else
-				event.getInventory().setItem(25, null);
-			
-			event.getInventory().setItem(40, gem);
 		}
-		else
-		{
+		else {
 			p.sendMessage("§a[宝石系统]§5 合成过程中出现意外，合成失败");
-			
-			if(event.getInventory().getItem(19).getAmount()>1)
-			{
-				ItemStack item = event.getInventory().getItem(19);
-				item.setAmount(item.getAmount()-1);
-				event.getInventory().setItem(19, item);
-			}
-			else
-				event.getInventory().setItem(19, null);
-			
-			if(event.getInventory().getItem(25).getAmount()>1)
-			{
-				ItemStack item = event.getInventory().getItem(25);
-				item.setAmount(item.getAmount()-1);
-				event.getInventory().setItem(25, item);
-			}
-			else
-				event.getInventory().setItem(25, null);
-			
-			event.getInventory().setItem(40, gem);
 		}
-		
+		firstGem.setAmount(firstGem.getAmount()-1);
+		secondGem.setAmount(secondGem.getAmount()-1);
+		event.getInventory().setItem(40, gem);
+
 	}
 
 	private void _synthesis(InventoryClickEvent event, ItemStack gem, double value) 
@@ -198,22 +163,15 @@ public class GemSynthesisListener implements Listener
 		ItemMeta meta = gem.getItemMeta();
 		List<String> loreList = new ArrayList<>();
 
-		if(meta.getLore()!=null)
-		{
-			for(String lo:meta.getLore())
-			{
-				loreList.add(lo);
-			}
+		if(meta.getLore()!=null) {
+			loreList.addAll(meta.getLore());
 		}
 		
-		String lore = "";
-		if(loreList.get(1).contains("暴击"))
-		{
+		String lore;
+		if(loreList.get(1).contains("暴击")) {
 			lore = loreList.get(1).substring(0, loreList.get(1).length()-3);
 			lore += (value+1);
-		}
-		else
-		{
+		} else {
 			lore = loreList.get(1).substring(0, loreList.get(1).length()-3);
 			lore += (value+0.5);
 		}

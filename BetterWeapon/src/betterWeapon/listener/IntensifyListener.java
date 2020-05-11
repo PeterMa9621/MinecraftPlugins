@@ -1,6 +1,7 @@
 package betterWeapon.listener;
 
 import betterWeapon.BetterWeapon;
+import betterWeapon.util.ItemStackUtil;
 import betterWeapon.util.SmeltType;
 import betterWeapon.util.Util;
 import org.bukkit.Bukkit;
@@ -36,7 +37,7 @@ public class IntensifyListener implements Listener {
         if(meta.getLore()!=null) {
             loreList.addAll(meta.getLore());
         }
-        Bukkit.getLogger().info(String.valueOf(level));
+
         ArrayList<String> lore = new ArrayList<String>() {{
             add("§a强化等级:§c"+(level+1));
             add("§e[附魔强化]");
@@ -150,11 +151,7 @@ public class IntensifyListener implements Listener {
                 if(equip!=null && rule.containsKey(equip.getType().toString())) {
                     ItemStack intensifyRock = event.getInventory().getItem(13);
                     if(intensifyRock!=null) {
-                        if(!intensifyRock.getItemMeta().hasLore()) {
-                            p.sendMessage("§a[强化系统] §c缺少强化石或无效的强化石");
-                            return;
-                        }
-                        if(!intensifyRock.isSimilar(plugin.intensifyManager.getItem())) {
+                        if(!ItemStackUtil.isSimilar(intensifyRock, plugin.intensifyManager.getItem())) {
                             p.sendMessage("§a[强化系统] §c缺少强化石或无效的强化石");
                             return;
                         }
@@ -166,13 +163,13 @@ public class IntensifyListener implements Listener {
                         }
 
                         //金刚石
-                        if(assistant.isSimilar(plugin.assistantManager.getAssistant(0))) {
+                        if(ItemStackUtil.isSimilar(assistant, plugin.assistantManager.getAssistant(0))) {
                             intensify(event, true, false);
                             return;
                         }
 
                         //幸运宝石
-                        if(assistant.isSimilar(plugin.assistantManager.getAssistant(1))) {
+                        if(ItemStackUtil.isSimilar(assistant, plugin.assistantManager.getAssistant(1))) {
                             intensify(event, false, true);
                             return;
                         }
