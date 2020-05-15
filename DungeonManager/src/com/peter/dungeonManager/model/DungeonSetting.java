@@ -74,6 +74,8 @@ public class DungeonSetting implements Comparable<DungeonSetting> {
     }
 
     public Boolean isSatisfyLevelRequirement(Player player) {
+        if(DungeonManager.levelSystemAPI==null)
+            return true;
         int playerLevel = DungeonManager.levelSystemAPI.getLevel(player);
         if(playerLevel < minLevel) {
             return false;

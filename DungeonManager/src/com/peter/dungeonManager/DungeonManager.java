@@ -21,7 +21,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class DungeonManager extends JavaPlugin
 {
 	public static API levelSystemAPI;
-	public static DpsAPI dpsAPI;
 
 	public ConfigManager configManager;
 	public DataManager dataManager;
@@ -39,11 +38,9 @@ public class DungeonManager extends JavaPlugin
 
 		if(Bukkit.getPluginManager().getPlugin("LevelSystem") != null){
 			levelSystemAPI = ((LevelSystem) Bukkit.getPluginManager().getPlugin("LevelSystem")).getAPI();
+			Bukkit.getConsoleSender().sendMessage("§a[DungeonManager] §e等级系统已加载");
 		}
 
-		if(Bukkit.getPluginManager().getPlugin("Dps") != null){
-			dpsAPI = ((Dps) Bukkit.getPluginManager().getPlugin("Dps")).getAPI();
-		}
 		// To do: add support for citizens
 		/*
 		if(Bukkit.getPluginManager().getPlugin("Citizens") == null) {

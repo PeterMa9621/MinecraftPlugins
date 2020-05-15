@@ -158,17 +158,6 @@ public class GuiManager {
                 icon = plugin.configManager.getLockIcon(dungeonSetting.getDisplayName());
                 lore.addAll(groupResponse.getReason());
                 Util.setPersistentData(icon, new NamespacedKey(plugin, "lock"), "lock");
-            } else {
-                if(player.isOp()) {
-                    RewardTable rewardTable = DungeonManager.dpsAPI.getRewardTable(dungeonName);
-                    int numReward = 1;
-                    if(rewardTable!=null) {
-                        for(Reward reward:rewardTable.getRewards()) {
-                            lore.add("¡ìf" + numReward + ". " + reward.getIcon().getItemMeta().getDisplayName() + ", " + reward.getChance());
-                            numReward ++;
-                        }
-                    }
-                }
             }
             Util.setLoreForItem(icon, lore);
             Util.setPersistentData(icon,  new NamespacedKey(plugin, "dungeonName"), dungeonName);

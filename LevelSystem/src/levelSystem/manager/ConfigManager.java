@@ -33,6 +33,8 @@ public class ConfigManager
 
 	private StorageInterface database;
 	private String databaseName;
+	private String databaseUserName;
+	private String databasePassword;
 
 	public static int maxExpPerMinute;
 
@@ -45,7 +47,7 @@ public class ConfigManager
 	private void initDatabase() {
 		database = Database.getInstance(databaseType, plugin);
 		String createTableQuery = "create table if not exists level_system(id varchar(100), name varchar(100), current_exp int, level int, bonus_card_expired_time datetime, bonus_name varchar(50), primary key(id));";
-		database.connect(databaseName, "level_system" , "root", "mjy159357", createTableQuery);
+		database.connect(databaseName, "level_system" , databaseUserName, databasePassword, createTableQuery);
 	}
 
 	public void loadConfig()
@@ -57,6 +59,8 @@ public class ConfigManager
 			config = load(file);
 
 			config.set("databaseName", "minecraft");
+			config.set("databaseUserName", "root");
+			config.set("databasePassword", "password");
 
 			config.set("maxExpPerMinute", 30);
 
@@ -118,6 +122,8 @@ public class ConfigManager
 		plugin.bonusCardManager.clear();
 
 		databaseName = config.getString("databaseName", "minecraft");
+		databaseUserName = config.getString("databaseUserName", "root");
+		databasePassword = config.getString("databasePassword", "password");
 
 		maxExpPerMinute = config.getInt("maxExpPerMinute", 30);
 

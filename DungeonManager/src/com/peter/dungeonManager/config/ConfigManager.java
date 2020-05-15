@@ -39,7 +39,7 @@ public class ConfigManager {
         if(!file.exists()){
             config = load(file);
 
-            config.set("maxInstancePerDungeon", 2);
+            //config.set("maxInstancePerDungeon", 2);
             config.set("startGameDelay", 30);
 
             config.set("lockDungeonIcon.id", "STICK");
