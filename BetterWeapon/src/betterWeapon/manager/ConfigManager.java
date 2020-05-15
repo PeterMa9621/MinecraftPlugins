@@ -69,6 +69,7 @@ public class ConfigManager {
                 add("diamond_pickaxe:fortune");
             }});
             config.set("Possibility", new int[] {100, 80, 70, 60, 40, 15, 8, 5, 3, 1});
+            config.set("Price", 1000);
 
             config.set("Smelt.Item.ItemID", "IRON_INGOT");
             config.set("Smelt.Item.Name", "°Ïa»€¡∂ Ø");
@@ -83,6 +84,7 @@ public class ConfigManager {
                 add("diamond_sword:attack");
                 add("diamond_chestplate:defend");
             }});
+
             config.set("Smelt.Possibility", new int[] {70, 60, 40, 20, 15, 8, 5, 4, 2, 1});
             config.set("Smelt.Price", 10000);
 
@@ -186,7 +188,7 @@ public class ConfigManager {
         for(int p:possibility) {
             intensifyManager.addPossibility(p);
         }
-
+        intensifyManager.setPrice(config.getInt("Price", 1000));
         //------------------------------------------------
         smeltManager.setPrice(config.getInt("Smelt.Price"));
 

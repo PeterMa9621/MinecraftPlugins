@@ -13,6 +13,7 @@ public class IntensifyManager {
     private ItemStack itemForIntensify;
     private ArrayList<Integer> possibilityList = new ArrayList<Integer>();
     private HashMap<String, String> rule = new HashMap<>();
+    private int price;
     public IntensifyManager(BetterWeapon plugin) {
         this.plugin = plugin;
     }
@@ -55,5 +56,13 @@ public class IntensifyManager {
 
     public HashMap<String, String> getRule() {
         return rule;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
     }
 }

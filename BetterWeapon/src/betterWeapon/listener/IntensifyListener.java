@@ -88,7 +88,7 @@ public class IntensifyListener implements Listener {
             if(assistant2 || Util.getRandomInt(100)<possibilityList.get(level)) {
                 _intensify(event, equip, level);
 
-                p.sendMessage("§a[强化系统]§c恭喜，强化成功！");
+                p.sendMessage("§a[强化系统] §c恭喜，强化成功！");
                 if(level+1>5) {
                     p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5F, 0.0F);
                     Bukkit.broadcastMessage("§3恭喜玩家§a"+p.getName()+"§3强化装备§a"+"§3至§a"+(level+1)+"§3级");
@@ -108,18 +108,18 @@ public class IntensifyListener implements Listener {
                         ItemStack assistantItem = event.getInventory().getItem(16);
                         if(assistantItem!=null)
                             assistantItem.setAmount(assistantItem.getAmount()-1);
-                        p.sendMessage("§a[强化系统]§5很遗憾，强化失败，辅助物品发挥效果，保护住了武器！");
+                        p.sendMessage("§a[强化系统] §5很遗憾，强化失败，辅助物品发挥效果，保护住了武器！");
                     } else {
                         equip = null;
-                        p.sendMessage("§a[强化系统]§5很遗憾，强化失败，装备碎掉了！");
+                        p.sendMessage("§a[强化系统] §5很遗憾，强化失败，装备碎掉了！");
                     }
                 } else {
-                    p.sendMessage("§a[强化系统]§5很遗憾，强化失败！");
+                    p.sendMessage("§a[强化系统] §5很遗憾，强化失败！");
                 }
             }
             event.getInventory().setItem(40, equip);
         } else {
-            p.sendMessage("§a[强化系统]§5该装备已强化到最大等级，无需继续强化！");
+            p.sendMessage("§a[强化系统] §5该装备已强化到最大等级，无需继续强化！");
         }
     }
 
@@ -155,6 +155,14 @@ public class IntensifyListener implements Listener {
                             p.sendMessage("§a[强化系统] §c缺少强化石或无效的强化石");
                             return;
                         }
+                        int priceForIntensify = plugin.intensifyManager.getPrice();
+                        if(plugin.economy.getBalance(p.getName())<priceForIntensify) {
+                            p.sendMessage("§a[强化系统] §c熔炼所需金币不足");
+                            return;
+                        }
+
+                        plugin.economy.withdrawPlayer(p.getName(), priceForIntensify);
+                        p.sendMessage("§a[强化系统] §e扣除§c" + priceForIntensify + "§e金币");
 
                         ItemStack assistant = event.getInventory().getItem(16);
                         if(assistant==null) {

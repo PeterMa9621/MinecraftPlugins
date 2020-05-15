@@ -144,12 +144,8 @@ public class SmeltListener implements Listener {
                         ruleSmelt.containsKey(event.getInventory().getItem(10).getType()))
                 {
                     ItemStack smeltRock = event.getInventory().getItem(16);
-                    if(smeltRock==null || !smeltRock.hasItemMeta() || !smeltRock.getItemMeta().hasLore()) {
-                        p.sendMessage("§a[熔炼系统] §c缺少熔炼石或无效的熔炼石");
-                        return;
-                    }
 
-                    if(ItemStackUtil.isSimilar(smeltRock, plugin.smeltManager.getItem())) {
+                    if(smeltRock!=null && ItemStackUtil.isSimilar(smeltRock, plugin.smeltManager.getItem())) {
                         int priceForSmelt = plugin.smeltManager.getPrice();
                         if(plugin.economy.getBalance(p.getName())>=priceForSmelt) {
                             p.sendMessage("§a[熔炼系统] §e扣除§c" + priceForSmelt + "§e金币");
@@ -158,6 +154,8 @@ public class SmeltListener implements Listener {
                         } else {
                             p.sendMessage("§a[熔炼系统] §c熔炼所需金币不足");
                         }
+                    } else {
+                        p.sendMessage("§a[熔炼系统] §c缺少熔炼石或无效的熔炼石");
                     }
                 } else {
                     p.sendMessage("§a[熔炼系统] §c缺少装备或无效的装备");

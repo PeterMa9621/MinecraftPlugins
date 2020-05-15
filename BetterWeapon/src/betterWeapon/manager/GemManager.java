@@ -84,7 +84,7 @@ public class GemManager {
 
     public void setInlayEquipment(List<String> inlayEquipment) {
         List<String> uppercaseEquipment = new ArrayList<>();
-        for (String s:equipment){
+        for (String s:inlayEquipment){
             uppercaseEquipment.add(s.toUpperCase());
         }
         this.inlayEquipment = uppercaseEquipment;

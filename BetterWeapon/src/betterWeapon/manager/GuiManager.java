@@ -85,7 +85,7 @@ public class GuiManager {
                 "emerald",
                 "§5点击开始强化",
                 new ArrayList<String>() {{
-                    add("§e需要花费§c"+plugin.smeltManager.getPrice()+"§e金币");
+                    add("§e需要花费§c"+plugin.intensifyManager.getPrice()+"§e金币");
                 }},
                 0);
         //--------------------------------------------
