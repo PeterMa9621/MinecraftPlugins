@@ -5,6 +5,7 @@ import dps.rewardBox.Reward;
 import dps.rewardBox.RewardBoxManager;
 import dps.rewardBox.RewardTable;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -122,10 +123,19 @@ public class ConfigUtil {
                 Bukkit.getConsoleSender().sendMessage("§6[Dps] §cNormal Rewards Format Error!");
                 continue;
             }
-            String cmd = rewardCmd.split("#")[0];
-            String material = rewardCmd.split("#")[1].toUpperCase();
+            String[] info = rewardCmd.split("#");
+            String cmd = info[0];
+            String material = info[1].toUpperCase();
+            String displayName = info[2].replace('&', ChatColor.COLOR_CHAR);
 
-            Reward reward = new Reward(1, new ItemStack(Material.getMaterial(material)), cmd);
+            ItemStack itemStack = new ItemStack(Material.getMaterial(material));
+            try {
+                ItemMeta itemMeta = itemStack.getItemMeta();
+                itemMeta.setDisplayName(displayName);
+                itemStack.setItemMeta(itemMeta);
+            } catch (Exception ignored) { }
+
+            Reward reward = new Reward(1, itemStack, cmd);
             RewardBoxManager.normalRewards.add(reward);
         }
         Bukkit.getConsoleSender().sendMessage("§6[Dps] §a已加载普通奖励物品§e" + RewardBoxManager.normalRewards.size() + "§a个");
