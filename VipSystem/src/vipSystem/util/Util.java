@@ -123,7 +123,7 @@ public class Util {
         });
         lpUser.data().add(Node.builder("group." + vipPlayer.getVipGroup()).build());
         lp.getUserManager().saveUser(lpUser);
-
+        vipPlayer.setIsExpired(false);
         players.put(vipPlayer.getUniqueId(), vipPlayer);
 
         configLoader.savePlayerConfig(vipPlayer);
