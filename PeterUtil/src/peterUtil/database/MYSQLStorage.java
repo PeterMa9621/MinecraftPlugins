@@ -50,8 +50,9 @@ public class MYSQLStorage implements StorageInterface{
                 initDatabase();
                 hasInitDatabase = true;
             }
-        } catch(Exception e){
-            System.out.println(e.getMessage());
+        } catch(ClassNotFoundException | SQLException c){
+            c.printStackTrace();
+            throw new IllegalStateException(c);
         }
     }
 

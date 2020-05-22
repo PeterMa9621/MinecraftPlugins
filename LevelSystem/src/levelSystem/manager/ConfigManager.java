@@ -8,6 +8,7 @@ import levelSystem.model.LevelPlayer;
 import levelSystem.model.LevelReward;
 import levelSystem.util.ItemUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -36,6 +37,7 @@ public class ConfigManager
 	private String databaseUserName;
 	private String databasePassword;
 
+	public boolean disallowFishingExp;
 	public static int maxExpPerMinute;
 
 	public DatabaseType databaseType = DatabaseType.MYSQL;
@@ -47,7 +49,11 @@ public class ConfigManager
 	private void initDatabase() {
 		database = Database.getInstance(databaseType, plugin);
 		String createTableQuery = "create table if not exists level_system(id varchar(100), name varchar(100), current_exp int, level int, bonus_card_expired_time datetime, bonus_name varchar(50), primary key(id));";
-		database.connect(databaseName, "level_system" , databaseUserName, databasePassword, createTableQuery);
+		try {
+			database.connect(databaseName, "level_system" , databaseUserName, databasePassword, createTableQuery);
+		} catch (Exception e){
+			Bukkit.getLogger().warning(ChatColor.RED + "数据库连接出现问题，请检查配置文件！");
+		}
 	}
 
 	public void loadConfig()
@@ -63,6 +69,7 @@ public class ConfigManager
 			config.set("databasePassword", "password");
 
 			config.set("maxExpPerMinute", 30);
+			config.set("disallowFishingExp", true);
 
 			config.set("bonusExpCard.normal.itemId", "STICK");
 			config.set("bonusExpCard.normal.customModelId", 34);
@@ -125,6 +132,7 @@ public class ConfigManager
 		databaseUserName = config.getString("databaseUserName", "root");
 		databasePassword = config.getString("databasePassword", "password");
 
+		disallowFishingExp = config.getBoolean("disallowFishingExp", true);
 		maxExpPerMinute = config.getInt("maxExpPerMinute", 30);
 
 		maxLevel = config.getInt("maxLevel", 1);
@@ -177,35 +185,39 @@ public class ConfigManager
 		}
 
 		Bukkit.getScheduler().runTaskLater(plugin, () -> {
-			HashMap<String, Object> result = database.get(player.getUniqueId(), new String[] {"name", "current_exp", "level", "bonus_card_expired_time", "bonus_name"});
+			try {
+				HashMap<String, Object> result = database.get(player.getUniqueId(), new String[]{"name", "current_exp", "level", "bonus_card_expired_time", "bonus_name"});
 
-			int level = 1;
-			int current_exp = 0;
-			LocalDateTime bonus_card_expired_time = null;
-			String bonusName = null;
-			if(result!=null){
-				level = (int) result.get("level");
-				current_exp = (int) result.get("current_exp");
-				Object obj = result.get("bonus_card_expired_time");
-				if(obj!=null)
-					bonus_card_expired_time = ((Timestamp) obj).toLocalDateTime();
-				obj = result.get("bonus_name");
-				if(obj!=null)
-					bonusName = (String) obj;
+				int level = 1;
+				int current_exp = 0;
+				LocalDateTime bonus_card_expired_time = null;
+				String bonusName = null;
+				if (result != null) {
+					level = (int) result.get("level");
+					current_exp = (int) result.get("current_exp");
+					Object obj = result.get("bonus_card_expired_time");
+					if (obj != null)
+						bonus_card_expired_time = ((Timestamp) obj).toLocalDateTime();
+					obj = result.get("bonus_name");
+					if (obj != null)
+						bonusName = (String) obj;
+				}
+				if (levelPlayer[0] == null)
+					levelPlayer[0] = new LevelPlayer(player, level, current_exp, bonus_card_expired_time, bonusName);
+				else {
+					levelPlayer[0].setLevel(level);
+					levelPlayer[0].setCurrentExp(current_exp);
+					levelPlayer[0].setBonusCardExpiredTime(bonus_card_expired_time);
+					levelPlayer[0].setBonusName(bonusName);
+				}
+
+				plugin.levelPlayerManager.addLevelPlayer(levelPlayer[0]);
+
+				if (callback != null)
+					callback.run(levelPlayer[0]);
+			} catch (Exception ignore) {
+				Bukkit.getLogger().warning("数据库连接出现问题，请检查");
 			}
-			if(levelPlayer[0] == null)
-				levelPlayer[0] = new LevelPlayer(player, level, current_exp, bonus_card_expired_time, bonusName);
-			else {
-				levelPlayer[0].setLevel(level);
-				levelPlayer[0].setCurrentExp(current_exp);
-				levelPlayer[0].setBonusCardExpiredTime(bonus_card_expired_time);
-				levelPlayer[0].setBonusName(bonusName);
-			}
-
-			plugin.levelPlayerManager.addLevelPlayer(levelPlayer[0]);
-
-			if(callback!=null)
-				callback.run(levelPlayer[0]);
 		}, 20);
 	}
 

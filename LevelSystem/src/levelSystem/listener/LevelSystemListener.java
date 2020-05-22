@@ -50,9 +50,11 @@ public class LevelSystemListener implements Listener
 
     @EventHandler
 	public void onPlayerFishing(PlayerFishEvent event) {
-		Player player = event.getPlayer();
-		UUID uuid = player.getUniqueId();
-		canGetExp.put(uuid, false);
+		if(plugin.configManager.disallowFishingExp) {
+			Player player = event.getPlayer();
+			UUID uuid = player.getUniqueId();
+			canGetExp.put(uuid, false);
+		}
 	}
 
 	@EventHandler
