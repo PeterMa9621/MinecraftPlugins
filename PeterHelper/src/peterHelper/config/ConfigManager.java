@@ -6,6 +6,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import peterHelper.PeterHelper;
 import peterHelper.model.CustomItemInfo;
+import peterHelper.model.SuiteInfo;
 
 import java.io.File;
 import java.io.IOException;
@@ -83,8 +84,12 @@ public class ConfigManager {
                 if(itemSection.contains("level")) {
                     level = itemSection.getInt("level");
                 }
+
                 String id = namespace+":"+key;
                 CustomItemInfo customItemInfo = new CustomItemInfo(namespace, id, level);
+                SuiteInfo suiteInfo = getSuiteInfo(itemSection);
+                if(suiteInfo!=null)
+                    customItemInfo.setSuiteInfo(suiteInfo);
                 customItemHashMap.put(id, customItemInfo);
                 itemIds.add(id);
                 if(itemFile.getName().contains("sword")) {
@@ -103,5 +108,18 @@ public class ConfigManager {
             }
         }
         Bukkit.getConsoleSender().sendMessage("§a[PeterHelper] §e共读取§6" + count + "§e个自定义物品!");
+    }
+
+    private SuiteInfo getSuiteInfo(ConfigurationSection itemSection) {
+        if(!itemSection.contains("suite")) {
+            return null;
+        }
+        ConfigurationSection suiteSection = itemSection.getConfigurationSection("suite");
+        String suiteName = suiteSection.getString("name");
+        int particleId = suiteSection.getInt("particle.id", 1) - 1;
+        double damage = suiteSection.getDouble("damage", 0);
+        double armor = suiteSection.getDouble("armor", 0);
+        double maxHealth = suiteSection.getDouble("maxHealth", 0);
+        return new SuiteInfo(suiteName, particleId, damage, armor, maxHealth);
     }
 }

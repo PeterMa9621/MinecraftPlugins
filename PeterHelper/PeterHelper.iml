@@ -36,15 +36,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../Project0/server/plugins/ItemsAdder2.0.12.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$MODULE_DIR$/../../Project0/server/plugins/LevelSystem.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -55,6 +46,15 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/../../Project0/server/plugins/ArmorEquipEvent-1.7.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../Project0/dungeonServer/plugins/ItemsAdder.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

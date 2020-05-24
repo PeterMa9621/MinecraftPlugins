@@ -5,6 +5,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import peterHelper.PeterHelper;
 import peterHelper.model.CustomItemInfo;
+import peterHelper.util.ArmorUtil;
 import peterHelper.util.AttributeModifierUtil;
 import peterHelper.util.LevelUtil;
 import peterHelper.util.Util;
@@ -30,6 +31,7 @@ public class CustomItemManager {
         } else if(Util.isArmor(itemStack)) {
             AttributeModifierUtil.randomArmorAttribute(itemMeta);
             itemStack.setItemMeta(itemMeta);
+            ArmorUtil.bindSuiteInfo(plugin, itemStack, customItemInfo.getSuiteInfo());
             LevelUtil.bindLevelUtil(itemStack, level, plugin);
         }
         return itemStack;
