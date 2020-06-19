@@ -218,7 +218,7 @@ public class ConfigManager {
         mainGuiId = config.getString("Clock.MainGuiId");
         String clockName = config.getString("Clock.Name");
         List<String> clockLore = config.getStringList("Clock.Lore");
-        Util.setItem(clock, clockName, clockLore, "WATCH");
+        Util.setItem(clock, clockName, clockLore, "PAPER");
 
         enableWorlds = config.getStringList("Clock.World");
 

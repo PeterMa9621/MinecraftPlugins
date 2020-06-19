@@ -82,6 +82,7 @@ public class EventListener implements Listener
 					String mainGuiId = configManager.mainGuiId;
 					Inventory inv = InventoryUtil.initInventory(player, configManager.guiNameList.get(mainGuiId),
 							configManager.list.get(mainGuiId), mainGuiId, dataManager.getPlayerData());
+					event.setCancelled(true);
 					player.openInventory(inv);
 				}
 			}
