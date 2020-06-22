@@ -218,7 +218,11 @@ public class ConfigManager {
         mainGuiId = config.getString("Clock.MainGuiId");
         String clockName = config.getString("Clock.Name");
         List<String> clockLore = config.getStringList("Clock.Lore");
-        Util.setItem(clock, clockName, clockLore, "PAPER");
+        Util.setItem(clock, clockName, clockLore, "BOOK");
+        clock.addUnsafeEnchantment(Enchantment.LUCK, 1);
+        ItemMeta clockItemMeta = clock.getItemMeta();
+        clockItemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        clock.setItemMeta(clockItemMeta);
 
         enableWorlds = config.getStringList("Clock.World");
 
