@@ -1,0 +1,19 @@
+name: DeathPenalty
+main: deathPenalty.DeathPenalty
+version: '1.0'
+api-version: '1.12'
+author: Jingyuan Ma
+depend:
+  - Vault
+commands:
+  deathpenalty:
+    description: DeathPenalty Commands
+    usage: /deathpenalty
+    aliases:
+      - dp
+    permission-message: §c无权执行！
+permissions: 
+  levelSystem.op: 
+    default: op
+  levelSystem.player: 
+    default: true

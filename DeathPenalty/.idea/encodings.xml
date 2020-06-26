@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/src/levelSystem/LevelSystem.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/levelSystem/expansion/LevelSystemExpansion.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/levelSystem/listener/BonusCardListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/levelSystem/listener/LevelSystemListener.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/levelSystem/manager/ConfigManager.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/src/levelSystem/util/ItemUtil.java" charset="GBK" />
+  </component>
+</project>
