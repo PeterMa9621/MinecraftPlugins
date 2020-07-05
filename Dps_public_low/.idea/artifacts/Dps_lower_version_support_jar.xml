@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Dps-lower-version-support:jar">
+    <output-path>$PROJECT_DIR$/../../Project0/testServer/plugins</output-path>
+    <root id="archive" name="Dps-lower-version-support.jar">
+      <element id="module-output" name="Dps-lower-version-support" />
+    </root>
+  </artifact>
+</component>

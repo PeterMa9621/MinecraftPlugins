@@ -55,7 +55,7 @@ public class Dps extends JavaPlugin
     {
 	    final Plugin plugin = this.getServer().getPluginManager().getPlugin("ScoreBoard");
 	    scoreBoard = ScoreBoard.class.cast(plugin);
-	    return scoreBoard != null; 
+	    return scoreBoard != null;
 	}
 	
 	public void onEnable() 
